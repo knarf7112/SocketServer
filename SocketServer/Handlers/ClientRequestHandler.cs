@@ -21,9 +21,7 @@ namespace SocketServer.Handlers
             this.ClientSocket = socket4Client;
             this.ClientSocket.SendTimeout = this.writeTimeout;
             this.ClientSocket.ReceiveTimeout = this.readTimeout;
-            this.SocketServer = socketServer;
-            //this.MainSocket.SendTimeout = this.writeTimeout;
-            //this.MainSocket.ReceiveTimeout = this.readTimeout;
+            this.SocketServer = socketServer;//link from parent socket server
             this.KeepService = true;
             this.ServiceState = state;
             //init logger

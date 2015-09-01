@@ -22,7 +22,5 @@ namespace SocketServer
         /// </summary>
         /// <param name="clientNo">tcp client no.</param>
         void RemoveClient(int clientNo);
-
-        Encoding GetEncoding();
     }
 }

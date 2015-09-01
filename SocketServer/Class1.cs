@@ -8,9 +8,16 @@ namespace SocketServer
 {
     public class Class1
     {
-        public void QQ()
+        /// <summary>
+        /// console in
+        /// </summary>
+        /// <param name="args"></param>
+        public static void Main(string[] args)
         {
-            
+            ISocketServer s1 = new AsyncMultiSocketServer(6111, "Authenticate");
+            s1.Start();
+
+            Console.ReadKey();
         }
     }
 }

@@ -15,28 +15,31 @@ using SocketServer.Handlers;
 
 namespace SocketServer
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class AsyncMultiSocketServer : ISocketServer
     {
         #region Field
-        // 工作進行中產生之訊息
+        // 紀錄Log
         private static readonly ILog log = LogManager.GetLogger(typeof(AsyncMultiSocketServer));
-        
+        //主服務Socket
         private Socket mainSocket;
-
+        //主服務終止flag
         private bool KeepSocketServerAlive;
-
+        //存放Client的字典檔
         private IDictionary<int, IClientRequestHandler> dicHandler;
-
+        //Client Count
         private int clientNo;
-
+        //監聽Port
         private int port;
-
+        //服務名稱
         public string stateName;
-
-        private Encoding encoding;
-
+        //監聽的IP資訊
         private IPAddress listenIP;
-
+        /// <summary>
+        /// 管理主Socket服務的背景執行緒物件
+        /// </summary>
         private BackgroundWorker bgWorker;
         //for lock
         private Object cLock = new Object();
@@ -53,13 +56,12 @@ namespace SocketServer
         /// <param name="port">socket listen port</param>
         /// <param name="start">是否直接啟動</param>
         /// <param name="stateName">要啟動的服務名稱,看ServiceFactory.cs的enum ServiceSelect列表</param>
-        /// <param name="encoding">設定編碼</param>
-        /// <param name="listenIP">socket listen ip [null=Any]</param>
-        public AsyncMultiSocketServer(int port, bool start,string stateName, Encoding encoding, string listenIP = null)
+        /// <param name="listenIP">socket listen ip [null=AnyIP]</param>
+        public AsyncMultiSocketServer(int port, bool start,string stateName, string listenIP = null)
         {
             this.port = port;
-            this.encoding = encoding;
             this.stateName = stateName;
+            //存放Thread的字典檔
             this.dicHandler = new ConcurrentDictionary<int, IClientRequestHandler>();
             log.Debug(">> Port Number: " + this.port);
             log.Debug(">> State name: " + this.stateName);
@@ -90,24 +92,38 @@ namespace SocketServer
             // Init BackGroundWorker and add Event
             this.bgWorker = new BackgroundWorker()
             {
-                WorkerSupportsCancellation = true
+                WorkerSupportsCancellation = true//指定此BackgroundWorker可取消工作中的Thread
             };
-            this.bgWorker.DoWork += bgWorker_DoWork;
-            this.bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
+            this.bgWorker.DoWork += bgWorker_DoWork;//工作觸發指定方法
+            this.bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;//工作完成觸發指定方法
         }
+        /// <summary>
+        /// Specified Prot and ServiceName Then run Constructor AsyncMultiSocketServer
+        /// Default Encode: UTF8
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="serviceName"></param>
         public AsyncMultiSocketServer(int port, string serviceName)
-            : this(port, false, serviceName, Encoding.UTF8)
+            : this(port, false, serviceName)
         {
 
         }
+        /// <summary>
+        /// Run Constructor AsyncMultiSocketServer By Prot
+        /// Default ServiceName: "Authenticate",Default Encode:System Default
+        /// </summary>
+        /// <param name="port">Listen Port</param>
         public AsyncMultiSocketServer(int port)
-            : this(port, false, "Authenticate", Encoding.Default)
+            : this(port, false, "Authenticate")
         {
 
         }
         #endregion
 
         #region public Method
+        /// <summary>
+        /// 啟動服務
+        /// </summary>
         public void Start()
         {
             this.KeepSocketServerAlive = true;
@@ -122,7 +138,7 @@ namespace SocketServer
             //this.mainSocket.Bind(new IPEndPoint(this.listenIP, this.port));
             //this.mainSocket.Listen(50);
             log.Debug(">> Server Start ...");
-
+            //如果Backgroundworker不忙則開始執行背景作業(Thread work)
             if (!this.bgWorker.IsBusy)
             {
                 this.bgWorker.RunWorkerAsync();
@@ -133,7 +149,9 @@ namespace SocketServer
                 this.Start();
             }
         }
-
+        /// <summary>
+        /// 停止服務
+        /// </summary>
         public void Stop()
         {
             if (this.KeepSocketServerAlive)
@@ -162,7 +180,7 @@ namespace SocketServer
                 }
                 finally
                 {
-                    //this.mainSocket = null;
+                    this.mainSocket = null;
                     //log.Debug(">> Main Socket Set Null");
                 }
             }
@@ -178,7 +196,11 @@ namespace SocketServer
             {
                 if (this.dicHandler.ContainsKey(clientNo))
                 {
+                    //子物件清除父層物件指標
+                    ((ClientRequestHandler)this.dicHandler[clientNo]).SocketServer = null;
+                    //取消子物件的Thread運行
                     (this.dicHandler[clientNo]).CancelAsync();
+                    //從字典檔移除子物件
                     this.dicHandler.Remove(clientNo);
                     //log.Debug(">> Remove: " + clientNo);
                 }
@@ -187,6 +209,11 @@ namespace SocketServer
         #endregion
 
         #region Event
+        /// <summary>
+        /// 服務完成後要做的事
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void bgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error == null)
@@ -205,6 +232,11 @@ namespace SocketServer
                 log.Error(">> Main Socket Task failed:" + e.Error.StackTrace);
             }
         }
+        /// <summary>
+        /// 產生一個背景執行緒來執行main Socket(某個Service)的連線服務
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             try
@@ -214,15 +246,18 @@ namespace SocketServer
                 {
                     this.mainSocket.Close();
                 }
-                //
+                // 1.建立Socket物件,接受雙向的Tcp/Ip協議
                 this.mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                // 2.建立允許連入的IP資訊關聯
                 this.mainSocket.Bind(new IPEndPoint(this.listenIP, this.port));
-                this.mainSocket.Listen(3000);
+                // 3.開始進入監聽狀態並監聽嘗試連入的連線 //之前測試,當等待的連線有作資料傳送時,可能會在暫存等待區裡面建立一個新的Socket並將收到的資料存放於此Socket的buffer中,當輪到此連線連入時就可以讀取buffer中的Client傳入資料
+                this.mainSocket.Listen(3000);//等待連接的最高上限會因OS不同(或ISP限制)而有不同限制
                 log.Debug(">> Server Start ...");
 
-                //持續監聽 
+                //持續監聽此服務 
                 while (this.KeepSocketServerAlive)
                 {
+                    // 4.開始等待連入(Blocking)
                     Socket socket4Client = this.mainSocket.Accept();
                     lock (cLock)
                     {
@@ -234,10 +269,6 @@ namespace SocketServer
                         {
                             this.clientNo += 1;
                         }
-                        ClientRequestHandler client = new ClientRequestHandler(this.clientNo, socket4Client, this, ServiceFactory.GetService(this.stateName));
-                        //this.dicHandler.Add(this.clientNo, this.clientRequestHandler);//*
-                        this.dicHandler.Add(this.clientNo, client);
-                        this.dicHandler[this.clientNo].DoCommunicate();
                         //
                         //log.Info
                         //(
@@ -248,6 +279,14 @@ namespace SocketServer
                         //    + Convert.ToString(this.clientNo)
                         //    + " started!"
                         //);
+                        // 5.產生一個Client物件並利用State來處理該作的事(並代入父層物件)
+                        ClientRequestHandler client = new ClientRequestHandler(this.clientNo, socket4Client, this, ServiceFactory.GetService(this.stateName));
+                        //this.dicHandler.Add(this.clientNo, this.clientRequestHandler);//*
+                        // 6.加入Client管理列表的字典檔
+                        this.dicHandler.Add(this.clientNo, client);
+                        // 7.產生一個背景執行緒執行此Client要處理的State
+                        this.dicHandler[this.clientNo].DoCommunicate();
+                        
                     }
                 }
                 log.Debug(">> Server Stop...");
@@ -260,12 +299,10 @@ namespace SocketServer
             this.RemoveAllClients();
         }
         #endregion
-
-        public Encoding GetEncoding()
-        {
-            return this.encoding;
-        }
         
+        /// <summary>
+        /// 移除所有被管理的Client物件
+        /// </summary>
         private void RemoveAllClients()
         {
             int[] copyKeys = new int[this.dicHandler.Count];

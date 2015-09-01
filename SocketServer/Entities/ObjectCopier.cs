@@ -3,11 +3,13 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
-namespace SocketServer.Handlers.State.Entities
+namespace SocketServer.Entities
 {
+    /// <summary>
+    /// Clone POCO object
+    /// </summary>
     public class ObjectCopier
     {
-        private static object lockObj = new object();
         /// <summary>
         /// 深層複製物件(包含參考一併複製)
         /// </summary>
@@ -27,32 +29,28 @@ namespace SocketServer.Handlers.State.Entities
             {
                 return default(T);
             }
-            lock (lockObj)
+
+            //建立二進位的formatter
+            IFormatter formatter = new BinaryFormatter();
+            //建立memoryStream來裝載轉換序列化後的資料
+            Stream stream = new MemoryStream();
+            using (stream)
             {
-                //建立二進位的formatter
-                IFormatter formatter = new BinaryFormatter();
-                //建立memoryStream來裝載轉換序列化後的資料
-                Stream stream = new MemoryStream();
-                using (stream)
-                {
-                    //序列化物件到資料流內
-                    formatter.Serialize(stream, source);
-                    //設定資料流起始位置
-                    stream.Seek(0, SeekOrigin.Begin);
-                    //回傳還原序列化後的物件
-                    return (T)formatter.Deserialize(stream);
-                }
+                //序列化物件到資料流內
+                formatter.Serialize(stream, source);
+                //設定資料流起始位置
+                stream.Seek(0, SeekOrigin.Begin);
+                //回傳還原序列化後的物件
+                return (T)formatter.Deserialize(stream);
             }
+            
         }
 
         public static T JSONCopy<T>(T source)
         {
-            lock (lockObj)
-            {
-                string jsonString = JsonConvert.SerializeObject(source);
+            string jsonString = JsonConvert.SerializeObject(source);
 
-                return (T)JsonConvert.DeserializeObject<T>(jsonString);
-            }
+            return (T)JsonConvert.DeserializeObject<T>(jsonString);
         }
 
     }

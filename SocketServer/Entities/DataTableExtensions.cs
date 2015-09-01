@@ -4,8 +4,11 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 
-namespace SocketServer.Handlers.State.Entities
+namespace SocketServer.Entities
 {
+    /// <summary>
+    /// extention methods
+    /// </summary>
     public static class Extensions
     {
         /// <summary>
@@ -69,8 +72,8 @@ namespace SocketServer.Handlers.State.Entities
         /// ex: obj.CHeckLength();
         /// 長度不符會拋出Exception
         /// </summary>
-        /// <typeparam name="T">要檢查的物件型別typeparam>
-        /// <param name="obj">要檢查的物件</param>
+        /// <typeparam name="T">要檢查的物件型別type</typeparam>
+        /// <param name="obj"></param>
         public static void CHeckLength<T>(this T obj)
         {
             lock (lockObj)
@@ -93,7 +96,7 @@ namespace SocketServer.Handlers.State.Entities
                         }
                         else
                         {
-                            throw new Exception(property.Name + "屬性:資料型態不為字串或資料為空!!!");
+                            throw new Exception(property.Name + "屬性:資料型態不為字串(string)型別或資料為空!!!");
                         }
                     }
                 }

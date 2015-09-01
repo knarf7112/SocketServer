@@ -7,9 +7,14 @@ namespace SocketServer.Handlers.State
 {
     public class State_Authenticate : IState
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="absClientRequestHandler"></param>
         public void Handle(AbsClientRequestHandler absClientRequestHandler)
         {
-            throw new NotImplementedException();
+            var qq = absClientRequestHandler;
+            absClientRequestHandler.ServiceState = new State_Exit();
         }
     }
 }

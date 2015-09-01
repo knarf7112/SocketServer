@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SocketServer.Handlers.State.Entities
+namespace SocketServer.Entities
 {
     /// <summary>
     /// 用來設定POCO的字串長度
