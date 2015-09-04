@@ -19,7 +19,7 @@ namespace WebSocket_Test
 
         static void Main(string[] args)
         {
-            serverSocket.Bind(new IPEndPoint(IPAddress.Any, 6111));
+            serverSocket.Bind(new IPEndPoint(IPAddress.Any, 6112));
             serverSocket.Listen(128);
             serverSocket.BeginAccept(null, 0, OnAccept, null);
             Console.WriteLine("開始非同步監聽...");

@@ -34,7 +34,6 @@ namespace SocketServer.Handlers.State
             iBonAuthenticate iBonAuthObj = null;
             EskmsPOCO request = null;
             EskmsPOCO response = null;
-            Stopwatch timer = null;
             string requestCheckErrMsg = null;
             string responseJsonStr = null;
             byte[] responseBytes = null;
@@ -57,7 +56,6 @@ namespace SocketServer.Handlers.State
                 else
                 {
                     log.Debug(m => m(">> {0}: {1}", this.GetType().Name, absClientRequestHandler.ClientNo));
-                    timer = new Stopwatch();
                     //resize buffer
                     Array.Resize(ref receiveBuffer, readCount);
                     //casting jsonstring from buffer array
