@@ -22,20 +22,29 @@ namespace WebSocket_Test
             serverSocket.Bind(new IPEndPoint(IPAddress.Any, 6111));
             serverSocket.Listen(128);
             serverSocket.BeginAccept(null, 0, OnAccept, null);
-            Console.Read();
+            Console.WriteLine("開始非同步監聽...");
+            ConsoleKey exit = ConsoleKey.N;
+            while (exit != ConsoleKey.Y)
+            {
+                exit = Console.ReadKey().Key;
+            }
         }
 
         private static void OnAccept(IAsyncResult result)
         {
             byte[] buffer = new byte[1024];
+            Socket client = null;
             try
             {
-                Socket client = null;
+               
                 string headerResponse = "";
                 if (serverSocket != null && serverSocket.IsBound)
                 {
+                    
                     client = serverSocket.EndAccept(result);
+                    Console.WriteLine("start receive data ...");
                     var i = client.Receive(buffer);
+                    Console.WriteLine("end receive data ...");
                     headerResponse = (System.Text.Encoding.UTF8.GetString(buffer)).Substring(0, i);
                     // write received data to the console
                     Console.WriteLine(headerResponse);
@@ -45,15 +54,15 @@ namespace WebSocket_Test
                 {
                     /* Handshaking and managing ClientSocket */
 
-                    var key = headerResponse.Replace("key:", "`")
-                              .Split('`')[1]                     // dGhlIHNhbXBsZSBub25jZQ== \r\n .......
-                              .Replace("\r", "").Split('\n')[0]  // dGhlIHNhbXBsZSBub25jZQ==
-                              .Trim();
-
+                    //var key = headerResponse.Replace("key:", "`")
+                    //          .Split('`')[1]                     // dGhlIHNhbXBsZSBub25jZQ== \r\n .......
+                    //          .Replace("\r", "").Split('\n')[0]  // dGhlIHNhbXBsZSBub25jZQ==
+                    //          .Trim();
+                    var key = headerResponse + " Test";
                     // key should now equal dGhlIHNhbXBsZSBub25jZQ==
                     var test1 = AcceptKey(ref key);
 
-                    var newLine = "\r\n";
+                    var newLine = "\r\n"; //Environment.NewLine;
 
                     var response = "HTTP/1.1 101 Switching Protocols" + newLine
                          + "Upgrade: websocket" + newLine
@@ -83,7 +92,10 @@ namespace WebSocket_Test
             }
             catch (SocketException exception)
             {
-                throw exception;
+                Console.WriteLine("Socket異常:{0}",exception.Message);
+                client.Close();
+                client= null;
+                Console.WriteLine("關閉此次Client");
             }
             finally
             {

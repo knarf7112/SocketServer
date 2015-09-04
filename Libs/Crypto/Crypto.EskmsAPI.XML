@@ -1,0 +1,345 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Crypto.EskmsAPI</name>
+    </assembly>
+    <members>
+        <member name="T:Crypto.EskmsAPI.AesCMac2Worker">
+            <summary>
+            NIST Special Publication 800-38B 
+            Recommendation for Block Cipher Modes of Operation: 
+            The CMAC(Cipher-based Message Authentication Code) Mode for Authentication
+            http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+            </summary>
+        </member>
+        <member name="T:Crypto.EskmsAPI.ICMac2Worker">
+            <summary>
+            The CMAC Mode for Authentication
+            http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.ICMac2Worker.SetIv(System.Byte[])">
+            <summary>
+            Set IV for MAC
+            </summary>
+            <param name="iv">initialization vector</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.ICMac2Worker.DataInput(System.Byte[])">
+            <summary>
+            CMAC Loading
+            </summary>
+            <param name="m">input data</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.ICMac2Worker.SetMacKey(System.String)">
+            <summary>
+            Set CMAC key label
+            </summary>
+            <param name="keyLabel">mac key label</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.ICMac2Worker.SetMacLength(System.Int32)">
+            <summary>
+            set size of MAC
+            </summary>
+            <param name="macLength">MAC Size</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.ICMac2Worker.GetMac">
+            <summary>
+            Get bytes by MacLength start from MSB
+            </summary>
+            <returns>MAC</returns>
+        </member>
+        <member name="M:Crypto.EskmsAPI.ICMac2Worker.GetOdd">
+            <summary>
+            Every odd bytes (start from 0, {1,3,5,7,9,11,13,15}) from 16 bytes standard CMAC
+            </summary>
+            <returns>MAC</returns>
+        </member>
+        <member name="M:Crypto.EskmsAPI.AesCMac2Worker.GetOdd">
+            <summary>
+            Every odd bytes( strat from 0 ){1,3,5,7,9,11,13,15} from 16-byte standard CMAC
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Crypto.EskmsAPI.secret_key_t">
+            <summary>
+            存放加解密時Dll所需要的資訊
+            </summary>
+        </member>
+        <member name="T:Crypto.EskmsAPI.EsKmsApi">
+            <summary>
+            呼叫並執行EsKmsApi.Dll內的方法,PS:DLL要在X64下跑,所以編譯的設定都改成x64和容許UnSafe程式碼(因DLL是C++寫的)
+            </summary>
+        </member>
+        <member name="T:Crypto.EskmsAPI.IEsKmsApi">
+            <summary>
+            使用EsKmsApi的Dll來取得 Diverse Key
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IEsKmsApi.Authentication(System.String,System.String)">
+            <summary>
+            appCode and authCode setting
+            </summary>
+            <param name="appCode">呼叫哪個應用程式</param>
+            <param name="authCode">允許授權的代碼</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IEsKmsApi.Cipher(Crypto.EskmsAPI.secret_key_t,System.UInt32,Crypto.EskmsAPI.mechanism_param_t,Crypto.EskmsAPI.data_blob_t,Crypto.EskmsAPI.data_blob_t@,Crypto.EskmsAPI.result_t@)">
+            <summary>
+            send to dll infomation and get result address
+            </summary>
+            <param name="key"></param>
+            <param name="cipher_method"></param>
+            <param name="mechanism"></param>
+            <param name="dbin"></param>
+            <param name="dbout"></param>
+            <param name="result"></param>
+        </member>
+        <member name="T:Crypto.EskmsAPI.EsKmsWebApi">
+            <summary>
+            走Socket直接和KMS交訊
+            </summary>
+        </member>
+        <member name="T:Crypto.EskmsAPI.IEsKmsWebApi">
+            <summary>
+            介接C++寫的DLL(eskmsapi.dll)
+            使用DLL來作加解密
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IEsKmsWebApi.Encrypt(System.String,System.Byte[],System.Byte[])">
+            <summary>
+            Encrypt by key with the specific keylabel
+            </summary>
+            <param name="keyLabel">keyLabel map to key in kms</param>
+            <param name="iv">iv for encrypting</param>
+            <param name="decrypted">data to encrypt</param>
+            <returns>encrypted data</returns>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IEsKmsWebApi.Decrypt(System.String,System.Byte[],System.Byte[])">
+            <summary>
+            decrypt by key with the specific keylabel
+            </summary>
+            <param name="keyLabel">keyLabel map to key in kms</param>
+            <param name="iv">iv for decrypting</param>
+            <param name="encrypted">data to decrypt</param>
+            <returns>decrypted data</returns>
+        </member>
+        <member name="P:Crypto.EskmsAPI.EsKmsWebApi.CipherMode">
+            <summary>
+            為了選擇第一段和第二段Request的中間部分字串(暫定)
+            "4226,\"Parameter\":\"00000000000000000000000000000000\" or "4225"
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IiBonAuthenticate.StartAuthenticate(System.Boolean)">
+            <summary>
+            開始執行認證
+            <param name="isGenSessionKey">是否產生SessionKey屬性</param>
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IiBonAuthenticate.Generate_SessionKey">
+            <summary>
+            取得Session Key
+            SessionKey = rndA[0..3] || rndB[0..3] || rndA[12..15] || rndB[12..15]
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Input_KeyLabel">
+            <summary>
+            [Input]:ex:2ICH3F000032A
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Input_KeyVersion">
+            <summary>
+            [Input]:0x00
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Input_UID">
+            <summary>
+            [Input]:卡片UID(7 bytes) 
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Input_BlobValue">
+            <summary>
+            UID組合完畢的資料:32 bytes(和卡片UID屬性二擇一輸入)
+            byte[] { 01 + uid + ICASH + uid + ICASH + uid }
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Input_Enc_RanB">
+            <summary>
+            [Input]:E(RanB) => 16 bytes
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Input_RanA">
+            <summary>
+            強制輸入的RanA
+            不輸入則從Dll產生隨機RanA值
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Output_RanB">
+            <summary>
+            [Output]:Random B
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Output_Enc_RanAandRanBRol8">
+            <summary>
+            iv = E(RanB)
+            [Output]:E( iv, (RanA || RanBRol8))
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Output_Enc_IVandRanARol8">
+            <summary>
+            iv = (E( iv, (RanA || RanBRol8))).SubArray(last 16 bytes)
+            [Output]:E( iv, RanARol8)
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Output_RandAStartIndex">
+            <summary>
+            [Output]:Random A start index
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IiBonAuthenticate.Output_SessionKey">
+            <summary>
+            [Output]:Session Key(16 bytes) = rndA[0..3] || rndB[0..3] || rndA[12..15] || rndB[12..15]
+            </summary>
+        </member>
+        <member name="F:Crypto.EskmsAPI.iBonAuthenticate.dicKmsLoginConfig">
+            <summary>
+            登入KMS的帳號密碼設定檔
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.StartAuthenticate(System.Boolean)">
+            <summary>
+            Run (3 Pass) Authenticate Flow
+            <param name="isGenSessionKey">是否產生SessionKey到SessionKey屬性內(預設:false)</param>
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.Generate_DivKey(System.String,System.String,System.Byte[],System.Byte[])">
+            <summary>
+            1.從KMS取得 diverse data,並將Divers Key設到kx欄位(16 bytes)
+            </summary>
+            <param name="keyLabel">KMS需要的程式命令參數</param>
+            <param name="uid">卡片 UID</param>
+            <param name="iv">KMS需要的initial vector</param>
+            <param name="decrypted">blob value(null:表示使用AESDiv+uid+icash+uid+icash+uid)</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.Generate_DecryptRanB">
+            <summary>
+            2.解密RanB,並將結果設到RanB屬性
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.Generate_EncRanAandRanBRol8">
+            <summary>
+            3. 產生Enc(RanA + RanB(左旋 1 Byte))
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.Generate_EncRanARol8">
+            <summary>
+            4.產生Enc(iv,RanARol8)//iv =>使用EncRanAandRanBRol8尾部16bytes資料,並將RanA左旋8後加密
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.Generate_SessionKey">
+            <summary>
+            5. 輸出傳輸加解密用的Session Key
+            SesKey = rndA[0..3] || rndB[0..3] || rndA[12..15] || rndB[12..15]
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.Generate_RanA(System.Byte[])">
+            <summary>
+            產出Random A 且設定RandomA Start Index
+            <param name="ranA">強制使用的RanA</param>
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.iBonAuthenticate.GetDiverseInput(System.String)">
+            <summary>
+            卡片uid轉換成KMS的Blob需要的參數
+            </summary>
+            <param name="uid"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Input_KeyLabel">
+            <summary>
+            ex:2ICH3F000032A
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Input_KeyVersion">
+            <summary>
+            0x00
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Input_UID">
+            <summary>
+            卡片UID(7 bytes) 
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Input_BlobValue">
+            <summary>
+            UID組合完畢的資料:32 bytes(和卡片UID屬性二擇一輸入)
+            byte[] { 01 + uid + ICASH + uid + ICASH + uid }
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Input_Enc_RanB">
+            <summary>
+            E(RanB) => 16 bytes
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Input_RanA">
+            <summary>
+            強制輸入的RanA
+            不輸入則從Dll產生隨機RanA值
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Output_RanB">
+            <summary>
+            Random B
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Output_Enc_RanAandRanBRol8">
+            <summary>
+            iv = E(RanB)
+            E( iv, (RanA || RanBRol8))
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Output_Enc_IVandRanARol8">
+            <summary>
+            iv = (E( iv, (RanA || RanBRol8))).SubArray(last 16 bytes)
+            E( iv, RanARol8)
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Output_RandAStartIndex">
+            <summary>
+            Random A start index(16 bytes)
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.iBonAuthenticate.Output_SessionKey">
+            <summary>
+            Session Key = rndA[0..3] || rndB[0..3] || rndA[12..15] || rndB[12..15]
+            </summary>
+        </member>
+        <member name="M:Crypto.IKey2Deriver.DiverseInput(System.Byte[])">
+            <summary>
+            input data for key diversification
+            </summary>
+            <param name="m">input bytes</param>
+        </member>
+        <member name="M:Crypto.IKey2Deriver.SetSeedKey(System.String)">
+            <summary>
+            Set seed key for diversifying
+            </summary>
+            <param name="keyLabel">2ICH0000010A</param>
+        </member>
+        <member name="M:Crypto.IKey2Deriver.Encrypt(System.Byte[],System.Byte[])">
+            <summary>
+            Get Derived Key
+            取得衍生KEey
+            </summary>
+            <param name="iv">initial vector</param>
+            <param name="decrypted"></param>
+            <returns>Derived key bytes</returns>
+        </member>
+        <member name="M:Crypto.IKey2Deriver.Decrypt(System.Byte[],System.Byte[])">
+            <summary>
+            衍生KEey解密還原回原始Key
+            </summary>
+            <param name="iv">initial vector</param>
+            <param name="encrypted">衍生KEey</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

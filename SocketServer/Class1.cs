@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +18,11 @@ namespace SocketServer
             ISocketServer s1 = new AsyncMultiSocketServer(6111, "Authenticate");
             s1.Start();
 
-            Console.ReadKey();
+            string cmd = string.Empty;
+            while (!cmd.Equals("exit"))
+            {
+                cmd = Console.ReadLine();
+            }
         }
     }
 }

@@ -41,6 +41,15 @@
     <Reference Include="Common.Logging.Log4Net1211">
       <HintPath>..\Libs\Common.Logging.Log4Net1211.dll</HintPath>
     </Reference>
+    <Reference Include="Crypto">
+      <HintPath>..\Libs\Crypto\Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="Crypto.EskmsAPI">
+      <HintPath>..\Libs\Crypto\Crypto.EskmsAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Crypto.POCO">
+      <HintPath>..\Libs\Crypto\Crypto.POCO.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\log4net.dll</HintPath>
@@ -48,6 +57,9 @@
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RandomGenerator">
+      <HintPath>..\Libs\Crypto\RandomGenerator.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -75,6 +87,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\EsKmsWebApiConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

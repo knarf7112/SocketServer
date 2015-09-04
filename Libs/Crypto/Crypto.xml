@@ -1,0 +1,879 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Crypto</name>
+    </assembly>
+    <members>
+        <member name="T:Crypto.Aes128CMacWorker">
+            <summary>
+            NIST Special Publication 800-38B 
+            Recommendation for Block Cipher Modes of Operation: 
+            The CMAC(Cipher-based Message Authentication Code) Mode for Authentication
+            http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+            </summary>
+        </member>
+        <member name="T:Crypto.ICMacWorker">
+            <summary>
+            The CMAC Mode for Authentication
+            http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+            </summary>
+        </member>
+        <member name="M:Crypto.ICMacWorker.DataInput(System.Byte[])">
+            <summary>
+            CMAC  Loaing
+            </summary>
+            <param name="m">input data</param>
+        </member>
+        <member name="M:Crypto.ICMacWorker.SetMacKey(System.Byte[])">
+            <summary>
+            Set CMAC key
+            </summary>
+            <param name="key">mac key</param>
+        </member>
+        <member name="M:Crypto.ICMacWorker.SetMacLength(System.Int32)">
+            <summary>
+            set size of MAC
+            </summary>
+            <param name="macLength">Mac size</param>
+        </member>
+        <member name="M:Crypto.ICMacWorker.GetMac">
+            <summary>
+            Get bytes by MacLength start from MSB
+            </summary>
+            <returns>MAC</returns>
+        </member>
+        <member name="M:Crypto.ICMacWorker.GetOdd">
+            <summary>
+            Every odd bytes(start from 0, {1,3,5,7,9,11,13,15}) from 16-byte standard CMAC
+            </summary>
+            <returns>MAC</returns>
+        </member>
+        <member name="M:Crypto.ICMacWorker.SetIV(System.Byte[])">
+            <summary>
+            set IV for MAC
+            設定初始值
+            </summary>
+            <param name="iv">initialization vector</param>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.DataInput(System.Byte[])">
+            <summary>
+            設定DataInput
+            </summary>
+            <param name="m">要加密的資料</param>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.SetMacKey(System.Byte[])">
+            <summary>
+            設定加密金鑰
+            </summary>
+            <param name="key">加密金鑰</param>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.SetMacLength(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="macLength"></param>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.GetMac">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.GetOdd">
+            <summary>
+            Every odd bytes( strat from 0 ){1,3,5,7,9,11,13,15} from 16-byte standard CMAC
+            抽取資料陣列的奇數字節的資料
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.SetIV(System.Byte[])">
+            <summary>
+            設定加解密時的初始值
+            </summary>
+            <param name="iv">initial vector</param>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.getNextSubKey(System.Byte[])">
+            <summary>
+            若無最高有效位數則陣列串連並左移1bit
+            若有最高有效位數則陣列串連並左移1bit後再和ConstRb作XOR
+            回傳結果陣列
+            </summary>
+            <param name="kx"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.Aes128CMacWorker.getSubKeys">
+            <summary>
+            使用AesCryptor加密ConstZero取得K0並設定k1,k2
+            </summary>
+        </member>
+        <member name="T:Crypto.CommonUtility.IHexWorker">
+            <summary>
+              Utility for pack and unpack a single byte
+            </summary>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexWorker.Byte2Hex(System.Byte)">
+            <summary>
+              unpack 1 byte to 2 hex
+            </summary>
+            <param name="b">byte</param>
+            <returns>hex</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexWorker.Hex2Byte(System.String)">
+            <summary>
+               pack 2 hex to 1 byte
+            </summary>
+            <param name="hexStr">hex string with 2 char</param>
+            <returns>byte</returns>
+        </member>
+        <member name="F:Crypto.CommonUtility.AbsHexWorker.HexPerByte">
+            <summary>
+            2 hex can make a byte
+            </summary>
+        </member>
+        <member name="T:Crypto.CommonUtility.BytesBitwiser">
+            <summary>
+            提供陣列左移bit或右移bit的方法物件
+            </summary>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.MsbOne(System.Byte[])">
+            <summary>
+            The left-most bit of a bit string
+            陣列第一個元素是否存在最高有效位數[1xxx xxxx]
+            </summary>
+            <param name="bytes">byte array</param>
+            <returns>true:the left-most bit equals 1</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.ShiftLeft(System.Byte[],System.Int32)">
+            <summary>
+            Shifts shiftCnt times of the bits in an array of bytes to the left .
+            將資料陣列向左位移n個位數
+            </summary>
+            <param name="srcBytes">The byte array to shift</param>
+            <param name="shiftCnt">number of times to shift left</param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.RotateLeft(System.Byte[],System.Int32)">
+            <summary>
+            Rotates shiftCnt times of the bits in an array of bytes to the left.
+            將資料陣列向左旋轉n個位數
+            </summary>
+            <param name="srcBytes"></param>
+            <param name="shiftCnt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.ShiftRight(System.Byte[],System.Int32)">
+            <summary>
+             Shifts shiftCnt times of the bits in an array of bytes to the right.
+            </summary>
+            <param name="srcBytes">The byte array to shift</param>
+            <param name="shiftCnt">number of times to shift right</param>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.RotateRight(System.Byte[],System.Int32)">
+            <summary>
+            Rotates shiftCnt times of the bits in an array of bytes to the right.
+            </summary>
+            <param name="srcBytes">The byte array to shift</param>
+            <param name="shiftCnt">number of times to shift right</param>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.ExclusiveOr(System.Byte[],System.Byte[])">
+            <summary>
+              op1 XOR op2 with bits of the byte array 
+            </summary>
+            <param name="op1">byte array1</param>
+            <param name="op2">byte array2</param>
+            <returns>Result of XOR</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IBytesBitwiser.CMacPadding(System.Byte[])">
+            <summary>
+             padding to 10^j , where j = (16 - MLen % 16) * 8 - 1
+            </summary>
+            <param name="srcBytes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.MsbOne(System.Byte[])">
+            <summary>
+            檢查陣列第一個元素是否存在最高有效位數
+            [1xxx xxxx] => true
+            [0xxx xxxx] => false
+            </summary>
+            <param name="bytes">來源陣列</param>
+            <returns>是否存在最高有效位數</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.ShiftLeft(System.Byte[],System.Int32)">
+            <summary>
+            將Byte Array所有元素向左移 n bit
+            並捨棄掉陣列第一個元素的最高有效位元(即最後一個陣列元素的最低位元補0)
+            ex:
+            {129,130}=>{ 10000001,10000010}
+            左移1bit,會將第1個bit丟掉
+            {00000011,00000100} => {3,4}
+            </summary>
+            <param name="srcBytes">要左移的陣列來源</param>
+            <param name="shiftCnt">要左移幾bit</param>
+            <returns>左移後的陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.shiftLeft(System.Byte[]@)">
+            <summary>
+            Shifts the bits in an array of bytes to the left one by one.
+            ex: 
+            {90,254,1} ==轉二進位==> {0101 1010(90),1111 1110(254),0000 0001(1)}
+            {0101 1010(90),1111 1110(254),0000 0001(1)} ==向左位移一位==> {1011 0101(181),1111 1100(252),0000 0010(2)}
+            如果陣列的第一個元素最高位數[1xxx xxxx]有包含1則要位移到陣列最後一位元素的最右側
+            </summary>
+            <param name="bytes">The byte array to shift.</param>
+            <returns>回傳陣列第一個元素的最高有效位數存歿 true(1):false(0)</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.RotateLeft(System.Byte[],System.Int32)">
+            <summary>
+            Rotates shiftCnt times of the bits in an array of bytes to the left.
+            類似ShiftLeft方法
+            差別是將來源陣列的第一個最高位元加到陣列的右邊(即陣列最後一個元素的最小位數)
+            ex:
+            {129,130}=>{ 10000001,10000010}
+            左移1bit,會將第1個bit移到最右邊
+            {00000011,00000101} => {3,5}
+            </summary>
+            <param name="srcBytes">The byte array to shift</param>
+            <param name="shiftCnt">number of times to shift left</param>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.ShiftRight(System.Byte[],System.Int32)">
+            <summary>
+            將Byte Array所有元素向右移 n bit 
+            並捨棄掉陣列最後一個元素的最低有效位元(即第一個陣列元素的最高位元補0)
+            ex:
+            {129,129}=>{ 10000001,10000001}
+            右移1bit,會將第1個bit丟掉
+            { 01000000, 11000000 } => { 64, 192 }
+            </summary>
+            <param name="srcBytes">要右移的陣列來源</param>
+            <param name="shiftCnt">要右移幾bit</param>
+            <returns>右移後的陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.shiftRight(System.Byte[]@)">
+            <summary>
+            Shifts the bits in an array of bytes to the right.
+            陣列元素向右移1 bit, 最小有效位數會丟棄
+            ex:{ 129, 129 } => { 10000001, 10000001 }
+            右移 1 bit,會將最後一個陣列元素的最小有效位數丟掉,最左邊補0
+            {01000000,11000000} => { 64, 192 }
+            </summary>
+            <param name="bytes">要右移的陣列來源</param>
+            <returns>陣列最後一個元素的最小有效位數 true(1)/false(0)</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.RotateRight(System.Byte[],System.Int32)">
+            <summary>
+            Shifts the bits in an array of bytes to the right.
+            陣列元素向右移1 bit, 最小有效位數會轉成最大有效位數再塞回陣列的第一個元素
+            ex:{ 129, 129 } => { 10000001, 10000001 }
+            右移 1 bit,會將最後一個陣列元素的最小有效位數會轉成最大有效位數再塞回陣列的第一個元素
+            {11000000,11000000} => { 192, 192 }
+            </summary>
+            <param name="srcBytes">要右移的陣列來源</param>
+            <param name="shiftCnt">右移n bit</param>
+            <returns>右移後的陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.ExclusiveOr(System.Byte[],System.Byte[])">
+            <summary>
+              op1 XOR op2  with bits of the byte array 
+              陣列A和陣列B所有元素作XOR後,回傳新陣列
+            </summary>
+            <param name="op1">byte array1</param>
+            <param name="op2">byte array2</param>
+            <returns>Result of XOR</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.BytesBitwiser.CMacPadding(System.Byte[])">
+            <summary>
+            The block length of AES-128 is 128 bits (16 octets). 
+            If the length of the message is not a positive
+            multiple of the block length then Pad M with
+            the bit-string 10^i to adjust the length of the last block up to the
+            block length.
+            function, padding(x), is defined as follows:
+            -   r = x.Length 
+            -   padding(x) = x || 10^i      where i is 128- 8*r - 1
+            That is, padding(x) is the concatenation of x and a single '1',
+            followed by the minimum number of '0's, so that the total length is
+            equal to 128 bits.
+            </summary>
+        </member>
+        <member name="T:Crypto.CommonUtility.ByteWorker">
+            <summary>
+            處理陣列的左旋,右旋,合併,取子陣列,Padding,轉置
+            </summary>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.RotateLeft(System.Byte[],System.Int32)">
+            <summary>
+            rotate src byte array left bytewise with cnt times
+            </summary>
+            <param name="src">src byte array</param>
+            <param name="cnt">times to rotate</param>
+            <returns>result bytes</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.RotateRight(System.Byte[],System.Int32)">
+            <summary>
+            rotate src byte array right bytewise with cnt times
+            </summary>
+            <param name="src">src byte array</param>
+            <param name="cnt">times to rotate</param>
+            <returns>result bytes</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.Combine(System.Byte[],System.Byte[])">
+            <summary>
+             Combine two arrays into one 
+            </summary>
+            <param name="first">first array</param>
+            <param name="second">second array</param>
+            <returns>result array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.Combine(System.Byte[][])">
+            <summary>
+             Combine several arrays into one
+            </summary>
+            <param name="manyByteArr">list of byte array</param>
+            <returns>result array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.SubArray(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+             Get sub array for src array
+            </summary>
+            <param name="src">src array</param>
+            <param name="beginIndex">begin to copy</param>
+            <param name="Length">lenght of bytes to copy</param>
+            <returns>result array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.ExclusiveOr(System.Byte[],System.Byte[])">
+            <summary>
+              op1 XOR op2  with bits of the byte array 
+            </summary>
+            <param name="op1">byte array1</param>
+            <param name="op2">byte array2</param>
+            <returns>Result of XOR</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.CMacPadding(System.Byte[])">
+            <summary>
+            if srcBytes.Length %16 != 0, padding to 10^j, where j = ( 16 - ( srcBytes.Length % 16 ) ) * 8 - 1
+            </summary>
+            <param name="srcBytes">src bytes</param>
+            <returns>padded bytes</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.ZeroPadding(System.Byte[],System.Int32)">
+            <summary>
+            if srcBytes.Length % blockSize != 0, padding to 0^j, where j = ( blockSize - ( srcBytes.Length % blockSize ) ) * 8
+            </summary>
+            <param name="srcBytes">src bytes</param>
+            <param name="blockSize">blockSize</param>
+            <returns>padded bytes</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.AreEqual(System.Byte[],System.Byte[])">
+            <summary>
+            check if each byte of op1 and op2 with the same value
+            </summary>
+            <param name="op1">byte array1</param>
+            <param name="op2">byte array2</param>
+            <returns>true: equal</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.Reverse(System.Byte[])">
+            <summary>
+            Reverse byte array 
+            </summary>
+            <param name="src"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.Fill(System.Byte[]@,System.Byte)">
+            <summary>
+            Fill src byte array with pad 
+            </summary>
+            <param name="src">src bytes</param>
+            <param name="pad">pad byte</param>
+        </member>
+        <member name="M:Crypto.CommonUtility.IByteWorker.Fill(System.Int32,System.Byte)">
+            <summary>
+            New byte array then fill with pad
+            </summary>
+            <param name="size">size of byte array</param>
+            <param name="pad">pad bytes</param>
+            <returns>new padded array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.RotateLeft(System.Byte[],System.Int32)">
+            <summary>
+            陣列元素左旋幾次,若左旋超過陣列範圍的會移到陣列右邊去
+            ex: {12,34,56,78,90,AB,CD,EF} ==左旋2次==> {56,78,90,AB,CD,EF,12,34}
+            </summary>
+            <param name="src">來源陣列</param>
+            <param name="cnt">左旋次數</param>
+            <returns>左旋後的新陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.RotateRight(System.Byte[],System.Int32)">
+            <summary>
+            陣列元素右旋幾次,若右旋陣列範圍的會移到陣列左邊去
+            ex: {12,34,56,78,90,AB,CD,EF} ==右旋2次==> {CD,EF,12,34,56,78,90,AB}
+            </summary>
+            <param name="src">來源陣列</param>
+            <param name="cnt">右旋次數</param>
+            <returns>右旋後的新陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.Combine(System.Byte[],System.Byte[])">
+            <summary>
+            合併兩個陣列產生一個新的合併陣列
+            </summary>
+            <param name="first"></param>
+            <param name="second"></param>
+            <returns>合併的新陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.Combine(System.Byte[][])">
+            <summary>
+            合併2維陣列
+            </summary>
+            <param name="manyByteArr"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.SubArray(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            取得來源陣列的指定子陣列
+            </summary>
+            <param name="src">來源陣列</param>
+            <param name="beginIndex">指定的起始索引</param>
+            <param name="length">子陣列長度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.ExclusiveOr(System.Byte[],System.Byte[])">
+            <summary>
+              op1 XOR op2  with bits of the byte array 
+            </summary>
+            <param name="op1">byte array1</param>
+            <param name="op2">byte array2</param>
+            <returns>Result of XOR</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.CMacPadding(System.Byte[])">
+            <summary>
+            將來源陣列補Padding
+            若長度整除16(BlockSize)則不作Padding,
+            若長度除16(BlockSize)有餘數則補上Padding =>{剩餘byte,0x80,0x00,0x00,0x00.....}
+            </summary>
+            <param name="srcBytes">來源陣列</param>
+            <returns>Padding後的陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.ZeroPadding(System.Byte[],System.Int32)">
+            <summary>
+            將來源陣列補Padding(有補的話,都補0)
+            若長度整除16(BlockSize)則不作Padding,
+            若長度除16(BlockSize)有餘數則補上Padding =>{剩餘byte,0x00,0x00,0x00,0x00.....}
+            </summary>
+            <param name="srcBytes"></param>
+            <param name="blockSize"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.AreEqual(System.Byte[],System.Byte[])">
+            <summary>
+            比較陣列值是否相同
+            </summary>
+            <param name="op1"></param>
+            <param name="op2"></param>
+            <returns>相同/不同</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.Reverse(System.Byte[])">
+            <summary>
+            陣列反轉
+            </summary>
+            <param name="src">來源陣列</param>
+            <returns>反轉的陣列</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.Fill(System.Byte[]@,System.Byte)">
+            <summary>
+            陣列值全部修改指定值
+            </summary>
+            <param name="src">來源陣列</param>
+            <param name="pad">指定值</param>
+        </member>
+        <member name="M:Crypto.CommonUtility.ByteWorker.Fill(System.Int32,System.Byte)">
+            <summary>
+            產生陣列並全部指定值
+            </summary>
+            <param name="size">要產生的陣列大小</param>
+            <param name="pad">指定的陣列值</param>
+            <returns></returns>
+        </member>
+        <member name="T:Crypto.CommonUtility.IHexConverter">
+            <summary>
+               Pack and unpack hex string to other Type( uint, string )
+            </summary>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Str2Hex(System.String)">
+            <summary>
+               Unpack Default encoding string to Hex string according to default encoding
+            </summary>
+            <param name="str">string data to be unpacked(with default encoding)</param>
+            <returns>hex string</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Hex2Str(System.String)">
+            <summary>
+              Pack hex string to Default encoding string according to default encoding
+            </summary>
+            <param name="hexStr">hex string to be packed</param>
+            <returns>string data(with default encoding)</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Hex2Bytes(System.String)">
+            <summary>
+              Pack hex string to byte array
+            </summary>
+            <param name="hexStr">hex string</param>
+            <returns>byte array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Hex2Bytes(System.Byte[])">
+            <summary>
+              Pack hex byte array to byte array
+            </summary>
+            <param name="hexBytes">hex byte array</param>
+            <returns>byte array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Bytes2Hex(System.Byte[])">
+            <summary>
+              Unpack byte array to hex string
+            </summary>
+            <param name="dataBytes">byte array to be unpacked</param>
+            <returns>Hex string</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Byte2Hex(System.Byte)">
+            <summary>
+              unpack 1 byte to 2 hex
+            </summary>
+            <param name="b">byte</param>
+            <returns>hex</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IHexConverter.Hex2Byte(System.String)">
+            <summary>
+               pack 2 hex to 1 byte
+            </summary>
+            <param name="hexStr">hex string with 2 char</param>
+            <returns>byte</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.HexConverter.Str2Hex(System.String)">
+            <summary>
+            字串轉hex字串,使用預設編碼
+            "IJK" => "494A4B" 
+            "494A4B"即{ 49, 4A, 4B }
+            </summary>
+            <param name="str">字串</param>
+            <returns>hex字串</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.HexConverter.Hex2Str(System.String)">
+            <summary>
+            hex字串轉字串,使用預設編碼
+            "494A4B" => "IJK"
+            "494A4B"即(hex){ 49, 4A, 4B } => byte{73, 74, 75}
+            </summary>
+            <param name="hexStr"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.HexConverter.Hex2Bytes(System.String)">
+            <summary>
+            hex字串轉Byte Array
+            ex:"0F1F" => {15, 31}
+            </summary>
+            <param name="hexStr">hex字串</param>
+            <returns>Byte Array</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.HexConverter.Hex2Bytes(System.Byte[])">
+            <summary>
+            陣列先用ASCII編碼轉hex字串再轉Byte Array
+            </summary>
+            <param name="hexBytes"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Crypto.CommonUtility.HexWorkerByArr">
+            <summary>
+            用靜態字典檔來當作查找雜湊hex的表(速度較快) 
+            ex:輸入15(byte)=>回傳"0F";輸入"0F"=>回傳15(byte)
+            </summary>
+        </member>
+        <member name="F:Crypto.CommonUtility.HexWorkerByArr.hHex">
+            <summary>
+            存放上面的資料轉成對應的查找表
+            </summary>
+        </member>
+        <member name="M:Crypto.CommonUtility.HexWorkerByArr.#cctor">
+            <summary>
+            A static constructor executes once per type, rather than once per instance.
+            A type can define only one static constructor, and it must be parameterless and have the
+            same name as the type:
+            The runtime automatically invokes a static constructor just prior to the type being
+            used. Two things trigger this:
+               • Instantiating the type
+               • Accessing a static member in the type
+            </summary>
+        </member>
+        <member name="M:Crypto.CommonUtility.IRandWorker.GetBytes(System.Int32)">
+            <summary>
+            Get random bytes
+            </summary>
+            <param name="size">size of bytes</param>
+            <returns>Random bytes</returns>
+        </member>
+        <member name="M:Crypto.CommonUtility.IRandWorker.GetBytes(System.Byte[])">
+            <summary>
+            Get Random bytes
+            </summary>
+            <param name="bytes">out byte array</param>
+        </member>
+        <member name="M:Crypto.IHashWorker.ComputeHash(System.Byte[])">
+            <summary>
+            Compute hash from byte array in memory
+            </summary>
+            <param name="decrypted">byte array to be hashed</param>
+            <returns>hash result</returns>
+        </member>
+        <member name="M:Crypto.IHashWorker.ComputeHash(System.IO.Stream)">
+            <summary>
+            Compute hash from Stream
+            從資料流取出資料來作Hash
+            </summary>
+            <param name="stream">stream of bytes</param>
+            <returns>hash result</returns>
+        </member>
+        <member name="M:Crypto.HashWorker.ComputeHash(System.Byte[])">
+            <summary>
+            將資料陣列作Hash
+            </summary>
+            <param name="decrypted"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.HashWorker.ComputeHash(System.IO.Stream)">
+            <summary>
+            將資料流內的資料作Hash後,輸出Hash陣列
+            </summary>
+            <param name="stream">要hash的資料流</param>
+            <returns>Hash陣列</returns>
+        </member>
+        <member name="M:Crypto.HashWorker.Hash2Hex(System.Byte[])">
+            <summary>
+            將資料陣列先hash產生hash陣列後,再將hash陣列轉hex字串
+            </summary>
+            <param name="decrypted">資料來源</param>
+            <returns>Hashed HexString</returns>
+        </member>
+        <member name="M:Crypto.HashWorker.Hash2Base64(System.Byte[])">
+            <summary>
+            將資料陣列先hash產生hash陣列後,再將hash陣列轉Base64字串
+            </summary>
+            <param name="decrypted">資料來源</param>
+            <returns>Hashed Base64String</returns>
+        </member>
+        <member name="M:Crypto.HashWorker.Initialize">
+            <summary>
+            初始化Hash演算物件
+            </summary>
+        </member>
+        <member name="M:Crypto.HashWorker.TransformBlock(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="inputBuffer"></param>
+            <param name="inputOffset"></param>
+            <param name="inputCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.HashWorker.TransformFinalBlock(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="inputBuffer"></param>
+            <param name="inputOffset"></param>
+            <param name="inputCount"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Crypto.HashWorker.HashAlg">
+            <summary>
+            設定要使用哪種hash演算法
+            SHA1/SHA256/MD5
+            </summary>
+        </member>
+        <member name="T:Crypto.IPaddingHelper">
+            <summary>
+            Padding
+            </summary>
+        </member>
+        <member name="M:Crypto.IPaddingHelper.AddPadding(System.Byte[])">
+            <summary>
+             Add padding to source
+            </summary>
+            <param name="src">source content</param>
+            <returns>content with padding</returns>
+        </member>
+        <member name="M:Crypto.IPaddingHelper.RemovePadding(System.Byte[])">
+            <summary>
+            Remove padding from content
+            </summary>
+            <param name="src">content with padding</param>
+            <returns>original source</returns>
+        </member>
+        <member name="P:Crypto.IPaddingHelper.BlockSize">
+            <summary>
+            GET/SET Block size, default 16
+            </summary>
+        </member>
+        <member name="T:Crypto.ISymCryptor">
+            <summary>
+            Symmectric cryptor
+            ref:https://msdn.microsoft.com/zh-tw/library/system.security.cryptography.symmetricalgorithm(v=vs.110).aspx
+            MSDN說:從 SymmetricAlgorithm 類別繼承時，您必須覆寫下列成員：CreateDecryptor、CreateEncryptor、GenerateIV 和 GenerateKey。
+            </summary>
+        </member>
+        <member name="M:Crypto.ISymCryptor.SetKey(System.Byte[])">
+            <summary>
+            set key for encrypt/decrypt
+            </summary>
+            <param name="key">key for symmectric</param>
+        </member>
+        <member name="M:Crypto.ISymCryptor.SetIV(System.Byte[])">
+            <summary>
+            set initial vector
+            </summary>
+            <param name="iv">initial vector</param>
+        </member>
+        <member name="M:Crypto.ISymCryptor.SetAlgorithm(System.String)">
+            <summary>
+            set algorithm
+            </summary>
+            <param name="alg">algorithm for the cryptor</param>
+        </member>
+        <member name="M:Crypto.ISymCryptor.SetAlgorithm(System.String,System.Security.Cryptography.CipherMode,System.Security.Cryptography.PaddingMode)">
+            <summary>
+            set parameter for the cryptor
+            </summary>
+            <param name="alg">algorithm for the cryptor</param>
+            <param name="cipherMode">Cipher mode(default:CBC)</param>
+            <param name="paddingMode">Padding mode(default:none)</param>
+        </member>
+        <member name="M:Crypto.ISymCryptor.Encrypt(System.Byte[])">
+            <summary>
+            Encrypt plain data into encrypted bytes
+            </summary>
+            <param name="data">encrypt data</param>
+            <returns>encrypted bytes</returns>
+        </member>
+        <member name="M:Crypto.ISymCryptor.Decrypt(System.Byte[])">
+            <summary>
+            Decrypt encrypted bytes to plain data
+            </summary>
+            <param name="encryptedData">encrypted bytes</param>
+            <returns>plain data</returns>
+        </member>
+        <member name="M:Crypto.ISymCryptor.Encrypt(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            從已解密(或無加密)的資料流讀取資料後,加密資料並寫入到資料流
+            </summary>
+            <param name="decryptedFile">解密(或無加密)的資料流</param>
+            <param name="encryptedFile">要加密的資料流</param>
+        </member>
+        <member name="M:Crypto.ISymCryptor.Decrypt(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            從已加密的資料流讀取資料後,解密資料並寫入到資料流
+            </summary>
+            <param name="encryptedFile">資料已加密的資料流</param>
+            <param name="decryptedFile">要解密的資料流</param>
+        </member>
+        <member name="T:Crypto.Pkcs7PaddingHelper">
+            <summary>
+            遵照Pkcs7規範將資料陣列尾部補齊規定的BlockSize大小
+            </summary>
+        </member>
+        <member name="M:Crypto.Pkcs7PaddingHelper.AddPadding(System.Byte[])">
+            <summary>
+            Padding data source
+            ex: {1, 2, 3} ==Pkcs7==> { 1,2,3,13,13,13,13,13,13,13,13,13,13,13,13,13}
+            </summary>
+            <param name="src">來源資料</param>
+            <returns>Padding後的資料陣列</returns>
+        </member>
+        <member name="M:Crypto.Pkcs7PaddingHelper.AddPadding(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            將來源資料流資內的資料和Padding陣列寫入目的資料流
+            </summary>
+            <param name="src">來源資料流</param>
+            <param name="dest">目的資料流</param>
+        </member>
+        <member name="M:Crypto.Pkcs7PaddingHelper.RemovePadding(System.Byte[])">
+            <summary>
+            移除委部Padding過的資料
+            ex:{ 1,2,3,13,13,13,13,13,13,13,13,13,13,13,13,13} ==Pkcs7==> {1, 2, 3}
+            </summary>
+            <param name="src"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.Pkcs7PaddingHelper.RemovePadding(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            移除Padding的陣列資料流
+            </summary>
+            <param name="src"></param>
+            <param name="dest"></param>
+        </member>
+        <member name="P:Crypto.Pkcs7PaddingHelper.BlockSize">
+            <summary>
+            每個區塊的大小,padding前檢查每個block大小用
+            </summary>
+        </member>
+        <member name="T:Crypto.SymCryptor">
+            <summary>
+            對稱式加解密
+            Default for AES128 algorithm
+            </summary>
+        </member>
+        <member name="M:Crypto.SymCryptor.SetKey(System.Byte[])">
+            <summary>
+            設定加解密的Key
+            </summary>
+            <param name="key">加解密用的金鑰</param>
+        </member>
+        <member name="M:Crypto.SymCryptor.SetIV(System.Byte[])">
+            <summary>
+            initial vector
+            設定加解密用的初始值
+            </summary>
+            <param name="iv"></param>
+        </member>
+        <member name="M:Crypto.SymCryptor.SetAlgorithm(System.String)">
+            <summary>
+            設定演算編碼方式(使用CBC模式,不Padding)
+            </summary>
+            <param name="alg"></param>
+        </member>
+        <member name="M:Crypto.SymCryptor.SetAlgorithm(System.String,System.Security.Cryptography.CipherMode,System.Security.Cryptography.PaddingMode)">
+            <summary>
+            設定演算物件的指定密碼編譯方式
+            </summary>
+            <param name="alg">指定的密碼編譯</param>
+            <param name="cipherMode">加密區塊的作業模式</param>
+            <param name="paddingMode">補BlockSize的方式</param>
+        </member>
+        <member name="M:Crypto.SymCryptor.Encrypt(System.Byte[])">
+            <summary>
+            加密資料
+            </summary>
+            <param name="data">要加密的原始資料</param>
+            <returns>加密過的資料</returns>
+        </member>
+        <member name="M:Crypto.SymCryptor.Decrypt(System.Byte[])">
+            <summary>
+            解密加密過的資料
+            </summary>
+            <param name="encryptedData">加密過的資料</param>
+            <returns>解密的資料</returns>
+        </member>
+        <member name="M:Crypto.SymCryptor.GetCipherMode(System.String)">
+            <summary>
+            只回傳兩種模式(EBC or CBC)
+            </summary>
+            <param name="cipherMode">cipherMode字串(指定要用來加密的區塊密碼模式)</param>
+            <returns>EBC or CBC</returns>
+        </member>
+        <member name="M:Crypto.SymCryptor.DoCrypt(System.Byte[],System.Security.Cryptography.ICryptoTransform)">
+            <summary>
+            共用的執行加解密流程,使用CryptoStream
+            //ref: http://stackoverflow.com/questions/24903575/how-to-return-byte-when-decrypt-using-cryptostream-descryptoserviceprovider
+            </summary>
+            <param name="data"></param>
+            <param name="cryptor">密碼編譯轉換介面</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
