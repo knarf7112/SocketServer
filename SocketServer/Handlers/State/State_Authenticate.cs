@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 //
 using Common.Logging;
 using System.Net.Sockets;
 using Crypto.EskmsAPI;
 using Crypto.POCO;
-using Crypto;
 using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace SocketServer.Handlers.State
 {
@@ -46,7 +42,7 @@ namespace SocketServer.Handlers.State
                 readCount = absClientRequestHandler.ClientSocket.Receive(receiveBuffer, SocketFlags.None);
                 if (readCount == 0) { return; }
                     //command 輸出狀態 TODO...
-                else if (readCount == 11 && Encoding.UTF8.GetString(receiveBuffer, 0, readCount).ToLower().Contains("status"))
+                else if (readCount == 7 && Encoding.UTF8.GetString(receiveBuffer, 0, readCount).ToLower().Contains("status"))
                 {
                     outputCmd = "Hello";
                     receiveBuffer = Encoding.UTF8.GetBytes(outputCmd);
@@ -62,9 +58,8 @@ namespace SocketServer.Handlers.State
                     requestJsonStr = Encoding.UTF8.GetString(receiveBuffer);
                     log.Debug(m => m("[{0}]Request: {1}", this.GetType().Name, requestJsonStr));
                     request = JsonConvert.DeserializeObject<EskmsPOCO>(requestJsonStr);
-                    //檢查Request資料長度
-
-                    request.CHeckLength(true, out requestCheckErrMsg);
+                    //檢查Request資料長度(Attribute)
+                    request.CheckLength(true, out requestCheckErrMsg);
                     //設定Authenticate參數
                     iBonAuthObj = new iBonAuthenticate()
                     {
@@ -74,9 +69,9 @@ namespace SocketServer.Handlers.State
                         Input_Enc_RanB = request.Input_Enc_RanB
                     };
                     log.Debug(m => m("開始執行Authenticate"));
-                    iBonAuthObj.StartAuthenticate(true);
+                    iBonAuthObj.StartAuthenticate(true);//會傳送數據到KMS並取回DiverseKey後做運算並將結果寫入Output屬性中
 
-
+                    //回應資料設定
                     response = new EskmsPOCO()
                     {
                         Input_KeyLabel = request.Input_KeyLabel,
@@ -99,6 +94,14 @@ namespace SocketServer.Handlers.State
                     }
                     log.Debug(m => m("[{0}] Response End", this.GetType().Name));
                 }
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                log.Error(m => m("資料檢核失敗:{0}",ex.ToString()));
+            }
+            catch(JsonException ex)
+            {
+                log.Error(m => m("Request(JsonString) Parse Request(Object) Failed:{0}", ex.ToString()));
             }
             catch (Exception ex)
             {

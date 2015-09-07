@@ -1,6 +1,6 @@
 ﻿namespace AuthenticateService
 {
-    partial class Service1
+    partial class AuthenticateService
     {
         /// <summary> 
         /// 設計工具所需的變數。

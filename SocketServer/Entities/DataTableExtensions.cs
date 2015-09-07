@@ -74,7 +74,7 @@ namespace SocketServer.Entities
         /// </summary>
         /// <typeparam name="T">要檢查的物件型別type</typeparam>
         /// <param name="obj"></param>
-        public static void CHeckLength<T>(this T obj)
+        public static void CheckLength<T>(this T obj)
         {
             lock (lockObj)
             {
@@ -90,13 +90,12 @@ namespace SocketServer.Entities
                             int valueLength = ((string)propertyValue).Length;
                             if (attr.FixLength != valueLength)
                             {
-                                throw new Exception(property.Name + "屬性與設定資料長度不符 => 輸入的資料長度:" + valueLength + " \n不同於屬性設定的長度:" + attr.FixLength);
+                                throw new ArgumentOutOfRangeException("[CheckLength] Error", property.Name + "屬性與設定資料長度不符 => 輸入的資料長度:" + valueLength + " \n不同於屬性設定的長度:" + attr.FixLength);
                             }
-
                         }
                         else
                         {
-                            throw new Exception(property.Name + "屬性:資料型態不為字串(string)型別或資料為空!!!");
+                            throw new ArgumentOutOfRangeException("[CheckLength] Error", property.Name + "屬性:資料型態不為字串(string)型別或資料為空!!!");
                         }
                     }
                 }

@@ -8,6 +8,12 @@ namespace SocketServer.Handlers.State
     public static class ServiceFactory
     {
         private static ServiceSelect service;
+        /// <summary>
+        /// 依據設定檔取得的設定字串選擇要新增的服務物件
+        /// </summary>
+        /// <param name="serviceName">服務名稱</param>
+        /// <param name="ignoreCase">忽略服務大小寫</param>
+        /// <returns>指定的服務要執行的工作狀態</returns>
         public static IState GetService(string serviceName, bool ignoreCase = false)
         {
             try
@@ -29,8 +35,14 @@ namespace SocketServer.Handlers.State
         }
     }
 
+    /// <summary>
+    /// 服務名稱列表
+    /// </summary>
     public enum ServiceSelect
     {
+        /// <summary>
+        /// 認證服務
+        /// </summary>
         Authenticate = 0,
     }
 }

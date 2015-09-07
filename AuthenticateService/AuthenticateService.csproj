@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DE566C97-470D-4393-9C54-E81E4F87CBBE}</ProjectGuid>
+    <ProjectGuid>{84A377D3-F01D-40AC-94E4-651B0DC58214}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AuthenticateService</RootNamespace>
@@ -32,23 +32,79 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Logging">
+      <HintPath>..\Libs\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Log4Net1211">
+      <HintPath>..\Libs\Common.Logging.Log4Net1211.dll</HintPath>
+    </Reference>
+    <Reference Include="Crypto">
+      <HintPath>..\Libs\Crypto\Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="Crypto.EskmsAPI">
+      <HintPath>..\Libs\Crypto\Crypto.EskmsAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Crypto.POCO">
+      <HintPath>..\Libs\Crypto\Crypto.POCO.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\Libs\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\Libs\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\Libs\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="RandomGenerator">
+      <HintPath>..\Libs\Crypto\RandomGenerator.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Management" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Service1.cs">
+    <Compile Include="AuthenticateService.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Service1.Designer.cs">
-      <DependentUpon>Service1.cs</DependentUpon>
+    <Compile Include="AuthenticateService.Designer.cs">
+      <DependentUpon>AuthenticateService.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="ProjectInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ProjectInstaller.Designer.cs">
+      <DependentUpon>ProjectInstaller.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SocketServer\SocketServer.csproj">
+      <Project>{119ea747-1b8c-41a5-b64f-5c897a8d3d15}</Project>
+      <Name>SocketServer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ProjectInstaller.resx">
+      <DependentUpon>ProjectInstaller.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
