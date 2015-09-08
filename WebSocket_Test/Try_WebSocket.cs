@@ -14,9 +14,9 @@ namespace WebSocket_Test
         SocketType.Stream, ProtocolType.Tcp);
         static private string guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-        static void Main(string[] args)
+        static void Main1(string[] args)
         {
-            serverSocket.Bind(new IPEndPoint(IPAddress.Any, 6112));
+            serverSocket.Bind(new IPEndPoint(IPAddress.Any, 611));
             serverSocket.Listen(128);
             serverSocket.BeginAccept(null, 0, OnAccept, null);
             Console.WriteLine("開始非同步監聽...");
