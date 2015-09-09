@@ -67,7 +67,7 @@ namespace WebSocket_Test
             //string readData = Encoding.UTF8.GetString(buffer.ToArray());
             //Console.Out.WriteLine("接收到的資料:{0}", readData);
             //*****************************************************
-            Thread.Sleep(20000);//20sec
+            Thread.Sleep(1000);//20sec
             byte[] response = null;
             //ref:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_server
             if (new Regex("^GET").IsMatch(readData))
@@ -86,18 +86,92 @@ namespace WebSocket_Test
             //ref: https://developer.mozilla.org/zh-TW/docs/WebSockets/Writing_WebSocket_client_applications
             sendData = response;
             ns.Write(sendData, 0, sendData.Length);
-            Console.Out.WriteLine("送出的資料:Test123 haha");
+            Console.Out.WriteLine("已送出HandShaking Header");
             //*****************************************************
+           
             Console.ReadKey();
             byte[] buffer2 = new byte[0x1000];
             Console.Out.WriteLine("等待資料");
             int readCnt2 = ns.Read(buffer2, 0, buffer2.Length);//不會Block  原因目前不明
-            string readData2 = Encoding.UTF8.GetString(buffer2, 0, readCnt2);
+            Array.Resize(ref buffer2,readCnt2);
+            byte[] clientData = DecryptClientData(buffer2);
+            string readData2 = Encoding.UTF8.GetString(clientData, 0, clientData.Length);
             Console.Out.WriteLine("收到的資料:{0}", readData2);
+            //*****************************************************
+            Console.ReadKey();
+            //ref: https://tools.ietf.org/html/rfc6455#section-5.1
+            string sendMsg = "Test123";//TODO...Server送出到前端WebSocket失敗
+            byte[] sendMsgBytes = Encoding.UTF8.GetBytes(sendMsg);
+
+            byte fin = 129;
+            byte dataLength = (byte)(128 + sendMsg.Length);
+            byte[] key = new byte[] { 1, 2, 3, 4 };
+            byte[] encData = DoXor(sendMsgBytes, key);
+            //byte[] totalData = new byte[1 + 1 + key.Length + encData.Length];
+
+            byte[] totalData = ConBineData(fin, dataLength, key, encData);
             
+
+            Console.Out.WriteLine("送出訊息:{0}", sendMsg);
+            ns.Write(totalData, 0, totalData.Length);
+            Console.Out.WriteLine("送出訊息:完畢");
+            //*****************************************************
+
+            Console.Out.WriteLine("按任意鍵結束 ...");
+            Console.ReadKey();
             ns.Close();
             Console.Out.WriteLine("GG...............");
             Console.ReadKey();
         }
+        //Server端送出Msg作格式處理
+        static byte[] DoXor(byte[] data,byte[] key)
+        {
+            byte[] result = new byte[data.Length];
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                result[i] = (byte)(data[i] ^ key[i % key.Length]);
+            }
+
+            return result;
+        }
+        //Server端送出資料串接
+        static byte[] ConBineData(byte fin, byte dataLength, byte[] key, byte[] data)
+        {
+            byte[] result = new byte[1 + 1 + key.Length + data.Length];
+            result[0] = fin;
+            result[1] = dataLength;
+            //湊Key
+            for (int i = 2; i < key.Length + 2; i++)
+            {
+                result[i] = key[i - 2];
+            }
+            //湊資料段
+            for (int j = (2 + key.Length); j < (data.Length + key.Length + 2); j++)
+            {
+                result[j] = data[j - (2 + key.Length)];
+            }
+            return result;
+        }
+        //WebSocket那邊送的資料轉回來
+        static byte[] DecryptClientData(byte[] data)
+        {
+            byte fin = data[0];
+            int dataLength = (data[1] - 128);
+            //copy key
+            byte[] key = new byte[4];
+            Buffer.BlockCopy(data, 2, key, 0, key.Length);
+            //copy data
+            byte[] encData = new byte[dataLength];
+            Buffer.BlockCopy(data, (1 + 1 + key.Length), encData, 0, encData.Length);
+            byte[] result = new byte[encData.Length];
+            for(int i = 0; i < encData.Length;i++)
+            {
+                result[i] = (byte)(encData[i] ^ key[i % key.Length]);
+            }
+
+            return result;
+        }
     }
+
 }
