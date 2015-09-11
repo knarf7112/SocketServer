@@ -13,7 +13,7 @@ using System.Security.Cryptography;
 
 namespace WebSocket_Test
 {
-    class MDN_Sample
+    class Test_MDN_Sample
     {
         //*****************************************************************************
         static void Main1(string[] args)
@@ -39,7 +39,7 @@ namespace WebSocket_Test
         //****************************************************************************
         //ref:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_server
         static void Main(string[] args)
-        {
+        {            
             TcpListener server = new TcpListener(IPAddress.Any, 612);
 
             server.Start();

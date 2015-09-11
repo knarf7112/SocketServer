@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 namespace WebSocket_Test
 {
     //ref:http://stackoverflow.com/questions/10200910/create-hello-world-websocket-example
-    public class Try_WebSocket
+    public class Test_WebSocket
     {
         static Socket serverSocket = new Socket(AddressFamily.InterNetwork,
         SocketType.Stream, ProtocolType.Tcp);
