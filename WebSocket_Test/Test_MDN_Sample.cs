@@ -67,7 +67,7 @@ namespace WebSocket_Test
             //string readData = Encoding.UTF8.GetString(buffer.ToArray());
             //Console.Out.WriteLine("接收到的資料:{0}", readData);
             //*****************************************************
-            Thread.Sleep(1000);//20sec
+            Thread.Sleep(1000);//1sec
             byte[] response = null;
             //ref:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_server
             if (new Regex("^GET").IsMatch(readData))
@@ -103,7 +103,7 @@ namespace WebSocket_Test
             string sendMsg = "Test123";//TODO...Server送出到前端WebSocket失敗
             byte[] sendMsgBytes = Encoding.UTF8.GetBytes(sendMsg);
 
-            byte fin = 129;
+            byte fin = 0x89;
             byte dataLength = (byte)(128 + sendMsg.Length);
             byte[] key = new byte[] { 1, 2, 3, 4 };
             byte[] encData = DoXor(sendMsgBytes, key);
