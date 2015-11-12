@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="AsyncMultiSocket.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="DebugToLog4Net.cs" />
     <Compile Include="Handlers\AbsClientRequestHandler.cs" />
     <Compile Include="Handlers\ClientRequestHandler.cs" />
     <Compile Include="Handlers\IClientRequestHandler.cs" />
