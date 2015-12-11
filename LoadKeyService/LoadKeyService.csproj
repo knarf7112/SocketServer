@@ -4,16 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{119EA747-1B8C-41A5-B64F-5C897A8D3D15}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{303FD900-0091-48F1-AFC6-1F7313030161}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SocketServer</RootNamespace>
-    <AssemblyName>SocketServer</AssemblyName>
+    <RootNamespace>LoadKeyService</RootNamespace>
+    <AssemblyName>LoadKeyService</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,9 +22,9 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\SocketServer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -50,51 +51,61 @@
     <Reference Include="Crypto.POCO">
       <HintPath>..\Libs\Crypto\Crypto.POCO.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net">
       <HintPath>..\Libs\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\Libs\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RandomGenerator">
-      <HintPath>..\Libs\Crypto\RandomGenerator.dll</HintPath>
+    <Reference Include="Npgsql">
+      <HintPath>..\Libs\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data" />
-    <Reference Include="System.XML" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncMultiSocket.cs" />
-    <Compile Include="Class1.cs" />
-    <Compile Include="DebugToLog4Net.cs" />
-    <Compile Include="Handlers\AbsClientRequestHandler.cs" />
-    <Compile Include="Handlers\ClientRequestHandler.cs" />
-    <Compile Include="Handlers\IClientRequestHandler.cs" />
-    <Compile Include="Entities\DataTableExtensions.cs" />
-    <Compile Include="Entities\LengthCkeckAttribute.cs" />
-    <Compile Include="Entities\ObjectCopier.cs" />
-    <Compile Include="Handlers\State\IState.cs" />
-    <Compile Include="Handlers\State\ServiceFactory.cs" />
-    <Compile Include="Handlers\State\State_Authenticate.cs" />
-    <Compile Include="Handlers\State\State_Exit.cs" />
-    <Compile Include="Handlers\State\State_KeyGetter.cs" />
-    <Compile Include="ISocketServer.cs" />
+    <Compile Include="LoadKeyService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LoadKeyService.Designer.cs">
+      <DependentUpon>LoadKeyService.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="ProjectInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ProjectInstaller.Designer.cs">
+      <DependentUpon>ProjectInstaller.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\EsKmsWebApiConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\SocketServer\SocketServer.csproj">
+      <Project>{119ea747-1b8c-41a5-b64f-5c897a8d3d15}</Project>
+      <Name>SocketServer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ProjectInstaller.resx">
+      <DependentUpon>ProjectInstaller.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

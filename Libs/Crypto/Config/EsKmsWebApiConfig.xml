@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<EsKmsWebApi>
-  <!--正式KMS-->
+<!--正式KMS-->
+<!--<EsKmsWebApi>
   <Url>http://10.27.68.163:8080/eGATEsKMS/interface</Url>
   <AppCode>APP_001</AppCode>
   <AuthCode>12345678</AuthCode>
   <AppName>icash2Test</AppName>
   <HttpMethod>POST</HttpMethod>
-</EsKmsWebApi>
+</EsKmsWebApi>-->
   <!--測試用,開啟NetTool抓Request用-->
 <!--<EsKmsWebApi>
   <Url>http://127.0.0.1:8081/eGATEsKMS/interface</Url>
@@ -15,3 +15,11 @@
   <AppName>icash2Test</AppName>
   <HttpMethod>POST</HttpMethod>
 </EsKmsWebApi>-->
+<!--測試用,LoadKey -->
+<EsKmsWebApi>
+  <Url>http://10.27.68.163:8080/eGATEsKMS/interface</Url>
+  <AppCode>APP_LOADKEY01</AppCode>
+  <AuthCode>00000000</AuthCode>
+  <AppName>APP_LOADKEY01</AppName>
+  <HttpMethod>POST</HttpMethod>
+</EsKmsWebApi>

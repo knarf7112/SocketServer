@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticateService", "Auth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocket_Net45_Test", "WebSocket_Net45_Test\WebSocket_Net45_Test.csproj", "{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadKeyService", "LoadKeyService\LoadKeyService.csproj", "{303FD900-0091-48F1-AFC6-1F7313030161}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{303FD900-0091-48F1-AFC6-1F7313030161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{303FD900-0091-48F1-AFC6-1F7313030161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{303FD900-0091-48F1-AFC6-1F7313030161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{303FD900-0091-48F1-AFC6-1F7313030161}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

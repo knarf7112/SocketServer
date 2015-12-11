@@ -341,5 +341,106 @@
             <param name="encrypted">衍生KEey</param>
             <returns></returns>
         </member>
+        <member name="T:Crypto.EskmsAPI.IKMSGetter">
+            <summary>
+            向KMS取DiversKey的
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.IKMSGetter.GetDiversKey">
+            <summary>
+            取得Divers Key,異常則回傳null
+            </summary>
+            <returns>Divers Key(16 byte)</returns>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IKMSGetter.Input_KeyLabel">
+            <summary>
+            [Input]:ex:2ICH3F000032A
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IKMSGetter.Input_KeyVersion">
+            <summary>
+            [Input]:0x00
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IKMSGetter.Input_UID">
+            <summary>
+            [Input]:卡片UID(7 bytes) 
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.IKMSGetter.Input_BlobValue">
+            <summary>
+            UID組合完畢的資料:32 bytes(和卡片UID屬性二擇一輸入)
+            byte[] { 01 + uid + ICASH + uid + ICASH + uid }
+            </summary>
+        </member>
+        <member name="T:Crypto.EskmsAPI.KMSGetter">
+            <summary>
+            向KMS取DiversKey的
+            </summary>
+        </member>
+        <member name="F:Crypto.EskmsAPI.KMSGetter.ConstBlockSize">
+            <summary>
+            Block Size
+            </summary>
+        </member>
+        <member name="F:Crypto.EskmsAPI.KMSGetter.dicKmsLoginConfig">
+            <summary>
+            登入KMS的帳號密碼設定檔
+            </summary>
+        </member>
+        <member name="M:Crypto.EskmsAPI.KMSGetter.GetDiversKey">
+            <summary>
+            取得Divers Key,異常則回傳null
+            </summary>
+            <returns>byte[]/null</returns>
+        </member>
+        <member name="M:Crypto.EskmsAPI.KMSGetter.Generate_DivKey(System.String,System.String,System.Byte[],System.Byte[])">
+            <summary>
+            1.從KMS取得 diverse data,並將Divers Key設到kx欄位(16 bytes)
+            </summary>
+            <param name="keyLabel">KMS需要的程式命令參數</param>
+            <param name="uid">卡片 UID</param>
+            <param name="iv">KMS需要的initial vector</param>
+            <param name="decrypted">blob value(null:表示使用AESDiv+uid+icash+uid+icash+uid)</param>
+        </member>
+        <member name="M:Crypto.EskmsAPI.KMSGetter.GetDiverseInput(System.String)">
+            <summary>
+            卡片uid轉換成KMS的Blob需要的參數
+            </summary>
+            <param name="uid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Crypto.EskmsAPI.KMSGetter.LoadXmlConfig(System.String)">
+            <summary>
+            取得連入KMS的設定檔
+            </summary>
+            <param name="fileName"></param>
+        </member>
+        <member name="P:Crypto.EskmsAPI.KMSGetter.Input_KeyLabel">
+            <summary>
+            ex:2ICH3F000032A
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.KMSGetter.Input_KeyVersion">
+            <summary>
+            0x00
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.KMSGetter.Input_UID">
+            <summary>
+            卡片UID(7 bytes) 
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.KMSGetter.Input_BlobValue">
+            <summary>
+            UID組合完畢的資料:32 bytes(和卡片UID屬性二擇一輸入)
+            byte[] { 01 + uid + ICASH + uid + ICASH + uid }
+            </summary>
+        </member>
+        <member name="P:Crypto.EskmsAPI.KMSGetter.Input_DeviceID">
+            <summary>
+            裝置ID(16 bytes => 32 hexString)
+            </summary>
+        </member>
     </members>
 </doc>

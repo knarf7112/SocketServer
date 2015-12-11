@@ -4,6 +4,40 @@
         <name>Crypto.POCO</name>
     </assembly>
     <members>
+        <member name="T:Crypto.POCO.EskmsKeyPOCO">
+            <summary>
+            Divers Key POCO
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyPOCO.Input_KeyLabel">
+            <summary>
+            KMS的keyLabel
+            ex:"2ICH3F000032A"
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyPOCO.Input_KeyVersion">
+            <summary>
+            KMS的keyVersion
+            ex:"00"
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyPOCO.Input_UID">
+            <summary>
+            SAM ID
+            ex:"04873ABA8D2C80"
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyPOCO.Input_DeviceID">
+            <summary>
+            卡機裝置ID
+            ex:"VF061041ABE8B0EF8B32A627B19D83AA"
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyPOCO.Output_DiversKey">
+            <summary>
+            Divers Key (16 bytes)
+            </summary>
+        </member>
         <member name="F:Crypto.POCO.Extentions.lockObj">
             <summary>
             lock用的物件
@@ -13,7 +47,7 @@
             <summary>
             (擴充方法)用來檢查POCO物件內字串屬性的資料長度是否符合Attribute設定的長度
             ex: obj.CHeckLength();
-            長度不符會拋出Exception
+            長度不符會拋出ArgumentOutOfRangeException
             </summary>
             <typeparam name="T">要檢查的物件型別type</typeparam>
             <param name="obj"></param>

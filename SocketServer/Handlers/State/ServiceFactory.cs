@@ -28,7 +28,8 @@ namespace SocketServer.Handlers.State
             {
                 case ServiceSelect.Authenticate:
                     return new State_Authenticate();
-
+                case ServiceSelect.LoadKey:
+                    return new State_KeyGetter();
                 default:
                     return new State_Exit();
             }
@@ -44,5 +45,9 @@ namespace SocketServer.Handlers.State
         /// 認證服務
         /// </summary>
         Authenticate = 0,
+        /// <summary>
+        /// 取得Divers key
+        /// </summary>
+        LoadKey = 1
     }
 }
