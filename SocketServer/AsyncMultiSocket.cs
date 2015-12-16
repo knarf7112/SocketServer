@@ -136,7 +136,7 @@ namespace SocketServer
             //this.mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //this.mainSocket.Bind(new IPEndPoint(this.listenIP, this.port));
             //this.mainSocket.Listen(50);
-            log.Debug(">> Server Start ...");
+            //log.Debug(">> Server Start ...");
             //如果Backgroundworker不忙則開始執行背景作業(Thread work)
             if (!this.bgWorker.IsBusy)
             {

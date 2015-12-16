@@ -38,6 +38,30 @@
             Divers Key (16 bytes)
             </summary>
         </member>
+        <member name="P:Crypto.POCO.EskmsKeyTxLogPOCO.SAM_UID">
+            <summary>
+            SAM ID
+            ex:"04873ABA8D2C80"
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyTxLogPOCO.DeviceId">
+            <summary>
+            卡機裝置ID
+            ex:"VF061041ABE8B0EF8B32A627B19D83AA"
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyTxLogPOCO.TestTxLog">
+            <summary>
+            測試解鎖是否成功的TxLog(length:288)
+            目前只需要看16~23(ReturnCode),之後再補上驗證mac
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyTxLogPOCO.ReturnCode">
+            <summary>
+            流程操作結果
+            (OK:000000/Fail:000001)
+            </summary>
+        </member>
         <member name="F:Crypto.POCO.Extentions.lockObj">
             <summary>
             lock用的物件

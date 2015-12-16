@@ -13,6 +13,35 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocket_Net45_Test", "Web
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadKeyService", "LoadKeyService\LoadKeyService.csproj", "{303FD900-0091-48F1-AFC6-1F7313030161}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Operate", "DB_Module\DB_Operate.csproj", "{15C31469-E46A-461A-9813-84CE6B7D166B}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ReaderShipmentWeb", "http://localhost:2887", "{E44DFB55-D09F-445F-90C9-B2667F38513B}"
+	ProjectSection(WebsiteProperties) = preProject
+		UseIISExpress = "true"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
+		ProjectReferences = "{a10a17cb-b0a2-4ba5-bdb8-1ac9f4698951}|ReaderShipmentWebHandler.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_2887"
+		Debug.AspNetCompiler.PhysicalPath = "ReaderShipmentWeb\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_2887\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_2887"
+		Release.AspNetCompiler.PhysicalPath = "ReaderShipmentWeb\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_2887\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		SlnRelativePath = "ReaderShipmentWeb\"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaderShipmentWebHandler", "ReaderShipmentHandler\ReaderShipmentWebHandler.csproj", "{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Operate_UnitTest", "DB_Operate_UnitTest\DB_Operate_UnitTest.csproj", "{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +68,22 @@ Global
 		{303FD900-0091-48F1-AFC6-1F7313030161}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{303FD900-0091-48F1-AFC6-1F7313030161}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{303FD900-0091-48F1-AFC6-1F7313030161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15C31469-E46A-461A-9813-84CE6B7D166B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15C31469-E46A-461A-9813-84CE6B7D166B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15C31469-E46A-461A-9813-84CE6B7D166B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15C31469-E46A-461A-9813-84CE6B7D166B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E44DFB55-D09F-445F-90C9-B2667F38513B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E44DFB55-D09F-445F-90C9-B2667F38513B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E44DFB55-D09F-445F-90C9-B2667F38513B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{E44DFB55-D09F-445F-90C9-B2667F38513B}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

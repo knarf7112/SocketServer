@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{119EA747-1B8C-41A5-B64F-5C897A8D3D15}</ProjectGuid>
+    <ProjectGuid>{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SocketServer</RootNamespace>
-    <AssemblyName>SocketServer</AssemblyName>
+    <RootNamespace>ReaderShipmentWebHandler</RootNamespace>
+    <AssemblyName>ReaderShipmentWebHandler</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -21,7 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\SocketServer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,80 +30,39 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ALCommon">
-      <HintPath>..\Libs\DBModule\ALCommon.dll</HintPath>
-    </Reference>
     <Reference Include="Common.Logging">
       <HintPath>..\Libs\Common.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Common.Logging.Log4Net1211">
       <HintPath>..\Libs\Common.Logging.Log4Net1211.dll</HintPath>
     </Reference>
-    <Reference Include="Crypto">
-      <HintPath>..\Libs\Crypto\Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="Crypto.EskmsAPI">
-      <HintPath>..\Libs\Crypto\Crypto.EskmsAPI.dll</HintPath>
-    </Reference>
     <Reference Include="Crypto.POCO">
       <HintPath>..\Libs\Crypto\Crypto.POCO.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net">
       <HintPath>..\Libs\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RandomGenerator">
-      <HintPath>..\Libs\Crypto\RandomGenerator.dll</HintPath>
+    <Reference Include="SocketClient.Domain">
+      <HintPath>..\Libs\SocketClient.Domain.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
-    <Reference Include="System.XML" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncMultiSocket.cs" />
     <Compile Include="Class1.cs" />
-    <Compile Include="DebugToLog4Net.cs" />
-    <Compile Include="Handlers\AbsClientRequestHandler.cs" />
-    <Compile Include="Handlers\ClientRequestHandler.cs" />
-    <Compile Include="Handlers\IClientRequestHandler.cs" />
-    <Compile Include="Entities\DataTableExtensions.cs" />
-    <Compile Include="Entities\LengthCkeckAttribute.cs" />
-    <Compile Include="Entities\ObjectCopier.cs" />
-    <Compile Include="Handlers\State\IState.cs" />
-    <Compile Include="Handlers\State\ServiceFactory.cs" />
-    <Compile Include="Handlers\State\State_Authenticate.cs" />
-    <Compile Include="Handlers\State\State_Exit.cs" />
-    <Compile Include="Handlers\State\State_ReaderLoadKey.cs" />
-    <Compile Include="Handlers\State\State_ReaderLoadKeyTxLog.cs" />
-    <Compile Include="ISocketServer.cs" />
+    <Compile Include="ReaderShipmentHandler.cs" />
+    <Compile Include="ConfigGetter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Config\EsKmsWebApiConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="log4net.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DB_Module\DB_Operate.csproj">
-      <Project>{15c31469-e46a-461a-9813-84ce6b7d166b}</Project>
-      <Name>DB_Operate</Name>
-    </ProjectReference>
+    <Compile Include="ReaderShipmentTxLogHandler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

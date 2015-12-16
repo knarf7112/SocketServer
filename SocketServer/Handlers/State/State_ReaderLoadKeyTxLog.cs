@@ -4,21 +4,19 @@ using System.Linq;
 using System.Text;
 //
 using Common.Logging;
+using ALCommon;
+//using ;
 using Newtonsoft.Json;
+using DB_Module.Controller;
+//
 using Crypto.POCO;
-using Crypto.EskmsAPI;
 using System.Net.Sockets;
 
 namespace SocketServer.Handlers.State
 {
-    public class State_KeyGetter : IState
+    public class State_ReaderLoadKeyTxLog : IState
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(State_Authenticate));
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="absClientRequestHandler"></param>
+        private static readonly ILog log = LogManager.GetLogger(typeof(State_ReaderLoadKeyTxLog));
         public void Handle(AbsClientRequestHandler absClientRequestHandler)
         {
             #region variable
@@ -26,14 +24,16 @@ namespace SocketServer.Handlers.State
             int readCount = 0;
             string requestJsonStr = null;
             string outputCmd = null;
-            IKMSGetter kmsGetter = null;
-            EskmsKeyPOCO request = null;
-            EskmsKeyPOCO response = null;
+            
+            EskmsKeyTxLogPOCO request = null;
+            EskmsKeyTxLogPOCO response = null;
             string requestCheckErrMsg = null;
             string responseJsonStr = null;
             byte[] responseBytes = null;
-            byte[] diversKey = null;
             int sendCount = -1;
+            AL_DBModule obDB = null;
+            Shipment shipment = null;
+            string txLogReturnCode = String.Empty;
             #endregion
 
             try
@@ -54,31 +54,42 @@ namespace SocketServer.Handlers.State
                     log.Debug(m => m(">> {0}: {1}", this.GetType().Name, absClientRequestHandler.ClientNo));
                     //resize buffer
                     Array.Resize(ref receiveBuffer, readCount);
+                    //init
+                    obDB = new AL_DBModule();
+                    shipment = new Shipment();
+
                     //casting jsonstring from buffer array
                     requestJsonStr = Encoding.UTF8.GetString(receiveBuffer);
                     log.Debug(m => m("[{0}]Request: {1}", this.GetType().Name, requestJsonStr));
-                    request = JsonConvert.DeserializeObject<EskmsKeyPOCO>(requestJsonStr);
+                    request = JsonConvert.DeserializeObject<EskmsKeyTxLogPOCO>(requestJsonStr);
                     //檢查Request資料長度(Attribute)
                     request.CheckLength(true, out requestCheckErrMsg);
-                    //設定Authenticate參數
-                    kmsGetter = new KMSGetter()
-                    {
-                        Input_KeyLabel = request.Input_KeyLabel,
-                        Input_KeyVersion = request.Input_KeyVersion,
-                        Input_UID = request.Input_UID,
-                        Input_DeviceID = request.Input_DeviceID
-                    };
-                    log.Debug(m => m("開始執行Authenticate"));
-                    diversKey = kmsGetter.GetDiversKey();//會傳送數據到KMS並取回DiverseKey後做運算並將結果寫入Output屬性中
 
                     //回應資料設定
-                    response = new EskmsKeyPOCO()
+                    response = new EskmsKeyTxLogPOCO()
                     {
-                        Input_KeyLabel = request.Input_KeyLabel,
-                        Input_KeyVersion = request.Input_KeyVersion,
-                        Input_UID = request.Input_UID,
-                        Output_DiversKey = diversKey
+                        SAM_UID = request.SAM_UID,
+                        DeviceId = request.DeviceId,
+                        ReturnCode = "000001"//預設為fail
                     };
+
+                    txLogReturnCode = request.TestTxLog.Substring(16, 8);//取第16~23個字串
+
+                    //簡易判斷:TxLog ReturnCode
+                    if (txLogReturnCode.Equals("00000000"))
+                    {
+                        log.Debug(m => m("1.Open DB Connection"));
+                        obDB.OpenConnection();
+
+                        log.Debug(m => m("2.Run DB Operate"));
+                        //執行Reader出貨的DB操作流程
+                        shipment.Shipment_Reader(obDB, request.SAM_UID, request.DeviceId);//
+                        response.ReturnCode = "000000";
+                    }
+                    else
+                    {
+                        log.Error(m => m("UID:{0}  DeviceId:{1}  TxLog ReturnCode異常:{2}",request.SAM_UID, request.DeviceId, txLogReturnCode));
+                    }
                     responseJsonStr = JsonConvert.SerializeObject(response);
                     responseBytes = Encoding.UTF8.GetBytes(responseJsonStr);
                     log.Debug(m => m("[{0}] Response:{1}", this.GetType().Name, responseJsonStr));
@@ -89,6 +100,7 @@ namespace SocketServer.Handlers.State
                     }
                     log.Debug(m => m("[{0}] Response End", this.GetType().Name));
                 }
+
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -104,7 +116,11 @@ namespace SocketServer.Handlers.State
             }
             finally
             {
-
+                if (obDB != null)
+                {
+                    obDB.CloseConnection();
+                    shipment = null;
+                }
                 absClientRequestHandler.ServiceState = new State_Exit();
             }
         }

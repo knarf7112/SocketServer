@@ -29,7 +29,9 @@ namespace SocketServer.Handlers.State
                 case ServiceSelect.Authenticate:
                     return new State_Authenticate();
                 case ServiceSelect.LoadKey:
-                    return new State_KeyGetter();
+                    return new State_ReaderLoadKey();
+                case ServiceSelect.LoadKeyTxLog:
+                    return new State_ReaderLoadKeyTxLog();
                 default:
                     return new State_Exit();
             }
@@ -46,8 +48,12 @@ namespace SocketServer.Handlers.State
         /// </summary>
         Authenticate = 0,
         /// <summary>
-        /// 取得Divers key
+        /// 驗證ReaderId並取得Divers key
         /// </summary>
-        LoadKey = 1
+        LoadKey = 1,
+        /// <summary>
+        /// 取得卡機TxLog並紀錄
+        /// </summary>
+        LoadKeyTxLog = 2
     }
 }
