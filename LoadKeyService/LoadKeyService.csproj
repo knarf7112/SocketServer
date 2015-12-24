@@ -36,6 +36,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ALCommon, Version=1.3.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\DBModule\ALCommon.dll</HintPath>
+    </Reference>
     <Reference Include="Common.Logging">
       <HintPath>..\Libs\Common.Logging.dll</HintPath>
     </Reference>
@@ -92,6 +96,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DB_Module\DB_Operate.csproj">
+      <Project>{15c31469-e46a-461a-9813-84ce6b7d166b}</Project>
+      <Name>DB_Operate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SocketServer\SocketServer.csproj">
       <Project>{119ea747-1b8c-41a5-b64f-5c897a8d3d15}</Project>
       <Name>SocketServer</Name>

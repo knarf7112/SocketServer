@@ -18,7 +18,7 @@ namespace ReaderShipmentWebHandler
         /// <summary>
         /// Request資料長度(轉完ASCII後)
         /// </summary>
-        private static readonly int LoadKeyTxLogLength = 334;
+        private static readonly int LoadKeyTxLogLength = 622;
 
         /// <summary>
         /// 從設定檔讀取的連向後台Service的服務名稱
@@ -128,9 +128,9 @@ namespace ReaderShipmentWebHandler
             byte[] result = null;
             if (inputData.Length != LoadKeyTxLogLength)
                 return result;                        //ha ha
-            string sam_uid = inputData.Substring(0,14);                                     //字串0~13為SAM UID(14 hex string)
-            string deviceId = inputData.Substring(14, 32);                                //字串14~45為DeviceId(32 hex string)
-            string txLog = inputData.Substring(46, 288);                                    //字串46~333為DeviceId(288 string)
+            string sam_uid = inputData.Substring(0,14);                                                 //字串0~13為SAM UID(14 hex string)
+            string deviceId = inputData.Substring(14, 32);                                              //字串14~45為DeviceId(32 hex string)
+            string txLog = Encoding.ASCII.GetString(StringToByteArray(inputData.Substring(46, 576)));   //字串46~621為TxLog(576 hex string)=>288 string
             //string deviceId = BitConverter.ToString(inputData, 9, 16).Replace("-", "");     //byte[9~24]
             EskmsKeyTxLogPOCO response = null;
             EskmsKeyTxLogPOCO request = new EskmsKeyTxLogPOCO()

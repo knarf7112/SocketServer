@@ -7,7 +7,7 @@
   </appender>
   <appender name="RollingFileAppender" type="log4net.Appender.RollingFileAppender,log4net">
     <!--為了Debug，先把log存到文鴻的D:/temp/log.txt-->
-    <file value="D:\\temp\\LoadKeyLog.txt" />
+    <file value="D:\\temp\\ReaderShipmentLog.txt" />
     <appendToFile value="true" />
     <rollingStyle value="Size" />
     <maxSizeRollBackups value="1" />

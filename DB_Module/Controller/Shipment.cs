@@ -146,7 +146,7 @@ namespace DB_Module.Controller
             {
                 TransactionOptions option = new TransactionOptions();
                 option.IsolationLevel = System.Transactions.IsolationLevel.RepeatableRead;
-                option.Timeout = new TimeSpan(0, 30, 10);//10sec
+                option.Timeout = new TimeSpan(0, 0, 10);//10sec
                 using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required,option))
                 {
                     //1.依據UID將SAM_D表格資料備份到SAMDIFF_D表格

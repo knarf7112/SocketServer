@@ -116,7 +116,7 @@ namespace SocketServer.Handlers.State
             }
             finally
             {
-                if (obDB != null)
+                if (obDB != null && obDB.ALCon != null)
                 {
                     obDB.CloseConnection();
                     shipment = null;

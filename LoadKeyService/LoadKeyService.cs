@@ -30,7 +30,7 @@ namespace LoadKeyService
 
         protected override void OnStart(string[] args)
         {
-            log.Debug(m => m("Start Service ..."));
+            log.Debug(m => m("OnStart Service ..."));
             try
             {
                 this.socketServer1.Start();
@@ -44,7 +44,7 @@ namespace LoadKeyService
 
         protected override void OnStop()
         {
-            log.Debug(m => m("Stop Service ..."));
+            log.Debug(m => m("OnStop Service ..."));
             this.socketServer1.Stop();
             this.socketServer2.Stop();
         }
