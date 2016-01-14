@@ -7,7 +7,6 @@ namespace SocketServer.Handlers.State
     /// </summary>
     public static class ServiceFactory
     {
-        private static ServiceSelect service;
         /// <summary>
         /// 依據設定檔取得的設定字串選擇要新增的服務物件
         /// </summary>
@@ -16,6 +15,7 @@ namespace SocketServer.Handlers.State
         /// <returns>指定的服務要執行的工作狀態</returns>
         public static IState GetService(string serviceName, bool ignoreCase = false)
         {
+            ServiceSelect service;
             try
             {
                 service = (ServiceSelect)Enum.Parse(typeof(ServiceSelect), serviceName, ignoreCase);

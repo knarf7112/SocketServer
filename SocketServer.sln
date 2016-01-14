@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadKeyService", "LoadKeySe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Operate", "DB_Module\DB_Operate.csproj", "{15C31469-E46A-461A-9813-84CE6B7D166B}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ReaderShipmentWeb", "http://localhost:2887", "{E44DFB55-D09F-445F-90C9-B2667F38513B}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ReaderShipmentWeb(1)", "http://localhost:2887", "{E44DFB55-D09F-445F-90C9-B2667F38513B}"
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
@@ -41,6 +41,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaderShipmentWebHandler", "ReaderShipmentHandler\ReaderShipmentWebHandler.csproj", "{A10A17CB-B0A2-4BA5-BDB8-1AC9F4698951}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Operate_UnitTest", "DB_Operate_UnitTest\DB_Operate_UnitTest.csproj", "{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Func", "Test_Func\Test_Func.csproj", "{164F0FE5-043F-47B2-8AB0-D33B6F4F68EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServer.v2", "SocketServer.v2\SocketServer.v2.csproj", "{EAD90E2F-7155-4F60-8E78-59D45913575A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +88,14 @@ Global
 		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13A340BB-787B-4E9F-BF0D-FC69CEFA44A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{164F0FE5-043F-47B2-8AB0-D33B6F4F68EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{164F0FE5-043F-47B2-8AB0-D33B6F4F68EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{164F0FE5-043F-47B2-8AB0-D33B6F4F68EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{164F0FE5-043F-47B2-8AB0-D33B6F4F68EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAD90E2F-7155-4F60-8E78-59D45913575A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAD90E2F-7155-4F60-8E78-59D45913575A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAD90E2F-7155-4F60-8E78-59D45913575A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAD90E2F-7155-4F60-8E78-59D45913575A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

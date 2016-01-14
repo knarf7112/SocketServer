@@ -167,7 +167,7 @@ namespace SocketServer.Handlers
 
             log.Debug(">> [" + e.Result.ToString() + "] Task Spend:" + (timer.ElapsedTicks /(decimal) Stopwatch.Frequency).ToString("f3") + "s");
         }
-    }
         #endregion
+    }
 }
 
