@@ -17,6 +17,10 @@ namespace Test_Func
         //BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔
         static void Main()
         {
+            string url1 = "qqq:127.0.0.1:8081";
+            string url2 = "http://www.gg.com.tw:9601/hahaha/test123?id=999&age=888";
+            UriBuilder uri = new UriBuilder(url1);
+            
             //Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"),6112);
             Console.WriteLine("開始測試連線");

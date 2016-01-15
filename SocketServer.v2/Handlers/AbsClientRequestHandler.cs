@@ -11,6 +11,7 @@ namespace SocketServer.v2.Handlers
         #region Static object
         //private static readonly ILog log = LogManager.GetLogger(typeof(AbsClientRequestHandler));
         private bool isUsed;
+        private Socket _client;
         #endregion
 
         #region Property
@@ -27,7 +28,23 @@ namespace SocketServer.v2.Handlers
         /// <summary>
         ///   socket client reuqest
         /// </summary>
-        public Socket ClientSocket { get; set; }
+        public Socket ClientSocket 
+        { 
+            get 
+            {
+                return this._client;
+            }
+            set
+            {
+                this._client = value;
+                //如果有才能設定逾時
+                if (hasTimeout && this._client != null)
+                {
+                    this.ClientSocket.ReceiveTimeout = this.receiveTimeout;
+                    this.ClientSocket.SendTimeout = this.sendTimeout;
+                }
+            } 
+        }
         /// <summary>
         /// main socket
         /// </summary>
@@ -43,10 +60,15 @@ namespace SocketServer.v2.Handlers
             set
             {
                 this.isUsed = value;
-                //若client handler被抓去用就要把keep state的 flag 打開
+                //若client handler被抓去用就要把keep state的 flag 打開並且使用次數+1
                 if(this.isUsed)
                 {
                     this.KeepService = true;
+                    if (this.UseCount >= Int32.MaxValue)
+                    {
+                        this.UseCount = 0;
+                    }
+                    this.UseCount += 1;
                 }
             }
         }
@@ -71,15 +93,16 @@ namespace SocketServer.v2.Handlers
         /// </summary>
         protected int receiveTimeout = 5000; // Set to 30000 ms
         protected int sendTimeout = 5000; // Set to 30000 ms
+        private bool hasTimeout;
         #endregion
 
         #region Constructor
-        public AbsClientRequestHandler(int clientNo)
+        public AbsClientRequestHandler(int clientNo,bool hasTimeout)
         {
             this.ClientNo = clientNo;
+            this.UseCount = 0;
             this.IsUsed = false;
-            //this.ClientSocket.ReceiveTimeout = this.receiveTimeout;
-            //this.ClientSocket.SendTimeout = this.sendTimeout;
+            this.hasTimeout = hasTimeout;
             this.KeepService = true;
             this.timer = new Stopwatch();
         }
@@ -109,20 +132,15 @@ namespace SocketServer.v2.Handlers
                 }
                 catch (SocketException sckEx)
                 {
-                    Console.WriteLine("[CancelAsync] Socket Error:" + sckEx.Message + Environment.NewLine + sckEx.StackTrace);
+                    Console.WriteLine("[CancelAsync] Client Socket Error:" + sckEx.Message + Environment.NewLine + sckEx.StackTrace);
                     //log.Error(m=>m(">> [AbsClientRequestHandler][CancelAsync]Client " + this.ClientNo + " Socket Close Failed: " + ex.Message));
                 }
                 finally
                 {
-                    if (this.UseCount >= Int32.MaxValue) 
-                    { 
-                        this.UseCount = 0; 
-                    }
-                    this.UseCount += 1;
-                    this.ClientSocket = null;
-                    this.IsUsed = false;
-                    this.KeepService = false;
-                    this.Request = string.Empty;
+                    this.ClientSocket = null;//清除本次的socket物件
+                    this.IsUsed = false;//表示可再次使用
+                    this.KeepService = false;//用來離開state迴圈
+                    this.Request = string.Empty;//清除本次收到的request字串
                 }
             }
             

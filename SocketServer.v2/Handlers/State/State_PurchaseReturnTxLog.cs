@@ -3,14 +3,13 @@ using System.Text;
 
 namespace SocketServer.v2.Handlers.State
 {
-    public class State_AutoLoadReversalTxLog :IState
+    public class State_PurchaseReturnTxLog : IState
     {
-
         public void Handle(ClientRequestHandler handler)
         {
             try
             {
-                string testStr = "hi, this is State_AutoLoad Reversal TxLog";
+                string testStr = "hi, this is State_PurchaseReturn TxLog";
                 Console.WriteLine("[{0}] RequestString:\r\n{1}", this.GetType().Name, handler.Request);
                 byte[] sendBytes = Encoding.ASCII.GetBytes(testStr);
                 handler.ClientSocket.Send(sendBytes);

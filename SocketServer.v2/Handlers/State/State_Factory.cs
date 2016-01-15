@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SocketServer.v2.Handlers.State
 {
@@ -33,21 +30,20 @@ namespace SocketServer.v2.Handlers.State
                     case "0334":
                         return new State_AutoLoadReversalTxLog();
                     case "0531":
-                        break;
+                        return new State_AutoLoadQuery();
                         //一般加値類
                     case "0331":
-                        break;
+                        return new State_Loading();
                     case "0341":
-                        break;
+                        return new State_LoadingTxLog();
                         //一般退貨類
                     case "0631":
-                        break;
+                        return new State_PurchaseReturn();
                     case "0641":
-                        break;
+                        return new State_PurchaseReturnTxLog();
                     default:
                         return new State_Exit();
                 }
-                return new State_Exit();
             }
             else
             {

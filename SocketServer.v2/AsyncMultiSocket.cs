@@ -18,8 +18,8 @@ namespace SocketServer.v2
         private Socket mainSocket;
         //主服務終止flag
         private bool KeepSocketServerAlive;
-        //存放Client的字典檔
-        private IDictionary<int, IClientRequestHandler> dicHandler;
+        //client handler集合的管理者
+        private ClientRequestManager clientManager;
         //Client Count
         private int clientNo;
         //監聽Port
@@ -28,12 +28,10 @@ namespace SocketServer.v2
         public string stateName;
         //監聽的IP資訊
         private IPAddress listenIP;
-        //釋放
+        ///blocking server then accept connection
         private ManualResetEvent AcceptConnectEvent;
         //for lock
         private Object cLock = new Object();
-
-        private Object dLock = new Object();
 
         #endregion
 
@@ -51,8 +49,7 @@ namespace SocketServer.v2
             this.port = port;
             this.stateName = stateName;
             this.AcceptConnectEvent = new ManualResetEvent(false);
-            //存放Thread的字典檔
-            this.dicHandler = new ConcurrentDictionary<int, IClientRequestHandler>();
+            this.clientManager = new ClientRequestManager();
             //log.Debug(">> Port Number: " + this.port);
             //log.Debug(">> State name: " + this.stateName);
             //log.Debug(">> Start : " + (start ? "true" : "false"));
@@ -98,29 +95,79 @@ namespace SocketServer.v2
         /// </summary>
         /// <param name="port">Listen Port</param>
         public AsyncMultiSocketServer(int port)
-            : this(port, false, "Authenticate")
+            : this(port, false, "AutoLoad")
         {
 
         }
         #endregion
 
-        #region public Method
+        #region Public Method
         /// <summary>
         /// 啟動服務
         /// </summary>
         public void Start()
         {
             //Console.WriteLine("Start Thread Id:{0} background:{1}", Thread.CurrentThread.ManagedThreadId, Thread.CurrentThread.IsBackground.ToString());
+            //執行任務
             Task.Run(() =>
             {
-                this.StartService();
+                this.StartService();//執行Socket Server服務
             });
         }
-
+        
         /// <summary>
-        /// 啟動服務
+        /// 停止服務
         /// </summary>
-        public void StartService()
+        public void Stop()
+        {
+            if (this.KeepSocketServerAlive)
+            {
+                this.AcceptConnectEvent.Set();
+                this.AcceptConnectEvent.Dispose();
+                //log.Debug(">> Set Flag ==> False ");
+                Console.WriteLine(">> Set Flag ==> False ");
+                this.KeepSocketServerAlive = false;
+            }
+
+            Console.WriteLine(">> {0} Service Stop ...", this.stateName);
+            if (this.mainSocket != null)
+            {
+                try
+                {
+                    this.mainSocket.Close();
+                    //log.Debug(">> Server Stop ...");
+                    //Console.WriteLine(">> {0} Server Stop ...",this.stateName);
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine(">> Main Socket Close Failed : " + ex.Message + ":" + ex.ErrorCode);
+                    //log.Error(">> Main Socket Close Failed : " + ex.Message + ":" + ex.ErrorCode);
+                    this.mainSocket.Shutdown(SocketShutdown.Both);
+                    this.mainSocket.Dispose();
+                    //log.Error(">> Main Socket Dispose ...");
+                }
+                finally
+                {
+                    this.mainSocket = null;
+                    this.clientManager = null;
+                    //log.Debug(">> Main Socket Set Null");
+                }
+            }
+            this.clientManager.ClearAll();
+        }
+
+        public void RemoveClient(int clientNo)
+        {
+            this.clientManager.RemoveClient(clientNo);
+        }
+        
+        #endregion
+
+        #region Private Method
+        /// <summary>
+        /// 啟動Async Socket Server服務
+        /// </summary>
+        private void StartService()
         {
             this.KeepSocketServerAlive = true;
             this.clientNo = 0;
@@ -165,52 +212,6 @@ namespace SocketServer.v2
                 Console.WriteLine("Start Failed...{0}", ex.Message);
             }
         }
-        
-        /// <summary>
-        /// 停止服務
-        /// </summary>
-        public void Stop()
-        {
-            if (this.KeepSocketServerAlive)
-            {
-                this.AcceptConnectEvent.Set();
-                this.AcceptConnectEvent.Dispose();
-                //log.Debug(">> Set Flag ==> False ");
-                Console.WriteLine(">> Set Flag ==> False ");
-                this.KeepSocketServerAlive = false;
-            }
-
-            Console.WriteLine(">> {0} Server Stop ...", this.stateName);
-            if (this.mainSocket != null)
-            {
-                try
-                {
-                    this.mainSocket.Close();
-                    //log.Debug(">> Server Stop ...");
-                    //Console.WriteLine(">> {0} Server Stop ...",this.stateName);
-                }
-                catch (SocketException ex)
-                {
-                    Console.WriteLine(">> Main Socket Close Failed : " + ex.Message + ":" + ex.ErrorCode);
-                    //log.Error(">> Main Socket Close Failed : " + ex.Message + ":" + ex.ErrorCode);
-                    this.mainSocket.Shutdown(SocketShutdown.Both);
-                    this.mainSocket.Dispose();
-                    //log.Error(">> Main Socket Dispose ...");
-                }
-                finally
-                {
-                    this.mainSocket = null;
-                    //log.Debug(">> Main Socket Set Null");
-                }
-            }
-        }
-
-        public void RemoveClient(int clientNo)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
         /// <summary>
         /// Asynchronization Callback
         /// </summary>
@@ -226,6 +227,7 @@ namespace SocketServer.v2
                     client = ((ClientRequestHandler)ar.AsyncState);
                     client.ClientSocket = client.MainSocket.EndAccept(ar);
                     setFlag = this.AcceptConnectEvent.Set();
+                    //開始執行工作流程
                     client.DoCommunicate();
                 }
             }
@@ -254,5 +256,6 @@ namespace SocketServer.v2
                 }
             }
         }
+        #endregion
     }
 }

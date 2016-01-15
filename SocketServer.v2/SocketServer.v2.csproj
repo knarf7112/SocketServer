@@ -51,6 +51,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
@@ -60,6 +61,7 @@
     <Compile Include="AsyncMultiSocket.cs" />
     <Compile Include="Handlers\AbsClientRequestHandler.cs" />
     <Compile Include="Handlers\ClientRequestHandler.cs" />
+    <Compile Include="Handlers\ClientRequestManager.cs" />
     <Compile Include="Handlers\IClientRequestHandler.cs" />
     <Compile Include="Handlers\State\IState.cs" />
     <Compile Include="Handlers\State\State_AutoLoad.cs" />
@@ -68,11 +70,15 @@
     <Compile Include="Handlers\State\State_AutoLoadTxLog.cs" />
     <Compile Include="Handlers\State\State_Exit.cs" />
     <Compile Include="Handlers\State\State_Factory.cs" />
+    <Compile Include="Handlers\State\State_Loading.cs" />
+    <Compile Include="Handlers\State\State_LoadingTxLog.cs" />
+    <Compile Include="Handlers\State\State_PurchaseReturn.cs" />
+    <Compile Include="Handlers\State\State_PurchaseReturnTxLog.cs" />
     <Compile Include="Handlers\State\State_ReceiveData.cs" />
     <Compile Include="ISocketServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceFactory.cs" />
+    <Compile Include="Handlers\BackEndSetting.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
