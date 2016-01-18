@@ -5,14 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+//
+using Common.Logging;
 
 namespace SocketServer.v2
 {
     class Program
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
+
         static void Main(string[] args)
         {
-            
+            log.Debug("Run Log:" + DateTime.Now.ToString("HH:mm:ss.fff") );
+            Console.ReadKey();
             ClientRequestManager manager = new ClientRequestManager();
             IClientRequestHandler client = manager.GetInstance();
             Console.ReadKey();

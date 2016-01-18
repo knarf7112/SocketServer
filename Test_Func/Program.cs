@@ -9,14 +9,42 @@ using System.ComponentModel;
 using System.Net.Sockets;
 using System.Net;
 using System.Diagnostics;
+using System.Timers;
 
 namespace Test_Func
 {
     class Program
     {
-        //BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔
+        //比較timer並確認是否都是new thread出來執行的(確認current thread Id)
         static void Main()
         {
+            Console.WriteLine("開始跑太碼...thread Id:{0}", Thread.CurrentThread.ManagedThreadId);
+            //timer 1
+            System.Timers.Timer t1 = new System.Timers.Timer(1000);
+            t1.Elapsed += t1_Elapsed;
+            t1.Start();
+            //timer 2
+            string state = "this is threading Timer";
+            //System.Threading.Timer t2 = new System.Threading.Timer(new TimerCallback(callback), state, 1000, 1000);
+            //結論:確認兩種timer都是產生一個或多個thread去跑
+            Console.ReadKey();
+        }
+
+        static void t1_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Console.WriteLine("[Timer 1]目前Thread ID:{0} \t {1}", Thread.CurrentThread.ManagedThreadId,e.SignalTime.ToString("HH:mm:ss"));
+        }
+
+        static void callback(object obj)
+        {
+            Console.WriteLine("[Timer 2]目前Thread ID:{0} \t {1}", Thread.CurrentThread.ManagedThreadId, (string)obj);
+        }
+        /**********************************************************************************/
+        //BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔
+        static void Main7()
+        {
+            //測試uri轉換格式
+            //ref:http://stackoverflow.com/questions/20164298/how-to-build-a-url
             string url1 = "qqq:127.0.0.1:8081";
             string url2 = "http://www.gg.com.tw:9601/hahaha/test123?id=999&age=888";
             UriBuilder uri = new UriBuilder(url1);
