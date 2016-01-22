@@ -9,9 +9,17 @@ using Common.Logging;
 
 namespace SocketServer.v2.Handlers.State
 {
+    /// <summary>
+    /// 處理狀態:自動加值沖正TxLog
+    /// </summary>
     public class State_AutoLoadReversalTxLog : State_AutoLoadTxLog
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(State_AutoLoadReversalTxLog));
+        /// <summary>
+        /// 送出沖正Txlog request到後台並取回 沖正Txlog response
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         protected override ALTxlog_Domain GetResponse(ALTxlog_Domain request)
         {
             ALTxlog_Domain result = null;
@@ -22,7 +30,7 @@ namespace SocketServer.v2.Handlers.State
                 SocketClient.Domain.Utilities.NewJsonWorker<ALTxlog_Domain> jsonWorker = new SocketClient.Domain.Utilities.NewJsonWorker<ALTxlog_Domain>();
                 byte[] dataByte = jsonWorker.Serialize2Bytes(request);
                 log.Debug(m => m("5.[AutoLoadReversalTxLog][Send] to Back-End Data: {0}", Encoding.ASCII.GetString(dataByte)));
-                string[] setting = ConfigLoader.GetSettings(ConType.AutoLoadReversalTxLog).Split(':');
+                string[] setting = ConfigLoader.GetSetting(ConType.AutoLoadReversalTxLog).Split(':');
                 string ip = setting[0];
                 int port = Convert.ToInt32(setting[1]);
                 int sendTimeout = Convert.ToInt32(setting[2]);

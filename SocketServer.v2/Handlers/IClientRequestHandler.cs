@@ -1,6 +1,9 @@
 ﻿
 namespace SocketServer.v2.Handlers
 {
+    /// <summary>
+    /// ClientHandler介面
+    /// </summary>
     public interface IClientRequestHandler
     {
         /// <summary>

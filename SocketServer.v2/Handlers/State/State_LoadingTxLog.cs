@@ -3,6 +3,9 @@ using System.Text;
 
 namespace SocketServer.v2.Handlers.State
 {
+    /// <summary>
+    /// 處理狀態:一般加值TxLog
+    /// </summary>
     public class State_LoadingTxLog :IState
     {
         public void Handle(ClientRequestHandler handler)

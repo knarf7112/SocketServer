@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 //
-using System.Net;
 using System.Configuration;
 
 namespace SocketServer.v2.Handlers
@@ -17,8 +13,10 @@ namespace SocketServer.v2.Handlers
         //存放數據的字典檔
         //private static IDictionary<ConType, UriBuilder> backEndSettingDic;
         private static IDictionary<ConType, string> backEndStringSettingDic;
-        //是否載入過設定檔
-        public static bool IsLoad = false;
+        /// <summary>
+        /// 是否載入過設定檔
+        /// </summary>
+        public static bool IsLoaded = false;
 
         /// <summary>
         /// static constructor
@@ -30,7 +28,7 @@ namespace SocketServer.v2.Handlers
             //Console.Write("跑靜態類別");
             //backEndSettingDic = new Dictionary<ConType, UriBuilder>();
             backEndStringSettingDic = new Dictionary<ConType, string>();
-            if (!IsLoad)
+            if (!IsLoaded)
             {
                 LoadSetting();
             }
@@ -49,10 +47,14 @@ namespace SocketServer.v2.Handlers
                     backEndStringSettingDic.Add(type, ConfigurationManager.AppSettings[item].ToString().Trim());
                 }
             }
-            IsLoad = true;
+            IsLoaded = true;
         }
-
-        public static string GetSettings(ConType type)
+        /// <summary>
+        /// 取得設定檔數據
+        /// </summary>
+        /// <param name="type">服務分類</param>
+        /// <returns>後台連線字串</returns>
+        public static string GetSetting(ConType type)
         {
             if (backEndStringSettingDic.ContainsKey(type))
             {

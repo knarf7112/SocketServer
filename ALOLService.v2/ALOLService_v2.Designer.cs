@@ -1,6 +1,6 @@
 ﻿namespace ALOLService.v2
 {
-    partial class Service1
+    partial class ALOLService_v2
     {
         /// <summary> 
         /// 設計工具所需的變數。

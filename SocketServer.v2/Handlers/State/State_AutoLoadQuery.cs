@@ -269,7 +269,7 @@ namespace SocketServer.v2.Handlers.State
                 NewJsonWorker<AL2POS_Domain> jsonWorker = new NewJsonWorker<AL2POS_Domain>();
                 byte[] dataByte = jsonWorker.Serialize2Bytes(request);
                 log.Debug(m => m("5.[AutoLoadQuery][Send] to Back-End Data: {0}", Encoding.ASCII.GetString(dataByte)));
-                string[] setting = ConfigLoader.GetSettings(ConType.AutoLoadQuery).Split(':');
+                string[] setting = ConfigLoader.GetSetting(ConType.AutoLoadQuery).Split(':');
                 string ip = setting[0];
                 int port = Convert.ToInt32(setting[1]);
                 int sendTimeout = Convert.ToInt32(setting[2]);

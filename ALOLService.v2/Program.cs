@@ -17,7 +17,7 @@ namespace ALOLService.v2
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[] 
             { 
-                new Service1() 
+                new ALOLService_v2() 
             };
             ServiceBase.Run(ServicesToRun);
         }

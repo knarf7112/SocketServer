@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace ALOLService.v2
 {
-    public partial class Service1 : ServiceBase
+    public partial class ALOLService_v2 : ServiceBase
     {
-        public Service1()
+        public ALOLService_v2()
         {
             InitializeComponent();
         }

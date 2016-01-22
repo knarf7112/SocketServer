@@ -3,6 +3,9 @@ using System.Text;
 
 namespace SocketServer.v2.Handlers.State
 {
+    /// <summary>
+    /// 處理狀態:購貨取消TxLog
+    /// </summary>
     public class State_PurchaseReturnTxLog : IState
     {
         public void Handle(ClientRequestHandler handler)

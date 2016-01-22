@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 //log
 using Common.Logging;
 
 namespace SocketServer.v2.Handlers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ClientRequestHandler : AbsClientRequestHandler
     {
         #region Static
