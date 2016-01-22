@@ -21,7 +21,7 @@ namespace SocketServer.v2.Handlers.State
         private string readerId;
         private string transDateTime;
         private string mac;
-
+        private string amount;
         /// <summary>
         /// 處理邏輯
         /// </summary>
@@ -105,6 +105,8 @@ namespace SocketServer.v2.Handlers.State
                 this.transDateTime = msgUtility.GetStr(msgBytes, "TransDateTime"); ;
                 //取後面的mac:要用來檢查data部分是否有被串改
                 this.mac = msgUtility.GetStr(msgBytes, "Mac");
+                //錢
+                this.amount = msgUtility.GetStr(msgBytes, "Amount");
                 //將data的部分取出作SHA1
                 byte[] hashData = msgUtility.GetBytes(msgBytes, "HeaderVersion", "Mac");
                 byte[] hashResult = CheckMacContainer.HashWorker.ComputeHash(hashData);
@@ -151,7 +153,7 @@ namespace SocketServer.v2.Handlers.State
             }
             
             //
-            oLDomain.AL_AMT = Convert.ToInt32(msgUtility.GetStr(msgBytes, "Amount"));
+            oLDomain.AL_AMT = Convert.ToInt32(this.amount);
             //
             oLDomain.ICC_NO = msgUtility.GetStr(msgBytes, "CardNo");
 
@@ -176,12 +178,12 @@ namespace SocketServer.v2.Handlers.State
             byte[] rspResult = new byte[request.Length];
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
 
-            string amount = msgUtility.GetStr(request, "Amount");
+            
             // modify request to response
             msgUtility.SetStr("02", rspResult, "Communicate");
             msgUtility.SetStr(response.AL2POS_RC, rspResult, "ReturnCode");
             msgUtility.SetStr(response.AL2POS_SN, rspResult, "CenterSeqNo");
-            msgUtility.SetStr(amount, rspResult, "Amount");
+            msgUtility.SetStr(this.amount, rspResult, "Amount");
 
             msgUtility.SetStr(this.transDateTime, rspResult, "TransDateTime");
             //是否產生mac

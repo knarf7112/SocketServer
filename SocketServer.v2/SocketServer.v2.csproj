@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{EAD90E2F-7155-4F60-8E78-59D45913575A}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SocketServer.v2</RootNamespace>
     <AssemblyName>SocketServer.v2</AssemblyName>
@@ -79,6 +79,9 @@
     <Reference Include="log4net">
       <HintPath>..\Libs\SocketServer_v2\Crypto2.0\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="LOLCommon">
+      <HintPath>..\Libs\SocketServer_v2\POCO\LOLCommon.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\SocketServer_v2\Crypto2.0\Newtonsoft.Json.dll</HintPath>
@@ -91,6 +94,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncMultiSocket.cs" />

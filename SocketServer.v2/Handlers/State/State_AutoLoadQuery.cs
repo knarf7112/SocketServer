@@ -193,31 +193,31 @@ namespace SocketServer.v2.Handlers.State
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
 
             // modify request to response
-            CheckMacContainer.ALQRespMsgUtility.SetStr("02", rspResult, "Communicate");
+            msgUtility.SetStr("02", rspResult, "Communicate");
             //return code
-            CheckMacContainer.ALQRespMsgUtility.SetStr(response.AL2POS_RC, rspResult, "ReturnCode");
+            msgUtility.SetStr(response.AL2POS_RC, rspResult, "ReturnCode");
             //承認編號
-            CheckMacContainer.ALQRespMsgUtility.SetStr(response.AL2POS_SN, rspResult, "CenterSeqNo");
+            msgUtility.SetStr(response.AL2POS_SN, rspResult, "CenterSeqNo");
             //Answer
-            CheckMacContainer.ALQRespMsgUtility.SetBytes(this.cardFormatMemberId, rspResult, "CardFormatMemberId");
-            CheckMacContainer.ALQRespMsgUtility.SetStr(this.cardNo, rspResult, "CardNo");
-            CheckMacContainer.ALQRespMsgUtility.SetStr(this.cardExpireDate1, rspResult, "CardExpireDate1");
-            CheckMacContainer.ALQRespMsgUtility.SetStr(this.cardExpireDate2, rspResult, "CardExpireDate2");
+            msgUtility.SetBytes(this.cardFormatMemberId, rspResult, "CardFormatMemberId");
+            msgUtility.SetStr(this.cardNo, rspResult, "CardNo");
+            msgUtility.SetStr(this.cardExpireDate1, rspResult, "CardExpireDate1");
+            msgUtility.SetStr(this.cardExpireDate2, rspResult, "CardExpireDate2");
             //交易時間
-            CheckMacContainer.ALQRespMsgUtility.SetStr(this.transDateTime, rspResult, "TransDateTime");
+            msgUtility.SetStr(this.transDateTime, rspResult, "TransDateTime");
             //是否產生mac
             if (doMAC)
             {
                 // fetch sha1 data
-                this.SetMAC(CheckMacContainer.ALQRespMsgUtility, rspResult, this.readerId, this.transDateTime);//CheckMacContainer.Mac2Manager.GetAuthMac(response.READER_ID, response.AL_TRANSTIME, sha1Result);
+                this.SetMAC(msgUtility, rspResult, this.readerId, this.transDateTime);//CheckMacContainer.Mac2Manager.GetAuthMac(response.READER_ID, response.AL_TRANSTIME, sha1Result);
             }
             else
             {
                 //若Mac驗證失敗,則使用來源mac簡易回傳
-                CheckMacContainer.ALQRespMsgUtility.SetStr(this.mac, rspResult, "Mac");
+                msgUtility.SetStr(this.mac, rspResult, "Mac");
             }
             // padding data
-            this.SetPadding(CheckMacContainer.ALQRespMsgUtility, rspResult);
+            this.SetPadding(msgUtility, rspResult);
             return rspResult;
         }
 

@@ -46,29 +46,61 @@ namespace SocketServer.v2.Handlers
 
         #region 狀態指定的部分
         /// <summary>
-        /// MsgUtility Object : 截取自動加值的Request電文欄位用的物件
+        /// MsgUtility Object : 設定自動加值的Request電文轉換用的物件(0332)
         /// </summary>
         public static IMsgUtility AOLReqMsgUtility = ctx["icash2AOLReqMsgUtility"] as IMsgUtility;
         /// <summary>
-        /// MsgUtility Object : 設定自動加值的Response電文欄位用的物件
+        /// MsgUtility Object : 設定自動加值的Response電文轉換用的物件(0332)
         /// </summary>
         public static IMsgUtility AOLRespMsgUtility = ctx["icash2AOLRespMsgUtility"] as IMsgUtility;
         /// <summary>
-        /// MsgUtility Object : 設定自動加值TxLog的Request電文欄位用的物件
+        /// MsgUtility Object : 設定自動加值TxLog的Request電文轉換用的物件(0333)
         /// </summary>
         public static IMsgUtility TOLReqMsgUtility = ctx["icash2TOLReqMsgUtility"] as IMsgUtility;
         /// <summary>
-        /// MsgUtility Object : 設定自動加值TxLog的Response電文欄位用的物件
+        /// MsgUtility Object : 設定自動加值TxLog的Response電文轉換用的物件(0333)
         /// </summary>
         public static IMsgUtility TOLRespMsgUtility = ctx["icash2TOLRespMsgUtility"] as IMsgUtility;
         /// <summary>
-        /// MsgUtility Object : 截取自動加值查詢的Request電文欄位用的物件
+        /// MsgUtility Object : 設定自動加值查詢的Request電文轉換用的物件(0531)
         /// </summary>
         public static IMsgUtility ALQReqMsgUtility = ctx["icash2ALQReqMsgUtility"] as IMsgUtility;
         /// <summary>
-        /// MsgUtility Object : 設定自動加值查詢的Response電文欄位用的物件
+        /// MsgUtility Object : 設定自動加值查詢的Response電文轉換用的物件(0531)
         /// </summary>
         public static IMsgUtility ALQRespMsgUtility = ctx["icash2ALQRespMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定一般加值的Request電文轉換用的物件(0331)
+        /// </summary>
+        public static IMsgUtility LOLReqMsgUtility = ctx["icash2LOLReqMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定一般加值的Response電文轉換用的物件(0331)
+        /// </summary>
+        public static IMsgUtility LOLRespMsgUtility = ctx["icash2LOLRespMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定一般加值TxLog的Request電文轉換用的物件(0341)
+        /// </summary>
+        public static IMsgUtility LOLTxLogReqMsgUtility = ctx["icash2TOLReqMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定一般加值TxLog的Response電文轉換用的物件(0341)
+        /// </summary>
+        public static IMsgUtility LOLTxLogRespMsgUtility = ctx["icash2TOLRespMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定購貨取消的Request電文轉換用的物件(0631)
+        /// </summary>
+        public static IMsgUtility PRReqMsgUtility = ctx["icash2POLReqMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定購貨取消的Response電文轉換用的物件(0631)
+        /// </summary>
+        public static IMsgUtility PRRespMsgUtility = ctx["icash2POLRespMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定購貨取消TxLog的Request電文轉換用的物件(0641)
+        /// </summary>
+        public static IMsgUtility PRTxLogReqMsgUtility = ctx["icash2TOLReqMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定購貨取消TxLog的Response電文轉換用的物件(0641)
+        /// </summary>
+        public static IMsgUtility PRTxLogRespMsgUtility = ctx["icash2TOLRespMsgUtility"] as IMsgUtility;
         #endregion
 
     }
