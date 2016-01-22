@@ -26,4 +26,29 @@ namespace Test_Func.Test
             Console.WriteLine(list.Count());
         }
     }
+
+    public class TestClass1
+    {
+        public static IList<string> StrList = new List<string>();
+
+        public static string Str = "test123";
+
+        public static int Intarger = 999;
+
+        public static IList<int> IntList = new List<int>();
+
+        public static void AddStr()
+        {
+            var tmp = "a";
+            for (var i = 1; i <= 10; i++)
+            {
+
+                StrList.Add(tmp);
+                byte[] bytes = Encoding.ASCII.GetBytes(tmp);
+                bytes[0] += 1;// (byte)i;
+                tmp = Encoding.ASCII.GetString(bytes);
+            }
+
+        }
+    }
 }

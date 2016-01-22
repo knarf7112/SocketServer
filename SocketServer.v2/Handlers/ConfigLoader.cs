@@ -12,10 +12,11 @@ namespace SocketServer.v2.Handlers
     /// <summary>
     /// 後台設定檔靜態物件
     /// </summary>
-    public class BackEndSetting
+    public class ConfigLoader
     {
         //存放數據的字典檔
-        private static IDictionary<ConType, UriBuilder> backEndSettingDic;
+        //private static IDictionary<ConType, UriBuilder> backEndSettingDic;
+        private static IDictionary<ConType, string> backEndStringSettingDic;
         //是否載入過設定檔
         public static bool IsLoad = false;
 
@@ -24,10 +25,11 @@ namespace SocketServer.v2.Handlers
         /// 當有new此物件前或訪問此物件的靜態成員,才會執行static constructor,每種Type只會跑一次
         /// (PS:異常會造成unhandled exception [OS:Application執行期間此物件類型就廢了])
         /// </summary>
-        static BackEndSetting()
+        static ConfigLoader()
         {
             //Console.Write("跑靜態類別");
-            backEndSettingDic = new Dictionary<ConType, UriBuilder>();
+            //backEndSettingDic = new Dictionary<ConType, UriBuilder>();
+            backEndStringSettingDic = new Dictionary<ConType, string>();
             if (!IsLoad)
             {
                 LoadSetting();
@@ -42,11 +44,21 @@ namespace SocketServer.v2.Handlers
             foreach(var item in ConfigurationManager.AppSettings.AllKeys){
                 if (Enum.TryParse(item, true,out type) && !String.IsNullOrEmpty(ConfigurationManager.AppSettings[item]))
                 {
-                    UriBuilder uri = new UriBuilder(ConfigurationManager.AppSettings[item]);
-                    backEndSettingDic.Add(type, uri);
+                    //UriBuilder uri = new UriBuilder(ConfigurationManager.AppSettings[item]);//非uri格式會拋異常,算了,自己切好了
+                    //backEndSettingDic.Add(type, uri);
+                    backEndStringSettingDic.Add(type, ConfigurationManager.AppSettings[item].ToString().Trim());
                 }
             }
             IsLoad = true;
+        }
+
+        public static string GetSettings(ConType type)
+        {
+            if (backEndStringSettingDic.ContainsKey(type))
+            {
+                return backEndStringSettingDic[type];
+            }
+            return null;
         }
 
         /// <summary>
@@ -54,14 +66,14 @@ namespace SocketServer.v2.Handlers
         /// </summary>
         /// <param name="type">指定的服務名稱</param>
         /// <returns>Uri設定數據</returns>
-        public static UriBuilder GetUri(ConType type)
-        {
-            if (backEndSettingDic.ContainsKey(type))
-            {
-                return backEndSettingDic[type];
-            }
-            return null;
-        }
+        //public static UriBuilder GetUri(ConType type)
+        //{
+        //    if (backEndSettingDic.ContainsKey(type))
+        //    {
+        //        return backEndSettingDic[type];
+        //    }
+        //    return null;
+        //}
     }
     /// <summary>
     /// 服務分類

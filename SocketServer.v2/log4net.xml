@@ -24,17 +24,17 @@
   <root>
     <level value="TRACE"/>
     <appender-ref ref="ConsoleAppender"/>
-    <!--
-        <appender-ref ref="RollingFileAppender"/>        
+    <!--<appender-ref ref="RollingFileAppender"/>-->
+    <!--        
         <appender-ref ref="EventLogAppender"/>
         -->
   </root>
   <logger name="Spring">
     <level value="Off"/>
   </logger>
-  <!--<logger name="Kms2.Crypto.AesCMac2Worker">
+  <logger name="Kms2.Crypto">
     <level value="Off"/>
-  </logger>-->
+  </logger>
   <logger name="SocketServer.v2">
     <level value="All"/>
   </logger>

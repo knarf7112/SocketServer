@@ -2,18 +2,20 @@
 using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+//
+using Common.Logging;
 
 namespace SocketServer.v2.Handlers
 {
     public abstract class AbsClientRequestHandler : IClientRequestHandler
     {
 
+       
+        private static readonly ILog log = LogManager.GetLogger(typeof(AbsClientRequestHandler));
         #region Static object
-        //private static readonly ILog log = LogManager.GetLogger(typeof(AbsClientRequestHandler));
         private bool isUsed;
         private Socket _client;
         #endregion
-
         #region Property
         /// <summary>
         ///   socket client 識別號碼   
@@ -75,7 +77,11 @@ namespace SocketServer.v2.Handlers
         /// <summary>
         /// Request String [ASCII]
         /// </summary>
-        public string Request { get; set; }
+        //public string RequestStr { get; set; }
+        /// <summary>
+        /// Request byte array
+        /// </summary>
+        public byte[] Request { get; set; }
         /// <summary>
         /// Service state
         /// </summary>
@@ -89,10 +95,13 @@ namespace SocketServer.v2.Handlers
         /// </summary>
         protected Stopwatch timer { get; set; }
         /// <summary>
-        /// Client Socket 的逾時設定
+        /// Client Socket 的接收逾時設定
         /// </summary>
-        protected int receiveTimeout = 5000; // Set to 30000 ms
-        protected int sendTimeout = 5000; // Set to 30000 ms
+        protected int receiveTimeout = 500; // Set to 30000 ms
+        /// <summary>
+        /// Client Socket 的送出逾時設定
+        /// </summary>
+        protected int sendTimeout = 500; // Set to 30000 ms
         private bool hasTimeout;
         #endregion
 
@@ -126,21 +135,22 @@ namespace SocketServer.v2.Handlers
             {
                 try
                 {
-                    Console.WriteLine("開始關閉Client連線:{0}", this.ClientNo);
+                    log.Debug(m=>m("開始關閉Client連線:{0}", this.ClientNo));
                     this.ClientSocket.Shutdown(SocketShutdown.Both);
                     this.ClientSocket.Close();
                 }
                 catch (SocketException sckEx)
                 {
-                    Console.WriteLine("[CancelAsync] Client Socket Error:" + sckEx.Message + Environment.NewLine + sckEx.StackTrace);
-                    //log.Error(m=>m(">> [AbsClientRequestHandler][CancelAsync]Client " + this.ClientNo + " Socket Close Failed: " + ex.Message));
+                    //Console.WriteLine("[CancelAsync] Client Socket Error:" + sckEx.Message + Environment.NewLine + sckEx.StackTrace);
+                    log.Error(m => m("[CancelAsync] Client Socket Error:{0} \r\n{1}" ,sckEx.Message , sckEx.StackTrace));
                 }
                 finally
                 {
+                    //清除本次狀態暫存的數據
                     this.ClientSocket = null;//清除本次的socket物件
-                    this.IsUsed = false;//表示可再次使用
                     this.KeepService = false;//用來離開state迴圈
-                    this.Request = string.Empty;//清除本次收到的request字串
+                    this.Request = null;//清除本次收到的request byte array
+                    this.IsUsed = false;//表示可再次使用
                 }
             }
             

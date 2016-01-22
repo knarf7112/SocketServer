@@ -10,13 +10,90 @@ using System.Net.Sockets;
 using System.Net;
 using System.Diagnostics;
 using System.Timers;
+using Test_Func.Test;
+using System.IO;
 
 namespace Test_Func
 {
     class Program
     {
-        //比較timer並確認是否都是new thread出來執行的(確認current thread Id)
-        static void Main()
+        #region 測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
+        static void Main(string[] args)
+        {
+            for(var i = 0; i < args.Length;i++)
+            {
+                Console.WriteLine("輸入參數[{0}]:{1}", i, args[i]);//給CMD跑的時候用的,應該沒用到(測試)
+            }
+            //var qq = Convert.ToByte("22", 16);
+            Console.WriteLine("輸入目的IP => ex: xxx.xx.xx.x");
+            string ip = Console.ReadLine();//input data
+            Console.WriteLine("輸入目的Port => ex: 6101");
+            int port = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("請輸入hex string");
+            string data = ReadLine();//Console.ReadLine();//因為原來的Console只能讀取到256個char,所以取出資料流改緩衝大小再讀
+
+            Console.WriteLine("send data(hex string length:{0}):{1}",data.Length,data);//除2就是byte length
+            byte[] sendData = StringToByteArray(data);
+            byte[] receiveData = null;
+            try
+            {
+                using (SocketClient.Domain.SocketClient client = new SocketClient.Domain.SocketClient(ip, port))
+                {
+                    if (client.ConnectToServer())
+                    {
+                        receiveData = client.SendAndReceive(sendData);
+                        Console.WriteLine("Receive Data(byte length:{0}): {1}", receiveData.Length, BitConverter.ToString(receiveData).Replace("-", ""));
+                    }
+                }
+            }
+            catch (SocketException sckEx)
+            {
+                Console.WriteLine("Socket 異常:{0}", sckEx.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("一般異常:{0}", ex.Message);
+            }
+            Console.WriteLine("結束 ...");
+            Console.ReadKey();
+        }
+        //ref:http://stackoverflow.com/questions/5557889/console-readline-max-length
+        public static string ReadLine()
+        {
+            int size = 0x1000;
+            //將Console的
+            Stream inputStream = Console.OpenStandardInput(size);//取出Console的標準輸入流並指定緩衝大小
+            byte[] buffer = new byte[size];
+            int outputLength = inputStream.Read(buffer, 0, size);//使用Stream來讀取資料到緩衝buffer變數
+            char[] chars = Encoding.UTF7.GetChars(buffer, 0, outputLength);//使用UTF7轉換buffer內的資料,轉成char陣列
+            return new String(chars);
+        }
+        public static byte[] StringToByteArray(String hex)
+        {
+            //http://stackoverflow.com/questions/1038031/what-is-the-easiest-way-in-c-sharp-to-trim-a-newline-off-of-a-string
+            hex = hex.TrimEnd('\r', '\n');//trim CRLF
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
+        }
+        #endregion
+
+        #region 測試靜態成員是否只跑一次
+        static void Main9()
+        {
+            TestClass1.AddStr();
+
+            TestClass1 c1 = new TestClass1();//第一次使用會跑一次靜態成員
+            //TestClass1.AddStr();
+            TestClass1 c2 = new TestClass1();//看會不會再進去跑一次靜態成員
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 比較timer並確認是否都是new thread出來執行的(確認current thread Id)
+        static void Main8()
         {
             Console.WriteLine("開始跑太碼...thread Id:{0}", Thread.CurrentThread.ManagedThreadId);
             //timer 1
@@ -39,8 +116,9 @@ namespace Test_Func
         {
             Console.WriteLine("[Timer 2]目前Thread ID:{0} \t {1}", Thread.CurrentThread.ManagedThreadId, (string)obj);
         }
-        /**********************************************************************************/
-        //BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔
+        #endregion
+
+        #region BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔,並轉各種格式字串轉成UriBuilder物件,方便取host和port和protocal名稱
         static void Main7()
         {
             //測試uri轉換格式
@@ -52,9 +130,9 @@ namespace Test_Func
             //Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"),6112);
             Console.WriteLine("開始測試連線");
-            for(var i = 0; i < 500; i++){
+            for(var i = 0; i < 800; i++){
                 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                stateObj clientState = new stateObj() { mainsck = client, send = "012340332" + i.ToString("D4") };
+                stateObj clientState = new stateObj() { mainsck = client, send = "012340331" + i.ToString("D4") };
                 client.BeginConnect(ep, ConnectCallBack, clientState);
             }
             
@@ -62,7 +140,7 @@ namespace Test_Func
         }
         static void ConnectCallBack(IAsyncResult ar)
         {
-            if (ar.IsCompleted)
+            if (ar.AsyncWaitHandle.WaitOne(1000) && ar.IsCompleted)
             {
                 stateObj tmp = (stateObj)ar.AsyncState;
                 tmp.mainsck.EndConnect(ar);
@@ -113,8 +191,10 @@ namespace Test_Func
             public string send;
             public string receive;
             public byte[] buffer = new byte[0x1000];
-        } 
-        /*********************************************************************************************/
+        }
+        #endregion
+
+        #region 測試Debugger物件與Enum變數用Reflection取値(TODO ...)
         //TODO: 使用TODO list來提醒未完成工作 -->檢視-->工作清單-->下拉選單選註解-->會出現TODO相關的所有列表
         static void Main6()
         {
@@ -140,8 +220,9 @@ namespace Test_Func
             [Description("屬性二的敘述")]
             N2 = 3
         }
-
-        //測試static共用於整個namespace下的那個類別
+        #endregion
+        
+        #region 測試static共用於整個namespace下的那個類別
         static void Main5()
         {
             ClsTest2 t1 = new ClsTest2();
@@ -157,8 +238,9 @@ namespace Test_Func
 
 
         }
+        #endregion
 
-        //測試沒lock時的multi thread來增加數據到List內,假設同時新增數據會不會衝突,不過測試起來都沒出現異常,可能寫入數據太小
+        #region 測試沒lock時的multi thread來增加數據到List內,假設同時新增數據會不會衝突,不過測試起來都沒出現異常,可能寫入數據太小
         static void Main4()
         {
             Class1 c1 = new Class1();
@@ -185,7 +267,9 @@ namespace Test_Func
             StaticClass1.DisplayCount();
             Console.ReadKey();
         }
+        #endregion
 
+        #region 測試Async Await 使用方式
         static void Main3(string[] args)
         {
             Console.WriteLine("Main:" + Thread.CurrentThread.ManagedThreadId);
@@ -222,7 +306,9 @@ namespace Test_Func
             Console.WriteLine("Run2:" + Thread.CurrentThread.ManagedThreadId);
             Console.WriteLine("網頁長度: " + content.Length);
         }
+        #endregion
 
+        #region 測試Task後的ContinueWith要做啥
         static void Main2(string[] arg)
         {
             //var qq = SynchronizationContext.Current;
@@ -235,16 +321,17 @@ namespace Test_Func
                 Random rnd = new Random(i);
                 int r = rnd.Next(0, 3000);
                 qq ttt = new qq() { i = i, r = r };
-                //Task.Factory.StartNew<qq>( (object obj,qq t)=>{
+                //Task.Factory.StartNew<qq>((object obj, qq t) =>
+                //{
                 //    Thread.Sleep(3000 - t.i * 100);
                 //    Console.WriteLine("Asynchronization M1:" + t.i + ": sleep:" + t.r);
                 //    t.i = t.i + 1;
                 //    return t;
-                //},ttt);
-                //p.M1(ttt).ContinueWith(iii =>
-                //{
-                //    Console.WriteLine("continue:" + ((qq)iii.Result).i + ": sleep:" + ((qq)iii.Result).r);
-                //});
+                //}, ttt);
+                p.M1(ttt).ContinueWith(iii =>
+                {
+                    Console.WriteLine("continue:" + ((qq)iii.Result).i + ": sleep:" + ((qq)iii.Result).r);
+                });
             }
             Console.ReadKey();
         }
@@ -261,6 +348,9 @@ namespace Test_Func
             public int i { get; set; }
             public int r { get; set; }
         }
+        #endregion
+
+        #region 測試delegate是否為不同Thread去執行:結論delegate不會開thread去跑
         static void Main1(string[] args)
         {
             /*
@@ -305,5 +395,6 @@ namespace Test_Func
             ((Func<int>)ar.AsyncState).EndInvoke(ar);
             Console.WriteLine("CallBack Thread Id:" + Thread.CurrentThread.ManagedThreadId);
         }
+        #endregion
     }
 }

@@ -8,6 +8,9 @@ using System.Collections.Concurrent;
 
 namespace SocketServer.v2.Handlers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ClientRequestManager
     {
         #region Field
@@ -42,6 +45,7 @@ namespace SocketServer.v2.Handlers
             {
                 //get one client object that is not using, if none then create new 
                 result = this.dic.Where(n => { return n.Value.IsUsed == false; }).FirstOrDefault().Value;
+                //沒有就建一個新的ClientHandler
                 if (result == null)
                 {
                     this.ClientNo++;

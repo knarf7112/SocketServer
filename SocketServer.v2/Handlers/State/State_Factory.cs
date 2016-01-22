@@ -1,25 +1,42 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Text;
+//log
+//using Common.Logging;
 
 namespace SocketServer.v2.Handlers.State
 {
+    /// <summary>
+    /// 處理狀態: 依據資料Command選擇處理狀態
+    /// </summary>
     public class State_Factory : IState
     {
+        //private static readonly ILog log = LogManager.GetLogger(typeof(State_Factory));
         private byte[] receiveData { get; set; }
 
+        /// <summary>
+        /// 注入資料
+        /// </summary>
+        /// <param name="receiveData">注入的資料</param>
         public State_Factory(byte[] receiveData)
         {
             this.receiveData = receiveData;
         }
+        /// <summary>
+        /// 狀態選擇
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <returns></returns>
         public IState StateSelect(ClientRequestHandler handler)
         {
             string conType = string.Empty;
-            handler.Request = Encoding.ASCII.GetString(this.receiveData);
-            Console.WriteLine("State Factory Select Request:{0}", handler.Request);
+            handler.Request = this.receiveData;// Encoding.ASCII.GetString(this.receiveData);
+            //Console.WriteLine("State Factory Select Request");
             if (handler.Request.Length > 10)
             {
-                conType = handler.Request.Substring(5, 4);//0332,0333,0334,0531,0331,0341,0631,0641
+                //依據接收字串內的某個Command字串
+                conType = Encoding.ASCII.GetString(handler.Request).Substring(6, 4);//0332,0333,0334,0531,0331,0341,0631,0641
+                //選擇處理狀態
                 switch (conType)
                 {
                         //自動加値類
@@ -59,7 +76,7 @@ namespace SocketServer.v2.Handlers.State
     }
 
     /// <summary>
-    /// 依據通訊種別分狀態列表
+    /// 依據通訊種別分狀態列表(保留:未使用)
     /// </summary>
     public enum StateType
     {
