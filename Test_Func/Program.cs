@@ -17,6 +17,15 @@ namespace Test_Func
 {
     class Program
     {
+        static void Main11(string[] args)
+        {
+            Parallel.ForEach("heLLo, worLd", (c, state, i) =>
+            {
+                Console.WriteLine(c.ToString() + i);
+            });
+            Console.ReadKey();
+        }
+
         #region 測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
         static void Main(string[] args)
         {

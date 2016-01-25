@@ -91,7 +91,7 @@ namespace SocketServer.v2
         }
         /// <summary>
         /// Run Constructor AsyncMultiSocketServer By Prot
-        /// Default ServiceName: "Authenticate",Default Encode:System Default
+        /// Default ServiceName: "AutoLoad",Default Encode:System Default
         /// </summary>
         /// <param name="port">Listen Port</param>
         public AsyncMultiSocketServer(int port)
