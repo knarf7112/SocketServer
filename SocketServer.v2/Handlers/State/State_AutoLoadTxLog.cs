@@ -84,7 +84,7 @@ namespace SocketServer.v2.Handlers.State
                 System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
                 SocketClient.Domain.Utilities.NewJsonWorker<ALTxlog_Domain> jsonWorker = new SocketClient.Domain.Utilities.NewJsonWorker<ALTxlog_Domain>();
                 byte[] dataByte = jsonWorker.Serialize2Bytes(request);
-                log.Debug(m => m("5.[AutoLoadTxLog][Send] to Back-End Data: {0}", Encoding.ASCII.GetString(dataByte)));
+                log.Debug(m => m("3.[AutoLoadTxLog][Send] to Back-End Data: {0}", Encoding.ASCII.GetString(dataByte)));
                 string[] setting = ConfigLoader.GetSetting(ConType.AutoLoadTxLog).Split(':');
                 string ip = setting[0];
                 int port = Convert.ToInt32(setting[1]);
@@ -97,7 +97,7 @@ namespace SocketServer.v2.Handlers.State
                     byte[] resultBytes = null;
                     resultBytes = socketClient.SendAndReceive(dataByte);
                     timer.Stop();
-                    log.Debug(m => m("6.[AutoLoadTxLog][Receive]Back-End Response(TimeSpend:{1}ms): {0}", Encoding.ASCII.GetString(resultBytes), timer.ElapsedMilliseconds));
+                    log.Debug(m => m("4.[AutoLoadTxLog][Receive]Back-End Response(TimeSpend:{1}ms): {0}", Encoding.ASCII.GetString(resultBytes), timer.ElapsedMilliseconds));
                     result = jsonWorker.Deserialize(resultBytes);
                 }
                 return result;
@@ -124,11 +124,12 @@ namespace SocketServer.v2.Handlers.State
         /// <summary>
         /// Request截取需要的資料轉成POCO
         /// </summary>
+        /// <param name="msgUtility">Msg Parser Object</param>
         /// <param name="msgBytes">Origin Request byte array</param>
         /// <returns>POCO</returns>
         protected virtual ALTxlog_Domain ParseRequest(IMsgUtility msgUtility,byte[] msgBytes)
         {
-            log.Debug("3.開始轉換自動加值TxLog Request物件");
+            log.Debug("1.開始轉換自動加值TxLog Request物件");
             ALTxlog_Domain oLDomain = new ALTxlog_Domain();
             //ComType:0333
             oLDomain.COM_TYPE = msgUtility.GetStr(msgBytes, "ReqType");
@@ -154,19 +155,20 @@ namespace SocketServer.v2.Handlers.State
             //
             oLDomain.TXLOG = msgUtility.GetStr(msgBytes, "CadLog");
 
-            log.Debug("4.結束轉換自動加值TxLog Request物件");
+            log.Debug("2.結束轉換自動加值TxLog Request物件");
             return oLDomain;
         }
 
         /// <summary>
         /// Response物件轉換成byte[]
         /// </summary>
+        /// <param name="msgUtility">Msg Parser Object</param>
         /// <param name="response">後端給的POCO</param>
         /// <param name="request">Origin Request byte array</param>
         /// <returns>response byte array</returns>
         protected virtual byte[] ParseResponse(IMsgUtility msgUtility,ALTxlog_Domain response, byte[] request)
         {
-            log.Debug(m => m("7.轉換後台自動加值TxLog Response物件 => Byte[]"));
+            log.Debug(m => m("5.轉換後台自動加值TxLog Response物件 => Byte[]"));
             byte[] rspResult = new byte[request.Length];
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
             // modify request to response
@@ -180,7 +182,7 @@ namespace SocketServer.v2.Handlers.State
             msgUtility.SetBytes(CheckMacContainer.ByteWorker.Fill(msgUtility.GetTag("DataPadding").Length, 0x20), rspResult, "DataPadding");
             //依據定義改變Response大小(因Request資料部分長度與Response資料部分長度不一樣)
             rspResult = CheckMacContainer.ByteWorker.SubArray(rspResult, 0, msgUtility.GetSize("HeaderVersion", "EndOfData"));
-
+            log.Debug(m => m("6.轉換後台自動加值TxLog Response物件完畢"));
             return rspResult;
         }
     }

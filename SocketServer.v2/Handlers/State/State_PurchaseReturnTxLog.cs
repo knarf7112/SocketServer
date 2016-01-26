@@ -17,6 +17,10 @@ namespace SocketServer.v2.Handlers.State
     public class State_PurchaseReturnTxLog : IState
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(State_PurchaseReturnTxLog));
+        /// <summary>
+        /// Http Response TimeOut
+        /// </summary>
+        private static readonly int ResponseTimeout = 30000;
         public void Handle(ClientRequestHandler handler)
         {
             try
@@ -85,11 +89,11 @@ namespace SocketServer.v2.Handlers.State
             {
                 System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
                 requestJSONstr = Newtonsoft.Json.JsonConvert.SerializeObject(request);
-                log.Debug(m => m("5.[PurchaseReturnTxLog][Send] to Back-End Data: {0}", requestJSONstr));
+                log.Debug(m => m("3.[PurchaseReturnTxLog][Send] to Back-End Data: {0}", requestJSONstr));
 
                 string url = ConfigLoader.GetSetting(ConType.PurchaseReturnTxLog);
                 timer.Start();
-                client = new HttpClient() { Timeout = new TimeSpan(0, 0, 10) };
+                client = new HttpClient() { Timeout = new TimeSpan(0, 0, 0, 0, State_PurchaseReturnTxLog.ResponseTimeout) };
                 requestMsg = new HttpRequestMessage(HttpMethod.Post, url);
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 requestMsg.Content = new StringContent(requestJSONstr, Encoding.UTF8, "application/json");
@@ -109,9 +113,9 @@ namespace SocketServer.v2.Handlers.State
                     {
                         log.Error(m => m("Response轉換失敗:{0} \r\n{1}", ex.Message, jsonData));
                     }
-                }).Wait(5000);
+                }).Wait(State_PurchaseReturnTxLog.ResponseTimeout);
                 timer.Stop();
-                log.Debug(m => m("6.[PurchaseReturnTxLog][Receive]Back-End Response(TimeSpend:{1}ms): {0}", jsonData, timer.ElapsedMilliseconds));
+                log.Debug(m => m("4.[PurchaseReturnTxLog][Receive]Back-End Response(TimeSpend:{1}ms): {0}", jsonData, timer.ElapsedMilliseconds));
 
 
                 return result;
@@ -121,15 +125,13 @@ namespace SocketServer.v2.Handlers.State
                 log.Error("[GetResponse]Send Back-End Error: " + ex.Message + " \r\n" + ex.StackTrace);
                 return null;
             }
-            finally
-            {
 
-            }
         }
 
         /// <summary>
         /// Request截取需要的資料轉成POCO
         /// </summary>
+        /// <param name="msgUtility">Msg Parser Object</param>
         /// <param name="msgBytes">Origin Request byte array</param>
         /// <returns>POCO</returns>
         protected virtual Txlog_Domain ParseRequest(IMsgUtility msgUtility, byte[] msgBytes)
@@ -137,7 +139,7 @@ namespace SocketServer.v2.Handlers.State
             /*
              {"COM_TYPE":"0341","MERCHANT_NO":null,"MERC_FLG":"SET","M_KIND":null,"POS_FLG":"01","POS_SEQNO":"471756","READER_ID":"8604241F6A9F2980    ","REG_ID":"01","SN":"02922396","STORE_NO":"113584","TRANS_TYPE":null,"TXLOG":"52201411031908470000000073111400240070060000020004241F6A9F2980000005000000420000001500009100000000270000880604241F6A9F298000000000000000000000000100000200000000006520C0FBSET00100113584100118604241F6A9F2980    00000294000000000000000000000000000000000000000000000000000000000000000000000A2","TXLOG_RC":null}
              */
-            log.Debug("3.開始轉換購貨取消TxLog Request物件");
+            log.Debug("1.開始轉換購貨取消TxLog Request物件");
             Txlog_Domain oLDomain = new Txlog_Domain();
             //ComType:0333
             oLDomain.COM_TYPE = msgUtility.GetStr(msgBytes, "ReqType");
@@ -163,7 +165,7 @@ namespace SocketServer.v2.Handlers.State
             //
             oLDomain.TXLOG = msgUtility.GetStr(msgBytes, "CadLog");
 
-            log.Debug("4.結束轉換購貨取消TxLog Request物件");
+            log.Debug("2.結束轉換購貨取消TxLog Request物件");
             return oLDomain;
         }
 
@@ -176,7 +178,7 @@ namespace SocketServer.v2.Handlers.State
         /// <returns>response byte array</returns>
         protected virtual byte[] ParseResponse(IMsgUtility msgUtility, Txlog_Domain response, byte[] request)
         {
-            log.Debug(m => m("7.轉換後台購貨取消TxLog Response物件 => Byte[]"));
+            log.Debug(m => m("5.轉換後台購貨取消TxLog Response物件 => Byte[]"));
             byte[] rspResult = new byte[request.Length];
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
             // modify request to response
@@ -190,7 +192,7 @@ namespace SocketServer.v2.Handlers.State
             msgUtility.SetBytes(CheckMacContainer.ByteWorker.Fill(msgUtility.GetTag("DataPadding").Length, 0x20), rspResult, "DataPadding");
             //依據定義改變Response大小(因Request資料部分長度與Response資料部分長度不一樣)
             rspResult = CheckMacContainer.ByteWorker.SubArray(rspResult, 0, msgUtility.GetSize("HeaderVersion", "EndOfData"));
-
+            log.Debug(m => m("6.轉換後台購貨取消TxLog Response物件完畢"));
             return rspResult;
         }
     }

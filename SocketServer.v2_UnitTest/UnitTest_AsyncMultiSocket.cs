@@ -135,7 +135,7 @@ namespace SocketServer.v2_UnitTest
             byte[] sendLoadData = StringToByteArray(sendLoadhexData);//轉一下
             string url = "127.0.0.1";
             int port = 8113;
-            int testCount = 20;//非同步連線總次數,太高就爆了
+            int testCount = 10;//非同步連線總次數,太高就爆了
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse(url), port);
             taskCount = new CountdownEvent(testCount);//callback sign告訴主程式完成任務用的
             string[] receiveList = new string[testCount];
@@ -144,13 +144,15 @@ namespace SocketServer.v2_UnitTest
             {
                 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 stateObj sendObj = new stateObj() { clientNo = i, mainSocket = client, sendData = sendLoadData, receiveSignList = taskCount, receiveDataList = receiveList };
+                //Thread.Sleep(100);
                 client.BeginConnect(ep, ConnectCallback, sendObj);
             }
 
-            taskCount.Wait(18000);//等所有任務完成:最多等13秒
+            taskCount.Wait(18000);//等所有任務完成:最多等18秒
             //列出所有接收到的訊息
             for (int j = 0; j < receiveList.Length; j++)
             {
+                
                 log.Info("Client[" + j + "] data:" + receiveList[j]);
                 Assert.IsNotNull(receiveList[j]);
             }
@@ -179,7 +181,7 @@ namespace SocketServer.v2_UnitTest
                 client.BeginConnect(ep, ConnectCallback, sendObj);
             }
 
-            taskCount.Wait(13000);//等所有任務完成:最多等13秒
+            taskCount.Wait(18000);//等所有任務完成:最多等18秒
             //列出所有接收到的訊息
             for (int j = 0; j < receiveList.Length; j++)
             {
@@ -211,7 +213,7 @@ namespace SocketServer.v2_UnitTest
                 client.BeginConnect(ep, ConnectCallback, sendObj);
             }
 
-            taskCount.Wait(13000);//等所有任務完成:最多等13秒
+            taskCount.Wait(18000);//等所有任務完成:最多等18秒
             //列出所有接收到的訊息
             for (int j = 0; j < receiveList.Length; j++)
             {
@@ -262,6 +264,7 @@ namespace SocketServer.v2_UnitTest
                 {
                     obj = (stateObj)ar.AsyncState;
                     obj.mainSocket.EndConnect(ar);
+                    //Thread.Sleep(obj.clientNo * 10);//加入延遲,結果一樣後端延遲
                     int sendLength = obj.mainSocket.Send(obj.sendData);
                     byte[] buffer = new byte[0x1000];
                     int receivelength = obj.mainSocket.Receive(buffer);

@@ -17,6 +17,10 @@ namespace SocketServer.v2.Handlers.State
     public class State_Loading : IState
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(State_Loading));
+        /// <summary>
+        /// Http Response TimeOut
+        /// </summary>
+        private static readonly int ResponseTimeout = 30000;
         //
         private string readerId;
         private string transDateTime;
@@ -245,11 +249,11 @@ namespace SocketServer.v2.Handlers.State
 
                 string url = ConfigLoader.GetSetting(ConType.Loading);
                 timer.Start();
-                client = new HttpClient() { Timeout = new TimeSpan(0, 0, 10) };
+                client = new HttpClient() { Timeout = new TimeSpan(0,0,0,0,State_Loading.ResponseTimeout) };
                 requestMsg = new HttpRequestMessage(HttpMethod.Post, url);
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 requestMsg.Content = new StringContent(requestJSONstr, Encoding.UTF8, "application/json");
-                client.SendAsync(requestMsg).ContinueWith(responseTask =>
+                /*result = */client.SendAsync(requestMsg).ContinueWith(responseTask =>
                 {
                     HttpResponseMessage response = responseTask.Result as HttpResponseMessage;
                     return response.Content.ReadAsByteArrayAsync().Result;
@@ -257,8 +261,10 @@ namespace SocketServer.v2.Handlers.State
                 {
                     byte[] data = dataTask.Result as byte[];
                     jsonData = Encoding.UTF8.GetString(data);
+                    //LOL_Domain tmp = null;
                     result = Newtonsoft.Json.JsonConvert.DeserializeObject<LOL_Domain>(jsonData);
-                }).Wait(5000);
+                    //return tmp;
+                }).Wait(State_Loading.ResponseTimeout);
                 timer.Stop();
                 log.Debug(m => m("6.[Loading][Receive]Back-End Response(TimeSpend:{1}ms): {0}", jsonData, timer.ElapsedMilliseconds));
 

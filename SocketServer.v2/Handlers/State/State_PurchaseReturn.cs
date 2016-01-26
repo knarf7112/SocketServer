@@ -17,6 +17,10 @@ namespace SocketServer.v2.Handlers.State
     public class State_PurchaseReturn : IState
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(State_PurchaseReturn));
+        /// <summary>
+        /// Http Response TimeOut
+        /// </summary>
+        private static readonly int ResponseTimeout = 30000;
         //
         private string readerId;
         private string transDateTime;
@@ -245,7 +249,7 @@ namespace SocketServer.v2.Handlers.State
 
                 string url = ConfigLoader.GetSetting(ConType.PurchaseReturn);
                 timer.Start();
-                client = new HttpClient() { Timeout = new TimeSpan(0, 0, 10) };
+                client = new HttpClient() { Timeout = new TimeSpan(0, 0, 0, 0, State_PurchaseReturn.ResponseTimeout) };
                 requestMsg = new HttpRequestMessage(HttpMethod.Post, url);
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 requestMsg.Content = new StringContent(requestJSONstr, Encoding.UTF8, "application/json");
@@ -258,7 +262,7 @@ namespace SocketServer.v2.Handlers.State
                     byte[] data = dataTask.Result as byte[];
                     jsonData = Encoding.UTF8.GetString(data);
                     result = Newtonsoft.Json.JsonConvert.DeserializeObject<LOL_Domain>(jsonData);
-                }).Wait(5000);
+                }).Wait(State_PurchaseReturn.ResponseTimeout);
                 timer.Stop();
                 log.Debug(m => m("6.[PurchaseReturn][Receive]Back-End Response(TimeSpend:{1}ms): {0}", jsonData, timer.ElapsedMilliseconds));
 

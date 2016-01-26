@@ -29,7 +29,7 @@ namespace SocketServer.v2.Handlers.State
                 System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
                 SocketClient.Domain.Utilities.NewJsonWorker<ALTxlog_Domain> jsonWorker = new SocketClient.Domain.Utilities.NewJsonWorker<ALTxlog_Domain>();
                 byte[] dataByte = jsonWorker.Serialize2Bytes(request);
-                log.Debug(m => m("5.[AutoLoadReversalTxLog][Send] to Back-End Data: {0}", Encoding.ASCII.GetString(dataByte)));
+                log.Debug(m => m("3.[AutoLoadReversalTxLog][Send] to Back-End Data: {0}", Encoding.ASCII.GetString(dataByte)));
                 string[] setting = ConfigLoader.GetSetting(ConType.AutoLoadReversalTxLog).Split(':');
                 string ip = setting[0];
                 int port = Convert.ToInt32(setting[1]);
@@ -42,7 +42,7 @@ namespace SocketServer.v2.Handlers.State
                     byte[] resultBytes = null;
                     resultBytes = socketClient.SendAndReceive(dataByte);
                     timer.Stop();
-                    log.Debug(m => m("6.[AutoLoadReversalTxLog][Receive]Back-End Response(TimeSpend:{1}ms): {0}", Encoding.ASCII.GetString(resultBytes), timer.ElapsedMilliseconds));
+                    log.Debug(m => m("4.[AutoLoadReversalTxLog][Receive]Back-End Response(TimeSpend:{1}ms): {0}", Encoding.ASCII.GetString(resultBytes), timer.ElapsedMilliseconds));
                     result = jsonWorker.Deserialize(resultBytes);
                 }
                 return result;
