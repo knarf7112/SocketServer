@@ -17,17 +17,33 @@ namespace Test_Func
 {
     class Program
     {
-        static void Main11(string[] args)
+        #region 測試Parallel : 和一般for跑迴圈比較起來還比較慢,用途看來是為了能夠利用多核心,要開工作管理員來看了
+        static void Main(string[] args)
         {
-            Parallel.ForEach("heLLo, worLd", (c, state, i) =>
+            string testStr = "heLLo, worLd";
+            Stopwatch timer = new Stopwatch();
+            Console.WriteLine("Start Parallel Function ...");
+            timer.Start();
+            Parallel.ForEach(testStr, (c, state, i) =>
             {
-                Console.WriteLine(c.ToString() + i);
+                Console.WriteLine(i + ":" + c.ToString());
             });
+            timer.Stop();
+            Console.WriteLine("Parallel TimeSpend: {0}ms", timer.ElapsedMilliseconds);
+            //timer.Restart();
+            //for (int i = 0; i < testStr.Length; i++)
+            //{
+            //    Console.WriteLine(i + ":" + testStr[i].ToString());
+            //}
+            //timer.Stop();
+            //Console.WriteLine("For TimeSpend: {0}ms", timer.ElapsedMilliseconds);
+            Console.WriteLine("End Test ...");
             Console.ReadKey();
         }
+        #endregion
 
         #region 測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
-        static void Main(string[] args)
+        static void Main10(string[] args)
         {
             for(var i = 0; i < args.Length;i++)
             {

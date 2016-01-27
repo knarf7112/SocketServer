@@ -28,7 +28,7 @@ namespace SocketServer.v2.Handlers.State
                 Txlog_Domain request = null;
                 Txlog_Domain response = null;
                 byte[] responseArr = null;
-                log.Debug(m => m("[State_PurchaseReturnTxLog] Request(ASCII):{0}", ClientRequestHandler.asciiOctets2String(handler.Request)));
+                log.Debug(m => m("[State_PurchaseReturnTxLog] {0} Request(ASCII):{1}", handler.ClientSocket.RemoteEndPoint.ToString(), ClientRequestHandler.asciiOctets2String(handler.Request)));
                 try
                 {
                     //1.parse Txlog

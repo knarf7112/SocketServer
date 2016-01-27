@@ -34,11 +34,11 @@ namespace SocketServer.v2.Handlers.State
         {
             try
             {
-                LOL_Domain request = null;
+                POL_Domain request = null;
                 bool doMac = true;
-                LOL_Domain response = null;
+                POL_Domain response = null;
                 byte[] responseArr = null;
-                log.Debug(m => m("[State_PurchaseReturn] Request(ASCII):{0}", ClientRequestHandler.asciiOctets2String(handler.Request)));
+                log.Debug(m => m("[State_PurchaseReturn] {0} Request(ASCII):{1}", handler.ClientSocket.RemoteEndPoint.ToString(), ClientRequestHandler.asciiOctets2String(handler.Request)));
                 //1.驗證Mac
                 if (this.CheckMac(CheckMacContainer.PRReqMsgUtility, handler.Request))
                 {
@@ -46,13 +46,13 @@ namespace SocketServer.v2.Handlers.State
                     request = this.ParseRequest(CheckMacContainer.PRReqMsgUtility, handler.Request);
                     //3.send to Back-End request and get response
                     response = this.GetResponse(request);
-                    if (response == null || string.IsNullOrEmpty(response.LOAD_RC))
+                    if (response == null || string.IsNullOrEmpty(response.PCHR_RC))
                     {
                         //back-End Error
-                        response = new LOL_Domain()
+                        response = new POL_Domain()
                         {
-                            LOAD_SN = "99999999",
-                            LOAD_RC = "990001"
+                            PCHR_SN = "99999999",
+                            PCHR_RC = "990001"
                         };
                     }
                 }
@@ -60,10 +60,10 @@ namespace SocketServer.v2.Handlers.State
                 {
                     //MAC驗證失敗
                     doMac = false;
-                    response = new LOL_Domain()
+                    response = new POL_Domain()
                     {
-                        LOAD_SN = "99999999",
-                        LOAD_RC = "990001"
+                        PCHR_SN = "99999999",
+                        PCHR_RC = "990001"
                     };
                 }
 
@@ -79,7 +79,7 @@ namespace SocketServer.v2.Handlers.State
             }
             catch (Exception ex)
             {
-                log.Error(m => m("[State_Loading][Handle] Error: {0} \r\n{1}", ex.Message, ex.StackTrace));
+                log.Error(m => m("[State_PurchaseReturn][Handle] Error: {0} \r\n{1}", ex.Message, ex.StackTrace));
             }
             finally
             {
@@ -128,10 +128,10 @@ namespace SocketServer.v2.Handlers.State
         /// <param name="msgUtility">Request Msg Parser</param>
         /// <param name="msgBytes">Origin Request byte array</param>
         /// <returns>POCO</returns>
-        protected virtual LOL_Domain ParseRequest(IMsgUtility msgUtility, byte[] msgBytes)
+        protected virtual POL_Domain ParseRequest(IMsgUtility msgUtility, byte[] msgBytes)
         {
             log.Debug("3.開始轉換購貨取消Request物件");
-            LOL_Domain oLDomain = new LOL_Domain();
+            POL_Domain oLDomain = new POL_Domain();
             //ComType:0332
             oLDomain.COM_TYPE = msgUtility.GetStr(msgBytes, "ReqType");
 
@@ -153,7 +153,7 @@ namespace SocketServer.v2.Handlers.State
             }
 
             //
-            oLDomain.LOAD_AMT = Convert.ToInt32(this.amount);
+            oLDomain.PCHR_AMT = Convert.ToInt32(this.amount);
             //
             oLDomain.ICC_NO = msgUtility.GetStr(msgBytes, "CardNo");
 
@@ -169,17 +169,16 @@ namespace SocketServer.v2.Handlers.State
         /// <param name="request">Origin Request byte array</param>
         /// <param name="doMAC">是否產生MAC:驗證失敗就使用來源的mac</param>
         /// <returns>response byte array</returns>
-        protected virtual byte[] ParseResponse(IMsgUtility msgUtility, LOL_Domain response, byte[] request, bool doMAC = true)
+        protected virtual byte[] ParseResponse(IMsgUtility msgUtility, POL_Domain response, byte[] request, bool doMAC = true)
         {
             log.Debug(m => m("7.轉換後台Response物件並建立MAC並轉成Response Byte[]"));
             byte[] rspResult = new byte[request.Length];
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
-
-            string amount = msgUtility.GetStr(request, "Amount");
+            
             // modify request to response
             msgUtility.SetStr("02", rspResult, "Communicate");
-            msgUtility.SetStr(response.LOAD_RC, rspResult, "ReturnCode");
-            msgUtility.SetStr(response.LOAD_SN, rspResult, "CenterSeqNo");
+            msgUtility.SetStr(response.PCHR_RC, rspResult, "ReturnCode");
+            msgUtility.SetStr(response.PCHR_SN, rspResult, "CenterSeqNo");
             msgUtility.SetStr(this.amount, rspResult, "Amount");
 
             msgUtility.SetStr(this.transDateTime, rspResult, "TransDateTime");
@@ -234,9 +233,9 @@ namespace SocketServer.v2.Handlers.State
         /// </summary>
         /// <param name="request">request poco</param>
         /// <returns>response poco</returns>
-        protected virtual LOL_Domain GetResponse(LOL_Domain request)
+        protected virtual POL_Domain GetResponse(POL_Domain request)
         {
-            LOL_Domain result = null;
+            POL_Domain result = null;
             HttpClient client = null;
             HttpRequestMessage requestMsg = null;
             string requestJSONstr = string.Empty;
@@ -261,7 +260,7 @@ namespace SocketServer.v2.Handlers.State
                 {
                     byte[] data = dataTask.Result as byte[];
                     jsonData = Encoding.UTF8.GetString(data);
-                    result = Newtonsoft.Json.JsonConvert.DeserializeObject<LOL_Domain>(jsonData);
+                    result = Newtonsoft.Json.JsonConvert.DeserializeObject<POL_Domain>(jsonData);
                 }).Wait(State_PurchaseReturn.ResponseTimeout);
                 timer.Stop();
                 log.Debug(m => m("6.[PurchaseReturn][Receive]Back-End Response(TimeSpend:{1}ms): {0}", jsonData, timer.ElapsedMilliseconds));

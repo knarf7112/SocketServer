@@ -26,7 +26,7 @@ namespace SocketServer.v2.Handlers.State
                 Txlog_Domain request = null;
                 Txlog_Domain response = null;
                 byte[] responseArr = null;
-                log.Debug(m => m("[State_LoadingTxLog] Request(ASCII):{0}", ClientRequestHandler.asciiOctets2String(handler.Request)));
+                log.Debug(m => m("[State_LoadingTxLog] {0} Request(ASCII):{1}", handler.ClientSocket.RemoteEndPoint.ToString(), ClientRequestHandler.asciiOctets2String(handler.Request)));
                 try
                 {
                     //1.parse Txlog
@@ -89,7 +89,7 @@ namespace SocketServer.v2.Handlers.State
                 requestJSONstr = Newtonsoft.Json.JsonConvert.SerializeObject(request);
                 log.Debug(m => m("3.[LoadingTxLog][Send] to Back-End Data: {0}", requestJSONstr));
 
-                string url = ConfigLoader.GetSetting(ConType.Loading);
+                string url = ConfigLoader.GetSetting(ConType.LoadingTxLog);
                 timer.Start();
                 client = new HttpClient() { Timeout = new TimeSpan(0, 0, 0, 0, State_LoadingTxLog.ResponseTimeout) };
                 requestMsg = new HttpRequestMessage(HttpMethod.Post, url);

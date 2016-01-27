@@ -21,7 +21,7 @@ namespace SocketServer.v2.Handlers.State
                 ALTxlog_Domain request = null;
                 ALTxlog_Domain response = null;
                 byte[] responseArr = null;
-                log.Debug(m => m("[State_AutoLoadTxLog] Request(ASCII):{0}", ClientRequestHandler.asciiOctets2String(handler.Request)));
+                log.Debug(m => m("[State_AutoLoadTxLog] {0} Request(ASCII):{1}", handler.ClientSocket.RemoteEndPoint.ToString(), ClientRequestHandler.asciiOctets2String(handler.Request)));
                 try
                 {
                     //1.parse Txlog

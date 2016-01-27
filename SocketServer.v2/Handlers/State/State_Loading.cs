@@ -34,11 +34,11 @@ namespace SocketServer.v2.Handlers.State
         {
             try
             {
-                LOL_Domain request = null;
+                LOL_Domain request = null; 
                 bool doMac = true;
                 LOL_Domain response = null;
                 byte[] responseArr = null;
-                log.Debug(m => m("[State_Loading] Request(ASCII):{0}", ClientRequestHandler.asciiOctets2String(handler.Request)));
+                log.Debug(m => m("[State_Loading] {0} Request(ASCII):{1}", handler.ClientSocket.RemoteEndPoint.ToString(), ClientRequestHandler.asciiOctets2String(handler.Request)));
                 //1.驗證Mac
                 if (this.CheckMac(CheckMacContainer.LOLReqMsgUtility, handler.Request))
                 {
@@ -175,7 +175,6 @@ namespace SocketServer.v2.Handlers.State
             byte[] rspResult = new byte[request.Length];
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
 
-            string amount = msgUtility.GetStr(request, "Amount");
             // modify request to response
             msgUtility.SetStr("02", rspResult, "Communicate");
             msgUtility.SetStr(response.LOAD_RC, rspResult, "ReturnCode");

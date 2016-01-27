@@ -35,7 +35,7 @@ namespace SocketServer.v2.Handlers.State
                 bool doMac = true;
                 AL2POS_Domain response = null;
                 byte[] responseArr = null;
-                log.Debug(m => m("[State_AutoLoadQuery] Request(ASCII):{0}", ClientRequestHandler.asciiOctets2String(handler.Request)));
+                log.Debug(m => m("[State_AutoLoadQuery] {0} Request(ASCII):{1}", handler.ClientSocket.RemoteEndPoint.ToString(), ClientRequestHandler.asciiOctets2String(handler.Request)));
                 //1.驗證Mac
                 if (this.CheckMac(CheckMacContainer.ALQReqMsgUtility,handler.Request))
                 {

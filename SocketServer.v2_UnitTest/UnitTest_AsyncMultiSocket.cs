@@ -169,7 +169,7 @@ namespace SocketServer.v2_UnitTest
             byte[] sendLoadTxLogData = StringToByteArray(sendLoadTxLoghexData);//轉一下
             string url = "127.0.0.1";
             int port = 8113;
-            int testCount = 20;//非同步連線總次數,太高就爆了
+            int testCount = 10;//非同步連線總次數,太高就爆了
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse(url), port);
             taskCount = new CountdownEvent(testCount);//callback sign告訴主程式完成任務用的
             string[] receiveList = new string[testCount];
