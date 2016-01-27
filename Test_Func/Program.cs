@@ -18,7 +18,7 @@ namespace Test_Func
     class Program
     {
         #region 測試Parallel : 和一般for跑迴圈比較起來還比較慢,用途看來是為了能夠利用多核心,要開工作管理員來看了
-        static void Main(string[] args)
+        static void Main11(string[] args)
         {
             string testStr = "heLLo, worLd";
             Stopwatch timer = new Stopwatch();
@@ -43,7 +43,7 @@ namespace Test_Func
         #endregion
 
         #region 測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
-        static void Main10(string[] args)
+        static void Main(string[] args)
         {
             for(var i = 0; i < args.Length;i++)
             {
