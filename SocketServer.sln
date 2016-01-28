@@ -50,6 +50,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServer.v2_UnitTest", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ALOLService.v2", "ALOLService.v2\ALOLService.v2.csproj", "{3CAC1A9C-C74B-43D7-907E-25380D0C4515}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacGenerator", "MacGenerator\MacGenerator.csproj", "{FD697B03-1050-41EB-BBCF-57E83456E3E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,6 +110,10 @@ Global
 		{3CAC1A9C-C74B-43D7-907E-25380D0C4515}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CAC1A9C-C74B-43D7-907E-25380D0C4515}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CAC1A9C-C74B-43D7-907E-25380D0C4515}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD697B03-1050-41EB-BBCF-57E83456E3E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD697B03-1050-41EB-BBCF-57E83456E3E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD697B03-1050-41EB-BBCF-57E83456E3E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD697B03-1050-41EB-BBCF-57E83456E3E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

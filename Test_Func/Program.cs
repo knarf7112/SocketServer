@@ -12,24 +12,132 @@ using System.Diagnostics;
 using System.Timers;
 using Test_Func.Test;
 using System.IO;
+// need using =>Main12
+using System.Management;
 
 namespace Test_Func
 {
     class Program
     {
+        #region 簡易偵測Windows系統中所有應用程式的啟動與結束
+        //想偵測Windows系統中所有應用程式的啟動與結束
+        //ref:https://dotblogs.com.tw/code6421/2015/06/02/151461
+        static void Main12()
+        {
+
+            //要using wmi的dll=>System.Management
+            ManagementEventWatcher wmiProcessWatcher = null, wmiProcessEndingWatcher = null ;
+            Task.Run(() =>
+            {
+                try
+                {
+                    //建立監視物件並設定Query字串
+                    wmiProcessWatcher = new ManagementEventWatcher("SELECT *FROM __InstanceCreationEvent WITHIN 0.1 WHERE TargetInstance ISA 'Win32_Process'");
+                    wmiProcessEndingWatcher = new ManagementEventWatcher("SELECT * FROM __InstanceDeletionEvent WITHIN 0.1 WHERE TargetInstance ISA 'Win32_Process'");
+                    wmiProcessWatcher.EventArrived += (object sender, EventArrivedEventArgs e) =>
+                    {
+                        string str = (string)((ManagementBaseObject)e.NewEvent.Properties["TargetInstance"].Value).Properties["Name"].Value;
+                        Console.WriteLine(string.Format("process {0} created", str));
+                    };
+                    wmiProcessEndingWatcher.EventArrived += new EventArrivedEventHandler((object sender, EventArrivedEventArgs e) => {
+                        string str = (string)((ManagementBaseObject)e.NewEvent.Properties["TargetInstance"].Value).Properties["Name"].Value;
+                        Console.WriteLine(string.Format("process {0} terminated", str));
+                    });
+                    wmiProcessWatcher.Start();
+                    wmiProcessEndingWatcher.Start();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
+            Console.WriteLine("press any key to exit");
+            if (wmiProcessWatcher != null)
+                wmiProcessWatcher.Stop();
+            if (wmiProcessEndingWatcher != null)
+                wmiProcessEndingWatcher.Stop();
+            Console.ReadKey();
+        }
+        #endregion
+
         #region 測試Parallel : 和一般for跑迴圈比較起來還比較慢,用途看來是為了能夠利用多核心,要開工作管理員來看了
         static void Main11(string[] args)
         {
-            string testStr = "heLLo, worLd";
+            Console.WriteLine("Start Parallel");
+            //用黑大的測試看來比較準 http://blog.darkthread.net/blogs/darkthreadtw/archive/2010/01/03/multicore-2.aspx
+            int MAX_COUNT = 5000 * 10000;
             Stopwatch timer = new Stopwatch();
-            Console.WriteLine("Start Parallel Function ...");
-            timer.Start();
-            Parallel.ForEach(testStr, (c, state, i) =>
+            for (int round = 0; round < 10; round++)
             {
-                Console.WriteLine(i + ":" + c.ToString());
-            });
-            timer.Stop();
-            Console.WriteLine("Parallel TimeSpend: {0}ms", timer.ElapsedMilliseconds);
+                timer.Restart();
+                for (int i = 0; i < MAX_COUNT; i++)
+                {
+                    double d = Math.Log10(Convert.ToDouble(i));
+                }
+                timer.Stop();
+                Console.WriteLine("循序處理 = {0:N0}ms", timer.ElapsedMilliseconds);
+                timer.Restart();
+
+                int WORK_COUNT = 4;
+                Thread[] workers = new Thread[WORK_COUNT];
+                int jobCountPerWork = MAX_COUNT / WORK_COUNT;
+                for (int i = 0; i < WORK_COUNT; i++)
+                {
+                    //將全部工作切成WORKER_COUNT份，
+                    //分給WORKER_COUNT個Thread執行
+                    int st = jobCountPerWork * i;
+                    int ed = jobCountPerWork * (i + 1);
+                    if (ed > MAX_COUNT)
+                        ed = MAX_COUNT;
+                    workers[i] = new Thread(() =>
+                    {
+                        //Console.WriteLine("LOOP: {0:N0} - {1:N0}", st, ed);
+                        for (int j = st; j < ed; j++)
+                        {
+                            double d = Math.Log10(Convert.ToDouble(j));
+                        }
+                    });
+                    workers[i].Start();
+                }
+                for (int i = 0; i < WORK_COUNT; i++)
+                    workers[i].Join();
+                timer.Stop();
+                Console.WriteLine("平行處理[{1}] = {0:N0}ms", timer.ElapsedMilliseconds, WORK_COUNT);
+                timer.Restart();
+                Parallel.For(0, MAX_COUNT, (int j) =>
+                {
+                    double d = Math.Log10(Convert.ToDouble(j));
+                });
+                timer.Stop();
+                Console.WriteLine("平行處理2 = {0:N0}ms", timer.ElapsedMilliseconds);
+            }
+            /****************************************************************************/
+            //int length = Int32.MaxValue;
+            //ref:http://blog.lyhdev.com/2010/12/c-task-parallel-library.html
+            //循序處理的寫法:I7 4核心測試發現CPU消耗根本只有1%
+            //for (int i = 0; i < length / 2; i++)
+            //{
+            //    Math.Sqrt(i);
+            //    Console.WriteLine(Math.Sqrt(i));
+            //}
+            //平行處理的寫法:I7 4核心測試發現8個執行緒都可以達到100%, 程序確實消耗80~90%
+            //Parallel.For(0, length / 2, (i) =>
+            //{
+            //    Console.WriteLine(Math.Sqrt(i));
+            //});
+            /*****************************************************************************************/
+            //string testStr = "heLLo, worLd";
+            //Stopwatch timer = new Stopwatch();
+            //Console.WriteLine("Start Parallel Function ...");
+            //timer.Start();
+            ////c:每個char , state:ParallelLoopState Object , i:index
+            //Parallel.ForEach(testStr, (c, state, i) =>
+            //{
+            //    if (c.Equals('w')) { state.Stop(); }
+            //    Console.WriteLine(i + ":" + c.ToString() + ":" + state.IsStopped);
+            //});
+            //timer.Stop();
+            //Console.WriteLine("Parallel TimeSpend: {0}ms", timer.ElapsedMilliseconds);
             //timer.Restart();
             //for (int i = 0; i < testStr.Length; i++)
             //{
@@ -37,7 +145,7 @@ namespace Test_Func
             //}
             //timer.Stop();
             //Console.WriteLine("For TimeSpend: {0}ms", timer.ElapsedMilliseconds);
-            Console.WriteLine("End Test ...");
+            //Console.WriteLine("End Test ...");
             Console.ReadKey();
         }
         #endregion
