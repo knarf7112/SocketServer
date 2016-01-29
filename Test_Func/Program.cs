@@ -19,6 +19,11 @@ namespace Test_Func
 {
     class Program
     {
+        static void Main(string[] args)
+        {
+
+        }
+
         #region 簡易偵測Windows系統中所有應用程式的啟動與結束
         //想偵測Windows系統中所有應用程式的啟動與結束
         //ref:https://dotblogs.com.tw/code6421/2015/06/02/151461
@@ -151,7 +156,7 @@ namespace Test_Func
         #endregion
 
         #region 測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
-        static void Main(string[] args)
+        static void Main10(string[] args)
         {
             for(var i = 0; i < args.Length;i++)
             {
