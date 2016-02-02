@@ -21,7 +21,13 @@ namespace Test_Func
     {
         static void Main(string[] args)
         {
-
+            SocketProxy s2 = new SocketProxy();
+            s2.AcceptConnect();
+            Console.WriteLine("End...");
+            Console.ReadKey();
+            var ips = Dns.GetHostAddresses("127.0.0.1");
+            string randing = (" ").PadLeft(12);
+            Console.WriteLine(randing.Length);
         }
 
         #region 簡易偵測Windows系統中所有應用程式的啟動與結束

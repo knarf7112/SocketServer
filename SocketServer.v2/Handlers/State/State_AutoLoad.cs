@@ -176,6 +176,7 @@ namespace SocketServer.v2.Handlers.State
         {
             log.Debug(m => m("7.轉換後台Response物件並建立MAC並轉成Response Byte[]"));
             byte[] rspResult = new byte[request.Length];
+            string rrn = (" ").PadLeft(12);
             Buffer.BlockCopy(request, 0, rspResult, 0, request.Length);//
 
             
@@ -184,7 +185,11 @@ namespace SocketServer.v2.Handlers.State
             msgUtility.SetStr(response.AL2POS_RC, rspResult, "ReturnCode");
             msgUtility.SetStr(response.AL2POS_SN, rspResult, "CenterSeqNo");
             msgUtility.SetStr(this.amount, rspResult, "Amount");
-
+            if (!String.IsNullOrEmpty(response.AL_RRN))
+            {
+                rrn = response.AL_RRN;
+            }
+            msgUtility.SetStr(rrn, rspResult, "Rrn");
             msgUtility.SetStr(this.transDateTime, rspResult, "TransDateTime");
             //是否產生mac
             if (doMAC)

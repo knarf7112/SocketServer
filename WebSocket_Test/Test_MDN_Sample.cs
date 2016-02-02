@@ -34,14 +34,31 @@ namespace WebSocket_Test
             //但是如果我在下面加一個參考,雖然Block在ReadLine那邊,但因為仍被參考,所以t不會被GC當垃圾丟掉
         }
         //****************************************************************************
-
-
+        /* Client端 直接用console測試
+         * 
+         * var url = "ws://xxx.xx.xxx.xx:612";
+         * var ws = new WebSocket(url);
+           ws.onopen = function(){
+                console.log('connected...');
+           };
+           var receivedata;
+           ws.onmessage = function(e){
+                receivedata = e.data;
+                console.log('接收到:' + receivedata );
+           };
+           ws.onclose = function(){
+                console.log('closed ...');
+           };
+           ws.onerror = function(){
+                console.log('error');
+           };
+        */
         //****************************************************************************
         //ref:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_server
         static void Main(string[] args)
         {            
             TcpListener server = new TcpListener(IPAddress.Any, 612);
-
+            
             server.Start();
             Console.WriteLine("Server has started on 127.0.0.1:80.{0}Waiting for a connection...", Environment.NewLine);
 
@@ -92,7 +109,7 @@ namespace WebSocket_Test
             Console.ReadKey();
             byte[] buffer2 = new byte[0x1000];
             Console.Out.WriteLine("等待資料");
-            int readCnt2 = ns.Read(buffer2, 0, buffer2.Length);//不會Block  原因目前不明
+            int readCnt2 = ns.Read(buffer2, 0, buffer2.Length);//會Block  等待client send msg
             Array.Resize(ref buffer2,readCnt2);
             byte[] clientData = DecryptClientData(buffer2);
             string readData2 = Encoding.UTF8.GetString(clientData, 0, clientData.Length);
@@ -100,30 +117,24 @@ namespace WebSocket_Test
             //*****************************************************
             Console.ReadKey();
             //ref: https://tools.ietf.org/html/rfc6455#section-5.1
+            //ref2:http://limitedcode.blogspot.tw/2014/05/websocket-websocket-server-console.html
             string sendMsg = "Test123";//TODO...Server送出到前端WebSocket失敗
             byte[] sendMsgBytes = Encoding.UTF8.GetBytes(sendMsg);
-
-            byte fin = 0x89;
-            byte dataLength = (byte)(128 + sendMsg.Length);
-            byte[] key = new byte[] { 1, 2, 3, 4 };
-            byte[] encData = DoXor(sendMsgBytes, key);
-            //byte[] totalData = new byte[1 + 1 + key.Length + encData.Length];
-
-            byte[] totalData = ConBineData(fin, dataLength, key, encData);
-            
-
-            Console.Out.WriteLine("送出訊息:{0}", sendMsg);
-            ns.Write(totalData, 0, totalData.Length);
-            Console.Out.WriteLine("送出訊息:完畢");
-            //*****************************************************
-
+            List<byte> dataSend = new List<byte>();
+            dataSend.Add(0x81);//data < 126 
+            dataSend.Add((byte)sendMsgBytes.Length);//data length
+            dataSend.AddRange(sendMsgBytes);//data content
+            ns.Write(dataSend.ToArray(), 0, dataSend.Count);
+            Console.WriteLine("送出伺服端的Msg:{0}", sendMsg);
+            Console.ReadKey();
+            /*****************************************************************/
             Console.Out.WriteLine("按任意鍵結束 ...");
             Console.ReadKey();
             ns.Close();
             Console.Out.WriteLine("GG...............");
             Console.ReadKey();
         }
-        //Server端送出Msg作格式處理
+        //Server端送出Msg作格式處理// 看起來不用做XOR -2016-01-29
         static byte[] DoXor(byte[] data,byte[] key)
         {
             byte[] result = new byte[data.Length];
