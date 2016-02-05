@@ -41,7 +41,7 @@ namespace SocketServer.v2
             IClientRequestHandler client = manager.GetInstance();
             Console.ReadKey();
             */
-            AsyncMultiSocketServer s1 = new AsyncMultiSocketServer(6114, "AutoLoad");
+            AsyncMultiSocketServer s1 = new AsyncMultiSocketServer(8115, "AutoLoad");
             Console.WriteLine("Main Thread Id:{0}  background:{1}", Thread.CurrentThread.ManagedThreadId, Thread.CurrentThread.IsBackground.ToString());
             s1.Start();
             //

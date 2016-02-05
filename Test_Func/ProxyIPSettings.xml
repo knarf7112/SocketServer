@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <IPEndPoint Id="1" Description="...">
+    <Origin>
+        <IP>127.0.0.1</IP>
+        <Port>811</Port>
+        <SendTimeout Description="ms">2000</SendTimeout>
+        <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+      </Origin>
+    <Origin>
+        <IP>127.0.0.2</IP>
+        <Port>812</Port>
+        <SendTimeout Description="ms">2000</SendTimeout>
+        <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+      </Origin>
+    <Destination>
+      <IP>127.0.1.1</IP>
+      <Port>813</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+    <Destination>
+      <IP>127.0.1.2</IP>
+      <Port>814</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="2" Description="...">
+    <Origin>
+        <IP>127.0.2.1</IP>
+        <Port>911</Port>
+        <SendTimeout Description="ms">3000</SendTimeout>
+        <ReceiveTimeout Description="ms">3000</ReceiveTimeout>
+      </Origin>
+    <Origin>
+        <IP>127.0.2.2</IP>
+        <Port>912</Port>
+        <SendTimeout Description="ms">2000</SendTimeout>
+        <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+      </Origin>
+    <Destination>
+        <IP>127.0.3.1</IP>
+        <Port>913</Port>
+        <SendTimeout Description="ms">2000</SendTimeout>
+        <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+      </Destination>
+    <Destination>
+        <IP>127.0.3.2</IP>
+        <Port>914</Port>
+        <SendTimeout Description="ms">2000</SendTimeout>
+        <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+      </Destination>
+  </IPEndPoint>
+</root>

@@ -14,12 +14,152 @@ using Test_Func.Test;
 using System.IO;
 // need using =>Main12
 using System.Management;
+using System.Xml.Linq;
+using System.Collections.Concurrent;
 
 namespace Test_Func
 {
     class Program
     {
+        #region 讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>>
+
         static void Main(string[] args)
+        {
+            string path = AppDomain.CurrentDomain.BaseDirectory + @"\ProxyIPSettings.xml";
+            IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> dics = Load(path);
+            //create a test endpoint
+            //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 811);
+            EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.0.0.2"), 812);
+            //search destination list from origin address at dictionary
+            IList<IPEndPoint> list = dics.FirstOrDefault(n => n.Key.Contains(ipTest)).Value;
+            Console.ReadKey();
+        }
+        public static IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> Load(string filePath)
+        {
+            IDictionary<IList<IPEndPoint>, IList<IPEndPoint>> ipEndPointDic = new ConcurrentDictionary<IList<IPEndPoint>, IList<IPEndPoint>>();
+            //load xml file
+            XDocument doc = XDocument.Load(filePath, LoadOptions.None);
+
+            IEnumerable<XElement> ipEndPointList = doc.Root.Elements("IPEndPoint");
+            IEnumerable<XElement> originNodes = null;
+            IEnumerable<XElement> destinationNodes = null;
+            //loop all Tag that name is IPEndPoint
+            foreach (var ipEndPointNode in ipEndPointList)
+            {
+                if (ipEndPointNode.HasElements)
+                {
+                    //get this endpoint inner settings
+                    //loading origin ip list setting
+                    originNodes = ipEndPointNode.Elements("Origin");
+                    //loading destination ip list setting
+                    destinationNodes = ipEndPointNode.Elements("Destination");
+                    //parse origin ip list setting
+                    IList<IPEndPoint> originlist = GetIpEndPointList(originNodes);
+                    //parse destination ip list setting
+                    IList<IPEndPoint> destinationlist = GetIpEndPointList(destinationNodes);
+                    //insert to dictionary
+                    ipEndPointDic.Add(originlist, destinationlist);
+                }
+            }
+            return ipEndPointDic;
+        }
+
+        protected static IList<IPEndPoint> GetIpEndPointList(IEnumerable<XElement> firstNodeGroups)
+        {
+            IList<IPEndPoint> list = new List<IPEndPoint>();
+            IPEndPoint UrlInfo = null;
+            if (firstNodeGroups.Count() == 0)
+            {
+                //throw new InvalidOperationException("Origin未設定");
+            }
+            //第一層(List)
+            foreach (var node in firstNodeGroups)
+            {
+
+                IEnumerable<XElement> childNodes = node.Elements();
+                string ip = string.Empty;
+                int port = 0;
+                //第二層(IPEndPoint)
+                foreach (var item in childNodes)
+                {
+                    switch (item.Name.LocalName.ToUpper())
+                    {
+                        case "IP":
+                            ip = item.Value;
+                            break;
+                        case "PORT":
+                            Int32.TryParse(item.Value, out port);
+                            break;
+                        case "SENDTIMEOUT":
+                            break;
+                        case "RECEIVETIMEOUT":
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(ip) && !port.Equals(0))
+                {
+                    UrlInfo = new IPEndPoint(IPAddress.Parse(ip), port);
+                    list.Add(UrlInfo);
+                }
+            }
+            return list;
+        }
+        #endregion
+
+        #region 依據附檔名遞迴搜尋指定的目錄
+        static void Main14(string[] args)
+        {
+            //依據附檔名搜尋此目錄下的所有符合的檔案
+            var native = System.IO.Directory.GetFiles(@"D:\DL", "*.jpg", SearchOption.AllDirectories);
+            int max = native.Length;
+            int count = 0;
+            string[] list = DirectorySearch(@"D:\DL", ".jpg");
+            //以下是筆對是否兩邊一樣
+            foreach (var item in native)
+            {
+                foreach (var my in list)
+                {
+                    if (item.Equals(my))
+                    {
+                        count += 1;
+                        break;
+                    }
+                }
+            }
+            Console.WriteLine("使用原生的總數:{0}, 自己算完的總數:{1}, Match的總數:{2}", max, list.Length, count);
+            Console.ReadKey();
+        }
+        //根據附檔名做目錄遞迴搜尋(PS:做爽的練習一下遞迴) 原生直接用Directory.GetFiles(@"D:\DL", "*.pdf", SearchOption.AllDirectories);
+        public static string[] DirectorySearch(string rootDirectory, params string[] extentions)
+        {
+            string[] files = new string[0];
+            string root = rootDirectory;
+            string[] innerFiles = new string[0];
+            string[] folderList = System.IO.Directory.GetDirectories(root, "*", System.IO.SearchOption.TopDirectoryOnly);
+            //找當前目錄下的所有附檔名符合的檔案
+            foreach (var extention in extentions)
+            {
+                files = System.IO.Directory.GetFiles(root, ("*" + extention), System.IO.SearchOption.TopDirectoryOnly);
+            }
+            //列舉出當前目錄下的所有第一層folder列表
+            foreach (var dir in folderList)
+            {
+                //進入遞迴(DFS)
+                innerFiles = DirectorySearch(dir, extentions);
+                //跑完遞迴後把結果並加起來
+                foreach (var extention in extentions)
+                {
+                    files = files.Concat(innerFiles).ToArray();
+                }
+            }
+            return files;
+        }
+        #endregion
+
+        #region 測試ProxySocket用的,要另外開2個nmap(一個當destination server,一個當origin client =>1.client要打proxy =>2.proxy轉給server =>3.server回傳 =>4.proxy回傳response)
+        static void Main13(string[] args)
         {
             SocketProxy s2 = new SocketProxy();
             s2.AcceptConnect();
@@ -29,6 +169,7 @@ namespace Test_Func
             string randing = (" ").PadLeft(12);
             Console.WriteLine(randing.Length);
         }
+        #endregion
 
         #region 簡易偵測Windows系統中所有應用程式的啟動與結束
         //想偵測Windows系統中所有應用程式的啟動與結束
