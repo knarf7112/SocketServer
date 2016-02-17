@@ -21,15 +21,62 @@ namespace Test_Func
 {
     class Program
     {
-        #region 讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>>
+        #region 16.測試async await 何時開分岔的? 結果:確定是從await之後才開岔產生另一個thread的
+        //ref:http://huan-lin.blogspot.com/2016/01/async-and-await.html
+        static void Main16(string[] args)
+        {
+            byte[] a = new byte[] { 10, 20, 30 };
+            byte[] b = new byte[] { 1, 2, 3 };
+            byte[] c = null;
 
-        static void Main(string[] args)
+            List<byte[]> list = new List<byte[]>();
+            list.Add(c); list.Add(a); list.Add(b); list.Add(a); list.Add(b); list.Add(c); list.Add(b); list.Add(c); list.Add(a); list.Add(a);
+            //var aa = list.Where(n => n != null).GroupBy(n => n);
+            var aa = from i in list
+                     group i by (list.Where( n=>n!=null)) into g1
+                     select new { g = g1 };
+            
+            
+            /**************************************************************/
+            Console.WriteLine("1." + Thread.CurrentThread.ManagedThreadId);
+            Task.Run(() =>
+            {
+                Console.WriteLine("3." + Thread.CurrentThread.ManagedThreadId);
+                var result = get();
+                result.ContinueWith(m => Console.WriteLine("4.5." + Thread.CurrentThread.ManagedThreadId + ":" + m.Result));
+                Console.WriteLine("5." + Thread.CurrentThread.ManagedThreadId);
+            });
+            Console.WriteLine("2." + Thread.CurrentThread.ManagedThreadId);
+            Console.ReadKey();
+        }
+
+        //static 
+
+        static async Task<string> get()
+        {
+            Console.WriteLine("4:" + Thread.CurrentThread.ManagedThreadId);
+            var qq = await rr();
+            Console.WriteLine(qq + ":" + Thread.CurrentThread.ManagedThreadId);
+            return qq;
+        }
+
+        static async Task<string> rr()
+        {
+            var ww = await Task.FromResult("test 123");
+            Thread.Sleep(5000);
+            return ww;
+        }
+        #endregion
+
+        #region 15.讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>>
+
+        static void Main15(string[] args)
         {
             string path = AppDomain.CurrentDomain.BaseDirectory + @"\ProxyIPSettings.xml";
             IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> dics = Load(path);
             //create a test endpoint
             //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 811);
-            EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.0.0.2"), 812);
+            EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.20.0.2"), 812);
             //search destination list from origin address at dictionary
             IList<IPEndPoint> list = dics.FirstOrDefault(n => n.Key.Contains(ipTest)).Value;
             Console.ReadKey();
@@ -54,9 +101,9 @@ namespace Test_Func
                     //loading destination ip list setting
                     destinationNodes = ipEndPointNode.Elements("Destination");
                     //parse origin ip list setting
-                    IList<IPEndPoint> originlist = GetIpEndPointList(originNodes);
+                    IList<IPEndPoint> originlist = GetIpEndPointList(originNodes, "Origin");
                     //parse destination ip list setting
-                    IList<IPEndPoint> destinationlist = GetIpEndPointList(destinationNodes);
+                    IList<IPEndPoint> destinationlist = GetIpEndPointList(destinationNodes,"Destination");
                     //insert to dictionary
                     ipEndPointDic.Add(originlist, destinationlist);
                 }
@@ -64,13 +111,13 @@ namespace Test_Func
             return ipEndPointDic;
         }
 
-        protected static IList<IPEndPoint> GetIpEndPointList(IEnumerable<XElement> firstNodeGroups)
+        protected static IList<IPEndPoint> GetIpEndPointList(IEnumerable<XElement> firstNodeGroups,string groupName)
         {
             IList<IPEndPoint> list = new List<IPEndPoint>();
             IPEndPoint UrlInfo = null;
             if (firstNodeGroups.Count() == 0)
             {
-                //throw new InvalidOperationException("Origin未設定");
+                throw new InvalidOperationException(groupName + "無設定資料");
             }
             //第一層(List)
             foreach (var node in firstNodeGroups)
@@ -108,7 +155,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 依據附檔名遞迴搜尋指定的目錄
+        #region 14.依據附檔名遞迴搜尋指定的目錄
         static void Main14(string[] args)
         {
             //依據附檔名搜尋此目錄下的所有符合的檔案
@@ -158,11 +205,12 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試ProxySocket用的,要另外開2個nmap(一個當destination server,一個當origin client =>1.client要打proxy =>2.proxy轉給server =>3.server回傳 =>4.proxy回傳response)
-        static void Main13(string[] args)
+        #region 13.測試ProxySocket用的,要另外開2個nmap(一個當destination server,一個當origin client =>1.client要打proxy =>2.proxy轉給server =>3.server回傳 =>4.proxy回傳response)
+        static void Main(string[] args)
         {
-            SocketProxy s2 = new SocketProxy();
-            s2.AcceptConnect();
+            
+            SocketProxy s2 = new SocketProxy(8112);
+            s2.Start();
             Console.WriteLine("End...");
             Console.ReadKey();
             var ips = Dns.GetHostAddresses("127.0.0.1");
@@ -171,7 +219,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 簡易偵測Windows系統中所有應用程式的啟動與結束
+        #region 12.簡易偵測Windows系統中所有應用程式的啟動與結束
         //想偵測Windows系統中所有應用程式的啟動與結束
         //ref:https://dotblogs.com.tw/code6421/2015/06/02/151461
         static void Main12()
@@ -212,7 +260,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試Parallel : 和一般for跑迴圈比較起來還比較慢,用途看來是為了能夠利用多核心,要開工作管理員來看了
+        #region 11.測試Parallel : 和一般for跑迴圈比較起來還比較慢,用途看來是為了能夠利用多核心,要開工作管理員來看了
         static void Main11(string[] args)
         {
             Console.WriteLine("Start Parallel");
@@ -302,7 +350,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
+        #region 10.測試Client Socket 的簡易發送訊息:有使用自己作的SocketClient.Domain.SocketClient的DLL(記得加入參考)
         static void Main10(string[] args)
         {
             for(var i = 0; i < args.Length;i++)
@@ -365,7 +413,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試靜態成員是否只跑一次
+        #region 9.測試靜態成員是否只跑一次
         static void Main9()
         {
             TestClass1.AddStr();
@@ -377,7 +425,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 比較timer並確認是否都是new thread出來執行的(確認current thread Id)
+        #region 8.比較timer並確認是否都是new thread出來執行的(確認current thread Id)
         static void Main8()
         {
             Console.WriteLine("開始跑太碼...thread Id:{0}", Thread.CurrentThread.ManagedThreadId);
@@ -403,7 +451,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔,並轉各種格式字串轉成UriBuilder物件,方便取host和port和protocal名稱
+        #region 7.BeginXXX的方式測試AsyncMultiSocketServer.v2的執行檔,並轉各種格式字串轉成UriBuilder物件,方便取host和port和protocal名稱
         static void Main7()
         {
             //測試uri轉換格式
@@ -479,7 +527,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試Debugger物件與Enum變數用Reflection取値(TODO ...)
+        #region 6.測試Debugger物件與Enum變數用Reflection取値(TODO ...)
         //TODO: 使用TODO list來提醒未完成工作 -->檢視-->工作清單-->下拉選單選註解-->會出現TODO相關的所有列表
         static void Main6()
         {
@@ -507,7 +555,7 @@ namespace Test_Func
         }
         #endregion
         
-        #region 測試static共用於整個namespace下的那個類別
+        #region 5.測試static共用於整個namespace下的那個類別
         static void Main5()
         {
             ClsTest2 t1 = new ClsTest2();
@@ -525,7 +573,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試沒lock時的multi thread來增加數據到List內,假設同時新增數據會不會衝突,不過測試起來都沒出現異常,可能寫入數據太小
+        #region 4.測試沒lock時的multi thread來增加數據到List內,假設同時新增數據會不會衝突,不過測試起來都沒出現異常,可能寫入數據太小
         static void Main4()
         {
             Class1 c1 = new Class1();
@@ -554,7 +602,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試Async Await 使用方式
+        #region 3.測試Async Await 使用方式
         static void Main3(string[] args)
         {
             Console.WriteLine("Main:" + Thread.CurrentThread.ManagedThreadId);
@@ -593,7 +641,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試Task後的ContinueWith要做啥
+        #region 2.測試Task後的ContinueWith要做啥
         static void Main2(string[] arg)
         {
             //var qq = SynchronizationContext.Current;
@@ -635,7 +683,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 測試delegate是否為不同Thread去執行:結論delegate不會開thread去跑
+        #region 1.測試delegate是否為不同Thread去執行:結論delegate不會開thread去跑
         static void Main1(string[] args)
         {
             /*

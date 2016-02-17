@@ -52,4 +52,24 @@
         <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
       </Destination>
   </IPEndPoint>
+<IPEndPoint Id="3" Description="Test">
+    <Origin>
+        <IP>127.0.0.1</IP>
+        <Port>*</Port>
+        <SendTimeout Description="ms">2000</SendTimeout>
+        <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1102</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1102</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
 </root>

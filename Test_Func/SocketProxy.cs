@@ -13,6 +13,7 @@ using System.Xml.Linq;
 
 namespace Test_Func
 {
+    public delegate void WriteLog(Enum logLevel,string Msg);
     /// <summary>
     /// Socket Proxy Class
     /// </summary>
@@ -36,54 +37,71 @@ namespace Test_Func
         /// Proxy Server 端點資訊
         /// </summary>
         private IPEndPoint ServerIP { get; set; }
+        /// <summary>
+        /// listen port
+        /// </summary>
+        private int ListenPort { get; set; }
 
         private IDictionary<IList<IPEndPoint>, IList<IPEndPoint>> proxyList;
+        /// <summary>
+        /// 委派給外部指定寫log的方法指標,若無指定就用Console寫
+        /// </summary>
+        public WriteLog OnWriteLog { get; set; }
 
-        public SocketProxy()
+        public SocketProxy(int listenPort)
         {
-            this.InitProperties();
+            this.ListenPort = listenPort;
+            this.Init();
         }
 
-        public SocketProxy(int listenPort, string remoteIP, int remotePort)
+
+        private void Init()
         {
-            //解析遠端,無法解析會拋異常
-            IPAddress[] IPs = Dns.GetHostEntry(IPAddress.Parse(remoteIP)).AddressList;
-            foreach (IPAddress ip in IPs)
-            {
-                Console.WriteLine("Dns Resolve's IPAddress: {0}", ip.ToString());
-            }
-            this.RemoteIP = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
-            this.ServerIP = new IPEndPoint(IPAddress.Any, listenPort);
-            this.mainSck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            this.acceptDone = new ManualResetEvent(false);
-            this.proxyList = new ConcurrentDictionary<IList<IPEndPoint>, IList<IPEndPoint>>();
-            this.KeepServerAlive = true;
-        }
-        private void InitProperties()
-        {
-            this.ServerIP = new IPEndPoint(IPAddress.Any, 999);
-            this.RemoteIP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 612);
+            this.ServerIP = new IPEndPoint(IPAddress.Any, this.ListenPort);
             this.mainSck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             this.acceptDone = new ManualResetEvent(false);
             this.KeepServerAlive = true;
+            string path = AppDomain.CurrentDomain.BaseDirectory + @"\ProxyIPSettings.xml";
+            this.proxyList = this.LoadSettings(path);
+            //會連到本機設定的Dns問,用host問並取回IP,無法解析會拋異常
+            //IPAddress[] IPs = Dns.GetHostEntry(IPAddress.Parse(remoteIP)).AddressList;
+            //foreach (IPAddress ip in IPs)
+            //{
+            //    Console.WriteLine("Dns Resolve's IPAddress: {0}", ip.ToString());
+            //}
         }
-        public void AcceptConnect()
+
+        /// <summary>
+        /// 背景啟動Proxy
+        /// </summary>
+        public void Start()
+        {
+            Task.Run(()=>{
+                this.Run();
+            });
+        }
+
+        /// <summary>
+        /// 啟動Proxy
+        /// </summary>
+        protected virtual void Run()
         {
             if (this.mainSck == null)
             {
-                this.InitProperties();
+                this.Init();
             }
             this.mainSck.Bind(this.ServerIP);
             this.mainSck.Listen(3000);
-            Console.WriteLine("Start Server ... Listen Port:" + this.ServerIP.Port);
+            this.WriteLog(LogLevel.DEBUG,"Start Server ... Listen Port:" + this.ServerIP.Port);
             do{
                 this.acceptDone.Reset();
                 this.mainSck.BeginAccept(this.AcceptCallback, this.mainSck);
                 this.acceptDone.WaitOne();
-                Console.WriteLine("Next Waiting for ...");
+                Console.WriteLine("Accept a client ...");
             }
             while(this.KeepServerAlive);
         }
+
         /// <summary>
         /// async accept a client 
         /// </summary>
@@ -99,15 +117,21 @@ namespace Test_Func
                     //來源端逾時
                     client.SendTimeout = 6000;
                     client.ReceiveTimeout = 6000;
-                    Console.WriteLine("Remote Clinet: " + client.RemoteEndPoint.ToString());
+                    IList<IPEndPoint> destinationList = null;
+                    Console.WriteLine("Origin IP: " + client.RemoteEndPoint.ToString());
                     try
                     {
                         byte[] response = null;
                         byte[] request = null;
-                        Console.WriteLine("Proxy要連的遠端:" + this.RemoteIP.ToString());
+                        destinationList = GetDestinationList((IPEndPoint)client.RemoteEndPoint);
+                        if (destinationList == null)
+                        {
+                            throw new Exception("[來源:" + client.RemoteEndPoint.ToString() + "]字典內查無遠端設定");
+                        }
+                        //Console.WriteLine("Proxy要連的遠端:" + this.RemoteIP.ToString());
                         //以同步方式=>1.取得來源端資料=>2.連到目的端並交換資料=>3.回送目的端回傳資料
                         if (this.ReceiveData(client, out request) &&
-                            this.SocketClient(this.RemoteIP, request, out response) &&
+                            this.GetResponse(destinationList, request, out response) &&
                             this.SendData(client, response))
                         {
                             Console.WriteLine("Response Complete: {0}", BitConverter.ToString(response).Replace("-", ""));
@@ -184,13 +208,15 @@ namespace Test_Func
 
         }
         /// <summary>
-        /// 連線目的端並送出請求與取得回應
+        /// 用Socket送出request資料至指定的server並取得response
         /// </summary>
         /// <param name="remoteIp">遠端端點資訊</param>
         /// <param name="request">請求資料</param>
         /// <param name="response">回應資料</param>
+        /// <param name="sendTimeout">default: 3 second</param>
+        /// <param name="receiveTimeout">default: 3 second</param>
         /// <returns>true:目的端有回應/false:目的端異常</returns>
-        protected virtual bool SocketClient(IPEndPoint remoteIp,byte[] request,out byte[] response)
+        protected virtual bool GetResponse(IPEndPoint remoteIp, byte[] request, out byte[] response, int sendTimeout = 3000, int receiveTimeout = 30000)
         {
             response = null;
             Socket client = null;
@@ -199,8 +225,8 @@ namespace Test_Func
                 using (client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                 {
                     //目的端逾時
-                    client.ReceiveTimeout = 3000;
-                    client.SendTimeout = 3000;
+                    client.ReceiveTimeout = sendTimeout;
+                    client.SendTimeout = receiveTimeout;
                     //connect to destination
                     client.Connect(remoteIp);
                     //send request
@@ -226,34 +252,214 @@ namespace Test_Func
                 return false;
             }
         }
-        //要載入設定的資訊檔 TODO...
-        public void LoadSetting(string url)
+
+        protected virtual void WriteLog(Enum logLevel,string msg)
         {
-            string fullPath = url;
-            if (!System.IO.File.Exists(fullPath))
+            if (this.OnWriteLog != null)
             {
-                fullPath = AppDomain.CurrentDomain.BaseDirectory;
-                
+                this.OnWriteLog.Invoke(logLevel, msg);
             }
-            XDocument doc = XDocument.Load(url, LoadOptions.None);
-            var qq = doc.Root; 
-            doc.Elements("");
+            else
+            {
+                Console.WriteLine(msg);
+            }
         }
 
-
-        //打算依據來源IP來找目的IP列表,並且平行發送訊息,只要有一個有回應就可以了 TODO...
-        private IList<IPEndPoint> GetDestinationList(IPEndPoint origin)
+        #region 取得遠端列表的(全部/任一)回應
+        /// <summary>
+        /// 用Socket取得單一遠端的回應
+        /// </summary>
+        /// <param name="remoteIp">指定的server端設定</param>
+        /// <param name="request">request data</param>
+        /// <param name="sendTimeout">default: 3 second</param>
+        /// <param name="receiveTimeout">default: 3 second</param>
+        /// <returns>response data</returns>
+        protected virtual byte[] GetResponse(IPEndPoint remoteIp, byte[] request,int sendTimeout = 3000,int receiveTimeout = 30000)
         {
-            var qwe = this.proxyList.AsParallel().First(x => x.Key.Contains(origin)).Value;
-            return qwe;
+            byte[] response = null;
+            Socket client = null;
+            try
+            {
+                Console.WriteLine("Destination IP:{0}", remoteIp.ToString());
+                using (client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    //目的端逾時
+                    client.ReceiveTimeout = sendTimeout;
+                    client.SendTimeout = receiveTimeout;
+                    //connect to destination
+                    client.Connect(remoteIp);
+                    //send request
+                    this.SendData(client, request);
+                    //get response
+                    this.ReceiveData(client, out response);
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                client = null; 
+                Console.WriteLine("Proxy連線遠端或送出資料異常[{0}]: {1}", client.RemoteEndPoint.ToString(), ex.Message);
+                return response;
+            }
         }
 
+        /// <summary>
+        /// 用Socket取得遠端列表的(全部/任一)回應
+        /// </summary>
+        /// <param name="remoteIpList">遠端目的列表</param>
+        /// <param name="request">request data</param>
+        /// <param name="response">response data</param>
+        /// <param name="waitAll">是否等待所有遠端response</param>
+        /// <param name="sendTimeout">default: 3 second</param>
+        /// <param name="receiveTimeout">default: 3 second</param>
+        /// <returns>true:取得response/false:遠端連線異常</returns>
+        protected virtual bool GetResponse(IList<IPEndPoint> remoteIpList, byte[] request, out byte[] response,bool waitAll = false, int sendTimeout = 3000, int receiveTimeout = 30000)
+        {
+            Queue<Task<byte[]>> resultList = new Queue<Task<byte[]>>();
+            response = null;
+            try
+            {
+                foreach (IPEndPoint dest in remoteIpList)
+                {
+                    //task run
+                    Task<byte[]> task = Task.Run(() => { return GetResponse(dest, request, sendTimeout, receiveTimeout); });
+                    //push in task list
+                    resultList.Enqueue(task);
+                }
+                if (waitAll)
+                {
+                    bool complete = Task.WaitAll(resultList.ToArray(), 50000);//timeout: 50 second
+                    //if need compare all result to do that// if need TODO...
+                    //resultList.GroupBy(n => n.Result)....;
+
+                    //if complete filter result is null and get the first task result
+                    response = complete ? resultList.Where(n => n.Result != null).FirstOrDefault().Result : null;
+                    return complete;
+
+                }
+                else
+                {
+                    int index = Task.WaitAny(resultList.ToArray(), 50000);//tiemout: 50 second
+                    //if anyone is complete use the return index to find task result
+                    response = index.Equals(-1) ? null : resultList.ElementAtOrDefault(index).Result;
+                    return !index.Equals(-1);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[GetResponse]Error:" + ex.Message + Environment.NewLine + ex.StackTrace);
+                return false;
+            }
+        }
+        #endregion
+
+        #region Load Xml File to settings
+        /// <summary>
+        /// 讀取指定路徑的Xml設定檔,轉成來源端列表與目的端列表的字典檔
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public IDictionary<IList<IPEndPoint>, IList<IPEndPoint>> LoadSettings(string filePath)
+        {
+            IDictionary<IList<IPEndPoint>, IList<IPEndPoint>> ipEndPointDic = new ConcurrentDictionary<IList<IPEndPoint>, IList<IPEndPoint>>();
+            //load xml file
+            XDocument doc = XDocument.Load(filePath, LoadOptions.None);
+
+            IEnumerable<XElement> ipEndPointList = doc.Root.Elements("IPEndPoint");
+            IEnumerable<XElement> originNodes = null;
+            IEnumerable<XElement> destinationNodes = null;
+            //loop all Tag that name is IPEndPoint
+            foreach (var ipEndPointNode in ipEndPointList)
+            {
+                if (ipEndPointNode.HasElements)
+                {
+                    //get this endpoint inner settings
+                    //loading origin ip list setting
+                    originNodes = ipEndPointNode.Elements("Origin");
+                    //loading destination ip list setting
+                    destinationNodes = ipEndPointNode.Elements("Destination");
+                    //parse origin ip list setting
+                    IList<IPEndPoint> originlist = GetIpEndPointList(originNodes, "Origin");
+                    //parse destination ip list setting
+                    IList<IPEndPoint> destinationlist = GetIpEndPointList(destinationNodes, "Destination");
+                    //insert to dictionary
+                    ipEndPointDic.Add(originlist, destinationlist);
+                }
+            }
+            return ipEndPointDic;
+        }
+        
+        /// <summary>
+        /// 將指定的XML項目列表轉成IPEndPoint物件列表
+        /// </summary>
+        /// <param name="firstNodeGroups">內含IP和Port標籤的Xml群組元素</param>
+        /// <param name="groupName">群組名稱</param>
+        /// <returns>IPEndPoint列表</returns>
+        protected virtual IList<IPEndPoint> GetIpEndPointList(IEnumerable<XElement> firstNodeGroups, string groupName)
+        {
+            IList<IPEndPoint> list = new List<IPEndPoint>();
+            IPEndPoint UrlInfo = null;
+            if (firstNodeGroups.Count() == 0)
+            {
+                throw new InvalidOperationException(groupName + "無設定資料");
+            }
+            //第一層(List)
+            foreach (var node in firstNodeGroups)
+            {
+
+                IEnumerable<XElement> childNodes = node.Elements();
+                string ip = string.Empty;
+                int port = 0;
+                //第二層(IPEndPoint)
+                foreach (var item in childNodes)
+                {
+                    switch (item.Name.LocalName.ToUpper())
+                    {
+                        case "IP":
+                            ip = item.Value;
+                            break;
+                        case "PORT":
+                            //TODO ... 需寫一個只看IP不檢查Port的方式
+                            Int32.TryParse(item.Value, out port);
+                            break;
+                        case "SENDTIMEOUT":
+                            break;
+                        case "RECEIVETIMEOUT":
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(ip) && !port.Equals(0))
+                {
+                    UrlInfo = new IPEndPoint(IPAddress.Parse(ip), port);
+                    list.Add(UrlInfo);
+                }
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 依據來源IPEndPoint來找設定檔內的目的地列表,無則為null
+        /// </summary>
+        /// <param name="origin">來源IP資訊</param>
+        /// <returns>目的地IP資訊列表</returns>
+        protected IList<IPEndPoint> GetDestinationList(IPEndPoint origin)
+        {
+             return this.proxyList.FirstOrDefault(n => n.Key.Contains(origin)).Value;
+        }
+        #endregion
+
+        /// <summary>
+        /// dispose proxy server
+        /// </summary>
         public void Dispose()
         {
             if (this.acceptDone != null)
             {
-                this.acceptDone.Set();
-                this.KeepServerAlive = false;
+                this.OnWriteLog = null;
+                this.acceptDone.Set();//release blocking thread
+                this.KeepServerAlive = false;// stop loop
                 if (this.mainSck != null)
                 {
                     try
@@ -271,5 +477,16 @@ namespace Test_Func
                 this.acceptDone.Dispose();
             }
         }
+    }
+    //reference log4net Log Level
+    enum LogLevel
+    {
+        ALL,
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR,
+        FATAL,
+        OFF,
     }
 }
