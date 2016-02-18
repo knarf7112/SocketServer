@@ -1,0 +1,353 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TRANSPORT_MANAGER_Lib</name>
+    </assembly>
+    <members>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.COM_TYPE">
+            <summary>
+            通信種別
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.M_KIND">
+            <summary>
+            特店種類
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.MERCHANT_NO">
+            <summary>
+            特約機構代碼
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.STORE_NO">
+            <summary>
+            特店店號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.REG_ID">
+            <summary>
+            POS機號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.READER_ID">
+            <summary>
+            讀卡機序號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.READER_TYPE">
+            <summary>
+            端末種別
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.READER_FLG">
+            <summary>
+            端末區分
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.RW_NO">
+            <summary>
+            RW機號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.RW_TYPE">
+            <summary>
+            RW機種
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.MERC_FLG">
+            <summary>
+            顧客識別子
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.SVC_FLG">
+            <summary>
+            服務守則
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.MACHINE_TYPE">
+            <summary>
+            機器種別
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.ITRW_Request.RETURN_CODE">
+            <summary>
+            Return code
+            </summary>
+        </member>
+        <member name="T:TRANSPORT_MANAGER_Lib.CReturn_Code_Ctless_ST">
+            <summary>
+            非接觸式:設置 Return Code
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CReturn_Code_Ctless_ST.Ap_Error">
+            <summary>
+            890001後台通訊錯誤
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CReturn_Code_Ctless_ST.Invalid_Terminal">
+            <summary>
+            890002查無端末(中心端無該端末相關資訊)
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CReturn_Code_Ctless_ST.Invalid_Store">
+            <summary>
+            890003無效特店
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CReturn_Code_Ctless_ST.Abandon_Terminal">
+            <summary>
+            890004端末已報廢
+            </summary>
+        </member>
+        <member name="T:TRANSPORT_MANAGER_Lib.CTGB_Request">
+            <summary>
+             取水位要求電文類別For web service 
+            Get Balance
+            </summary>  
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.COM_TYPE">
+            <summary>
+            通信種別
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.M_KIND">
+            <summary>
+            特店種類
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.MERCHANT_NO">
+            <summary>
+            特約機構代號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.STORE_NO">
+            <summary>
+            PAM所代號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.REG_ID">
+            <summary>
+            POS編號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.READER_ID">
+            <summary>
+            端末製造編號(20 Bytes)
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.READER_TYPE">
+            <summary>
+            端末種別
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.READER_FLG">
+            <summary>
+            端末區分
+            0001: TRA
+            0002: TRTC
+            0003: KRTC
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.RW_NO">
+            <summary>
+            RW編號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.RW_TYPE">
+            <summary>
+            RW機種
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.MERC_FLG">
+            <summary>
+            顧客識別符號
+            TRA
+            TRC-TRTC
+            KRT-KRTC
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.SVC_FLG">
+            <summary>
+            服務守則(Service Code)
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.MACHINE_TYPE">
+            <summary>
+            機器種別
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.RETURN_CODE">
+            <summary>
+            回應碼
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.POS_SEQNO">
+            <summary>
+            POS交易序號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.CASHIER_NO">
+            <summary>
+            收銀員代號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.LOADING_BAL">
+            <summary>
+            Request: 前次加值日的加值水位餘額
+            Response: 本交易日待Reset水位值
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.LOADING_SEQ">
+            <summary>
+            Request: 前次加值日的加值交易累計次數
+            Response: 本交易日初始加值交易次數值
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.DATETIME">
+            <summary>
+            電文產出日時
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.MAC">
+            <summary>
+            MAC
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.SN">
+            <summary>
+            承認編號
+            </summary>
+        </member>
+        <member name="P:TRANSPORT_MANAGER_Lib.CTGB_Request.Terminal_ID">
+            <summary>
+            Terminal_ID(86+UID)
+            </summary>
+        </member>
+        <member name="T:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request">
+            <summary>
+            取水位要求電文類別 For Socket
+            Get Balance
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.COM_TYPE">
+            <summary>
+            通信種別
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.MERC_FLG">
+            <summary>
+            顧客識別符號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.MERCHANT_ID">
+            <summary>
+            特約機構代號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.STORE_NO">
+            <summary>
+            門市代號/PAM所代號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.REG_ID">
+            <summary>
+            POS機號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.READER_ID">
+            <summary>
+            端末製造編號(20 Bytes)
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.READER_TYPE">
+            <summary>
+            端末種別
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.READER_FLG">
+            <summary>
+            端末區分
+            0001: TRA
+            0002: TRTC
+            0003: KRTC
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.RW_NO">
+            <summary>
+            RW編號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.RW_TYPE">
+            <summary>
+            RW機種
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.SVC_FLG">
+            <summary>
+            服務守則(Service Code)
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.MACHINE_TYPE">
+            <summary>
+            機器種別
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.RETURN_CODE">
+            <summary>
+            回應碼
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.POS_SEQNO">
+            <summary>
+            POS交易序號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.CASHIER_NO">
+            <summary>
+            收銀員代號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.LOADING_BAL">
+            <summary>
+            Request: 前次加值日的加值水位餘額
+            Response: 本交易日待Reset水位值
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.LOADING_SEQ">
+            <summary>
+            Request: 前次加值日的加值交易累計次數
+            Response: 本交易日初始加值交易次數值
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.DATETIME">
+            <summary>
+            電文產出日時
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.MAC">
+            <summary>
+            MAC
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.SN">
+            <summary>
+            承認編號
+            </summary>
+        </member>
+        <member name="F:TRANSPORT_MANAGER_Lib.CTGB_Soc_Request.Terminal_ID">
+            <summary>
+            Terminal_ID(86+UID)
+            </summary>
+        </member>
+        <member name="M:TRANSPORT_MANAGER_Lib.TRANS_MANAGER.#ctor">
+            <summary>
+            建構函式
+            </summary>
+        </member>
+        <member name="M:TRANSPORT_MANAGER_Lib.TRANS_MANAGER.Dispose">
+            <summary>
+            Dispose
+            </summary>
+        </member>
+    </members>
+</doc>
