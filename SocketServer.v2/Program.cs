@@ -27,7 +27,8 @@ namespace SocketServer.v2
             IMac2Manager mac2Manager = ctx["mac2Manager"] as IMac2Manager;
             IHashWorker hashWorker = ctx["hashWorker"] as IHashWorker;
             IMsgUtility msgUtility = ctx["icash2AOLReqMsgUtility"] as IMsgUtility;
-
+            IMsgUtility PAMReqMsgUtility = ctx["icash2PAMReqMsgUtility"] as IMsgUtility;
+            IMsgUtility PAMRespMsgUtility = ctx["icash2PAMRespMsgUtility"] as IMsgUtility;
             Console.ReadKey();
         }
         /**************************************************************************************/
@@ -41,7 +42,8 @@ namespace SocketServer.v2
             IClientRequestHandler client = manager.GetInstance();
             Console.ReadKey();
             */
-            AsyncMultiSocketServer s1 = new AsyncMultiSocketServer(8115, "AutoLoad");
+            //AsyncMultiSocketServer s1 = new AsyncMultiSocketServer(8115, "AutoLoad");
+            AsyncMultiSocketServer s1 = new AsyncMultiSocketServer(8116, "PAMQuota");
             Console.WriteLine("Main Thread Id:{0}  background:{1}", Thread.CurrentThread.ManagedThreadId, Thread.CurrentThread.IsBackground.ToString());
             s1.Start();
             //

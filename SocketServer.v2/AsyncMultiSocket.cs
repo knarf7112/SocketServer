@@ -9,6 +9,9 @@ using Common.Logging;
 
 namespace SocketServer.v2
 {
+    /// <summary>
+    /// 非同步Socket Server v2
+    /// </summary>
     public class AsyncMultiSocketServer : ISocketServer
     {
         #region Field
@@ -20,8 +23,6 @@ namespace SocketServer.v2
         private bool KeepSocketServerAlive;
         //client handler集合的管理者
         private ClientRequestManager clientManager;
-        //Client Count
-        private int clientNo;
         //監聽Port
         private int port;
         //服務名稱
@@ -42,7 +43,7 @@ namespace SocketServer.v2
         /// </summary>
         /// <param name="port">socket listen port</param>
         /// <param name="start">是否直接啟動</param>
-        /// <param name="stateName">要啟動的服務名稱,看ServiceFactory.cs的enum ServiceSelect列表</param>
+        /// <param name="serviceName">要啟動的服務名稱,看ServiceFactory.cs的enum ServiceSelect列表</param>
         /// <param name="listenIP">socket listen ip [null=AnyIP]</param>
         public AsyncMultiSocketServer(int port, bool start, string serviceName, string listenIP = null)
         {
@@ -175,7 +176,6 @@ namespace SocketServer.v2
         private void StartService()
         {
             this.KeepSocketServerAlive = true;
-            this.clientNo = 0;
             //若 Socket 正在工作，則停止
             if (this.mainSocket != null)
             {
@@ -193,15 +193,7 @@ namespace SocketServer.v2
                 do
                 {
                     this.AcceptConnectEvent.Reset();
-                    //目前用ClientManager管理,所以沒用clientNo屬性,需要計算總使用次數就取所有ClientHanlder的UseCount總計
-                    //lock (cLock)
-                    //{
-                    //    if (Int32.MaxValue == this.clientNo)
-                    //    {
-                    //        this.clientNo = 0;
-                    //    }
-                    //    this.clientNo++;
-                    //}
+
                     ClientRequestHandler client = (ClientRequestHandler)this.clientManager.GetInstance();//new ClientRequestHandler(this.clientNo);// (ClientRequestHandler)ClientRequestHandleManager.GetInstance(this.mainSocket);
                     if (client.MainSocket == null)
                     {

@@ -9,8 +9,6 @@ namespace SocketServer.v2.Handlers
 {
     public abstract class AbsClientRequestHandler : IClientRequestHandler
     {
-
-       
         private static readonly ILog log = LogManager.GetLogger(typeof(AbsClientRequestHandler));
         #region Static object
         private bool isUsed;
@@ -75,10 +73,6 @@ namespace SocketServer.v2.Handlers
             }
         }
         /// <summary>
-        /// Request String [ASCII]
-        /// </summary>
-        //public string RequestStr { get; set; }
-        /// <summary>
         /// Request byte array
         /// </summary>
         public byte[] Request { get; set; }
@@ -97,11 +91,11 @@ namespace SocketServer.v2.Handlers
         /// <summary>
         /// Client Socket 的接收逾時設定
         /// </summary>
-        protected int receiveTimeout = 500; // Set to 30000 ms
+        protected int receiveTimeout = 30000; // Set to 30000 ms
         /// <summary>
         /// Client Socket 的送出逾時設定
         /// </summary>
-        protected int sendTimeout = 500; // Set to 30000 ms
+        protected int sendTimeout = 30000; // Set to 30000 ms
         private bool hasTimeout;
         #endregion
 
@@ -124,7 +118,7 @@ namespace SocketServer.v2.Handlers
         public virtual void DoCommunicate()
         {
             //觸發backgroundWorker的DoWork事件去委派執行backgroundWorker_DoWork方法
-             ;
+             //;
         }
         /// <summary>
         /// 取消此Client的連線作業

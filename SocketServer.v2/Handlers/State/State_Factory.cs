@@ -57,6 +57,9 @@ namespace SocketServer.v2.Handlers.State
                         return new State_PurchaseReturn();
                     case "0641":
                         return new State_PurchaseReturnTxLog();
+                        //PAM取額度
+                    case "0322":
+                        return new State_PAMQuota();
                     default:
                         return new State_Exit();
                 }

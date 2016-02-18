@@ -19,7 +19,9 @@ namespace SocketServer.v2.Handlers
 
         private object lockObj = new object();
         #endregion
-
+        /// <summary>
+        /// Handler Number
+        /// </summary>
         public int ClientNo { get; set; }
 
         /// <summary>

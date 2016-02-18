@@ -34,7 +34,7 @@ namespace SocketServer.v2.Handlers
             }
         }
         /// <summary>
-        /// 從設定檔載入指定的Uri格式
+        /// 從設定檔載入指定的連線資訊
         /// </summary>
         protected static void LoadSetting()
         {
@@ -62,20 +62,6 @@ namespace SocketServer.v2.Handlers
             }
             return null;
         }
-
-        /// <summary>
-        /// 取得服務的Uri設定數據
-        /// </summary>
-        /// <param name="type">指定的服務名稱</param>
-        /// <returns>Uri設定數據</returns>
-        //public static UriBuilder GetUri(ConType type)
-        //{
-        //    if (backEndSettingDic.ContainsKey(type))
-        //    {
-        //        return backEndSettingDic[type];
-        //    }
-        //    return null;
-        //}
     }
     /// <summary>
     /// 服務分類
@@ -118,5 +104,9 @@ namespace SocketServer.v2.Handlers
         /// 購貨取消TxLog服務 ConType: 0641
         /// </summary>
         PurchaseReturnTxLog = 8,
+        /// <summary>
+        /// PAM取額度服務 ConType: 0322
+        /// </summary>
+        PAMQuota = 9
     }
 }

@@ -80,7 +80,10 @@ namespace SocketServer.v2.Handlers
             //Console.WriteLine("Time Spend:{0}ms", this.timer.ElapsedMilliseconds.ToString());
             log.Info(m => m("Time Spend:{0}ms", this.timer.ElapsedMilliseconds.ToString()));
         }
-
+        /// <summary>
+        /// Handler status:只顯示使用狀態與累計次數
+        /// </summary>
+        /// <returns>handler used status</returns>
         public override string ToString()
         {
             return String.Format("ClientHandlerNo:{0}, 使用總次數:{1}, 使用中:{2}",this.ClientNo.ToString(),this.UseCount.ToString(),this.IsUsed.ToString());

@@ -129,6 +129,7 @@ namespace SocketServer.v2.Handlers.State
         /// <summary>
         /// Request截取需要的資料轉成POCO
         /// </summary>
+        /// <param name="msgUtility">使用的Msg Parser</param>
         /// <param name="msgBytes">Origin Request byte array</param>
         /// <returns>POCO</returns>
         protected virtual Txlog_Domain ParseRequest(IMsgUtility msgUtility, byte[] msgBytes)

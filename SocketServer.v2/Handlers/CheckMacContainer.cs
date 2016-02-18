@@ -101,6 +101,14 @@ namespace SocketServer.v2.Handlers
         /// MsgUtility Object : 設定購貨取消TxLog的Response電文轉換用的物件(0641)
         /// </summary>
         public static IMsgUtility PRTxLogRespMsgUtility = ctx["icash2TOLRespMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定PAM取額度水位的Request電文轉換用的物件(0322)
+        /// </summary>
+        public static IMsgUtility PAMReqMsgUtility = ctx["icash2PAMReqMsgUtility"] as IMsgUtility;
+        /// <summary>
+        /// MsgUtility Object : 設定PAM取額度水位的Response電文轉換用的物件(0322)
+        /// </summary>
+        public static IMsgUtility PAMRespMsgUtility = ctx["icash2PAMRespMsgUtility"] as IMsgUtility;
         #endregion
 
     }
