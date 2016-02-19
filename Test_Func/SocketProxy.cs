@@ -124,6 +124,7 @@ namespace Test_Func
                         byte[] response = null;
                         byte[] request = null;
                         destinationList = GetDestinationList((IPEndPoint)client.RemoteEndPoint);
+                        //destinationList = GetDestinationList(((IPEndPoint)client.RemoteEndPoint).Address.ToString()).ToList();
                         if (destinationList == null)
                         {
                             throw new Exception("[來源:" + client.RemoteEndPoint.ToString() + "]字典內查無遠端設定");
@@ -409,28 +410,28 @@ namespace Test_Func
 
                 IEnumerable<XElement> childNodes = node.Elements();
                 string ip = string.Empty;
-                int port = 0;
+                int port = -1;
                 //第二層(IPEndPoint)
-                foreach (var item in childNodes)
+                foreach (XElement item in childNodes)
                 {
                     switch (item.Name.LocalName.ToUpper())
                     {
                         case "IP":
-                            ip = item.Value;
+                            //Any IP or specified IP
+                            ip = (item.Value == "*") ? IPAddress.Any.ToString() : item.Value;
                             break;
                         case "PORT":
-                            //TODO ... 需寫一個只看IP不檢查Port的方式
-                            Int32.TryParse(item.Value, out port);
+                            //Any Port or specified Port
+                            port = (item.Value == "*") ? 0 : Int32.Parse(item.Value);
                             break;
                         case "SENDTIMEOUT":
-                            break;
                         case "RECEIVETIMEOUT":
-                            break;
                         default:
                             break;
                     }
                 }
-                if (!string.IsNullOrEmpty(ip) && !port.Equals(0))
+                //valid ip and port
+                if (!string.IsNullOrEmpty(ip) && !port.Equals(-1))
                 {
                     UrlInfo = new IPEndPoint(IPAddress.Parse(ip), port);
                     list.Add(UrlInfo);
@@ -448,6 +449,28 @@ namespace Test_Func
         {
              return this.proxyList.FirstOrDefault(n => n.Key.Contains(origin)).Value;
         }
+        /*
+        protected IEnumerable<IPEndPoint> GetDestinationList(IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> dicProxySetting,IPEndPoint origin)
+        {
+            foreach (IList<IPEndPoint> proxy in dicProxySetting.Keys)
+            {
+                //來源連線資訊符合字典集合內的條件1.指定來源的IP和Port都一樣
+                if (proxy.Any(m => ((m.Equals(origin)) ||
+                                         //條件2.指定來源的IP符合允許任何Port
+                             (m.Address.Equals(origin.Address) && m.Port.Equals(0)) ||
+                                         //條件3.指定來源為允許任何IP但Port要符合
+                             (m.Address.Equals(IPAddress.Any) && m.Port.Equals(origin.Port)) ||
+                                         //條件4.允許任何IP且允許任何Port
+                             (m.Address.Equals(IPAddress.Any) && m.Port.Equals(0)))))
+                {
+                    foreach (var item in dicProxySetting[proxy])
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+        */
         #endregion
 
         /// <summary>

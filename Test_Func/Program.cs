@@ -70,15 +70,32 @@ namespace Test_Func
 
         #region 15.讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>>
 
-        static void Main15(string[] args)
+        static void Main(string[] args)
         {
             string path = AppDomain.CurrentDomain.BaseDirectory + @"\ProxyIPSettings.xml";
             IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> dics = Load(path);
             //create a test endpoint
             //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 811);
-            EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.20.0.2"), 812);
+            //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.20.0.2"), 812);
             //search destination list from origin address at dictionary
-            IList<IPEndPoint> list = dics.FirstOrDefault(n => n.Key.Contains(ipTest)).Value;
+            //IList<IPEndPoint> list = dics.FirstOrDefault(n => n.Key.Contains(ipTest)).Value;
+            
+            /********************************************************************************/
+            //任意IP或任意Port的選擇測試(會選到IPEndPoint[ID:4,5,6,7])
+            //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 999);//遠端資訊應為: (127.0.0.1:1200),(127.0.0.1:1210),(127.0.0.1:1220),(127.0.0.1:1230)
+            //任意IP或任意Port的選擇測試(會選到IPEndPoint[ID:4,5,7]:任意IP指定Port)
+            //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("123.123.123.123"), 998);//遠端資訊應為: (127.0.0.1:1200),(127.0.0.1:1211),(           ),(127.0.0.1:1230)
+            //任意IP或任意Port的選擇測試(會選到IPEndPoint[ID:4,6,7]:指定IP任意Port)
+            EndPoint ipTest = new IPEndPoint(IPAddress.Parse("10.10.10.10"), 997);//遠端資訊應為: (127.0.0.1:1200),(              ),(127.0.0.1:1221),(127.0.0.1:1230)
+            //任意IP或任意Port的選擇測試(會選到會選到IPEndPoint[ID:7]:指定IP任意Port)
+            //EndPoint ipTest = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 65535);//遠端資訊應為: (             ),(             ),(            ),(127.0.0.1:1230)
+            IEnumerable<IPEndPoint> mathesIpInfo =  GetDestinationList(dics, (IPEndPoint)ipTest);//這邊只是定義  ,還未取得結果
+            mathesIpInfo = mathesIpInfo.ToList();//要執行過iterator才會進去跑
+            foreach (var item in mathesIpInfo)
+            {
+                Console.WriteLine("符合設定檔的遠端資訊:{0}", item.ToString());
+            }
+            Console.WriteLine("End...");
             Console.ReadKey();
         }
         public static IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> Load(string filePath)
@@ -125,33 +142,54 @@ namespace Test_Func
 
                 IEnumerable<XElement> childNodes = node.Elements();
                 string ip = string.Empty;
-                int port = 0;
+                int port = -1;
                 //第二層(IPEndPoint)
                 foreach (var item in childNodes)
                 {
                     switch (item.Name.LocalName.ToUpper())
                     {
                         case "IP":
-                            ip = item.Value;
+                            ip = (item.Value == "*") ? IPAddress.Any.ToString() : item.Value;
                             break;
                         case "PORT":
-                            Int32.TryParse(item.Value, out port);
+                            port = (item.Value == "*") ? 0 : Int32.Parse(item.Value);
                             break;
                         case "SENDTIMEOUT":
-                            break;
                         case "RECEIVETIMEOUT":
-                            break;
                         default:
                             break;
                     }
                 }
-                if (!string.IsNullOrEmpty(ip) && !port.Equals(0))
+                //valid ip and port
+                if (!string.IsNullOrEmpty(ip) && !port.Equals(-1))
                 {
                     UrlInfo = new IPEndPoint(IPAddress.Parse(ip), port);
                     list.Add(UrlInfo);
                 }
             }
             return list;
+        }
+
+        protected static IEnumerable<IPEndPoint> GetDestinationList(IDictionary<IList<IPEndPoint>, IList<IPEndPoint>> dicProxySetting, IPEndPoint origin)
+        {
+            foreach (IList<IPEndPoint> proxy in dicProxySetting.Keys)
+            {
+                //來源連線資訊符合字典集合內的條件
+                //條件1.指定來源的IP和Port都一樣
+                if (proxy.Any(m => ((m.Equals(origin)) ||
+                    //條件2.指定來源的IP符合允許任何Port
+                             (m.Address.Equals(origin.Address) && m.Port.Equals(0)) ||
+                    //條件3.指定來源為允許任何IP但Port要符合
+                             (m.Address.Equals(IPAddress.Any) && m.Port.Equals(origin.Port)) ||
+                    //條件4.允許任何IP且允許任何Port
+                             (m.Address.Equals(IPAddress.Any) && m.Port.Equals(0)))))
+                {
+                    foreach (var item in dicProxySetting[proxy])
+                    {
+                        yield return item;
+                    }
+                }
+            }
         }
         #endregion
 
@@ -206,7 +244,7 @@ namespace Test_Func
         #endregion
 
         #region 13.測試ProxySocket用的,要另外開2個nmap(一個當destination server,一個當origin client =>1.client要打proxy =>2.proxy轉給server =>3.server回傳 =>4.proxy回傳response)
-        static void Main(string[] args)
+        static void Main13(string[] args)
         {
             
             SocketProxy s2 = new SocketProxy(8112);

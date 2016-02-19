@@ -52,10 +52,10 @@
         <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
       </Destination>
   </IPEndPoint>
-<IPEndPoint Id="3" Description="Test">
+  <IPEndPoint Id="3" Description="Test">
     <Origin>
         <IP>127.0.0.1</IP>
-        <Port>*</Port>
+        <Port>20</Port>
         <SendTimeout Description="ms">2000</SendTimeout>
         <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
     </Origin>
@@ -68,6 +68,102 @@
     <Destination>
       <IP>127.0.0.1</IP>
       <Port>1102</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="4" Description="[1-1,2-1,3-1]指定的IP和Port">
+    <Origin Description="1-1">
+      <IP>127.0.0.1</IP>
+      <Port>999</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Origin Description="2-1">
+      <IP>123.123.123.123</IP>
+      <Port>998</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Origin Description="3-1">
+      <IP>10.10.10.10</IP>
+      <Port>997</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1200</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="5" Description="[1-1]來源任意IP,指定Port">
+    <Origin>
+      <IP Description="任意IP">*</IP>
+      <Port>999</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1210</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="5-1" Description="[2-1]來源任意IP,指定Port">
+    <Origin>
+      <IP Description="任意IP">*</IP>
+      <Port>998</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1211</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="6" Description="[1-1]來源指定IP,任意Port">
+    <Origin>
+      <IP>127.0.0.1</IP>
+      <Port Description="任意Port">*</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1220</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="6-1" Description="[3-1]來源指定IP,任意Port">
+    <Origin>
+      <IP>10.10.10.10</IP>
+      <Port Description="任意Port">*</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1221</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Destination>
+  </IPEndPoint>
+  <IPEndPoint Id="7" Description="[1-1,2-1,3-1]來源任意IP,任意Port">
+    <Origin>
+      <IP Description="任意IP">*</IP>
+      <Port Description="任意Port">*</Port>
+      <SendTimeout Description="ms">2000</SendTimeout>
+      <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
+    </Origin>
+    <Destination>
+      <IP>127.0.0.1</IP>
+      <Port>1230</Port>
       <SendTimeout Description="ms">2000</SendTimeout>
       <ReceiveTimeout Description="ms">2000</ReceiveTimeout>
     </Destination>
