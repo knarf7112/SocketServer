@@ -25,8 +25,8 @@ namespace SocketServer.Handlers.State
             string requestJsonStr = null;
             string outputCmd = null;
             
-            EskmsKeyTxLogPOCO request = null;
-            EskmsKeyTxLogPOCO response = null;
+            EskmsKeyTxLogPOCO_v2 request = null;
+            EskmsKeyTxLogPOCO_v2 response = null;
             string requestCheckErrMsg = null;
             string responseJsonStr = null;
             byte[] responseBytes = null;
@@ -61,16 +61,16 @@ namespace SocketServer.Handlers.State
                     //casting jsonstring from buffer array
                     requestJsonStr = Encoding.UTF8.GetString(receiveBuffer);
                     log.Debug(m => m("[{0}]Request: {1}", this.GetType().Name, requestJsonStr));
-                    request = JsonConvert.DeserializeObject<EskmsKeyTxLogPOCO>(requestJsonStr);
+                    request = JsonConvert.DeserializeObject<EskmsKeyTxLogPOCO_v2>(requestJsonStr);
                     //檢查Request資料長度(Attribute)
                     request.CheckLength(true, out requestCheckErrMsg);
 
                     //回應資料設定
-                    response = new EskmsKeyTxLogPOCO()
+                    response = new EskmsKeyTxLogPOCO_v2()
                     {
                         SAM_UID = request.SAM_UID,
                         DeviceId = request.DeviceId,
-                        ReturnCode = "000001"//預設為fail
+                        ReturnCode = "000001",//預設為fail
                     };
 
                     txLogReturnCode = request.TestTxLog.Substring(16, 8);//取第16~23個字串
@@ -81,10 +81,22 @@ namespace SocketServer.Handlers.State
                         log.Debug(m => m("1.Open DB Connection"));
                         obDB.OpenConnection();
 
-                        log.Debug(m => m("2.Run DB Operate"));
-                        //執行Reader出貨的DB操作流程
-                        shipment.Shipment_Reader(obDB, request.SAM_UID, request.DeviceId);//
+                        log.Debug(m => m("2.Run Shipment DB Operate SAM_UID:{0}, DeviceId:{1}", request.SAM_UID, request.DeviceId));
+                        //若有輸入顧客識別符號和卡機種別則寫入時就依據此資料寫入,若無則使用預設値寫入(在DB_Operate.SQL.Sql_Getter_Reader_D裡)
+                        if (!String.IsNullOrEmpty(request.Merc_Flg) && !String.IsNullOrEmpty(request.Reader_Type))
+                        {
+                            log.Debug(m => m("2-1. 自訂卡機格式與顧客識別[Reader_Type:{0}, Merc_Flg:{1}]", request.Reader_Type, request.Merc_Flg));
+                            //執行Reader出貨的DB操作流程
+                            shipment.Shipment_Reader(obDB, request.SAM_UID, request.DeviceId, request.Reader_Type, request.Merc_Flg);//
+                        }
+                        else
+                        {
+                            log.Debug(m => m("2-2.預設的卡機格式與顧客識別[Reader_Type:{0}, Merc_Flg:{1}]", "03", "ICA"));
+                            //執行Reader出貨的DB操作流程
+                            shipment.Shipment_Reader(obDB, request.SAM_UID, request.DeviceId);//
+                        }
                         response.ReturnCode = "000000";
+                        log.Debug(m => m("3.Shipment DB Operate End ..."));
                     }
                     else
                     {

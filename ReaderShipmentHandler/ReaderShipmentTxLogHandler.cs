@@ -16,9 +16,14 @@ namespace ReaderShipmentWebHandler
         private static readonly ILog log = LogManager.GetLogger(typeof(ReaderShipmentTxLogHandler));
 
         /// <summary>
-        /// Request資料長度(轉完ASCII後)
+        /// Request資料長度(轉完ASCII後) 14+32+288*2
         /// </summary>
         private static readonly int LoadKeyTxLogLength = 622;
+
+        /// <summary>
+        /// Request資料長度(轉完ASCII後) 14+32+288*2+6+4 (加上"SET"的hex與"02"的hex)
+        /// </summary>
+        private static readonly int LoadKeyTxLogLength_v2 = 632;
 
         /// <summary>
         /// 從設定檔讀取的連向後台Service的服務名稱
@@ -44,7 +49,7 @@ namespace ReaderShipmentWebHandler
             context.Response.ContentType = "text/plain";
             context.Response.StatusCode = 200;
             //檢查request資料是否符合規定長度
-            if (!String.IsNullOrEmpty(inputData) && inputData.Length == LoadKeyTxLogLength)
+            if (!String.IsNullOrEmpty(inputData) && (inputData.Length == LoadKeyTxLogLength || inputData.Length == LoadKeyTxLogLength_v2))
             {
                 backEndResponseData = DoLoadKeyTxLog(inputData);
                 //context.Response.OutputStream.Position = 0;
@@ -126,19 +131,24 @@ namespace ReaderShipmentWebHandler
         private static byte[] DoLoadKeyTxLog(string inputData)
         {
             byte[] result = null;
-            if (inputData.Length != LoadKeyTxLogLength)
-                return result;                        //ha ha
+            //if (inputData.Length != LoadKeyTxLogLength || inputData.Length != LoadKeyTxLogLength_v2)
+            //    return result;                        
             string sam_uid = inputData.Substring(0,14);                                                 //字串0~13為SAM UID(14 hex string)
             string deviceId = inputData.Substring(14, 32);                                              //字串14~45為DeviceId(32 hex string)
             string txLog = Encoding.ASCII.GetString(StringToByteArray(inputData.Substring(46, 576)));   //字串46~621為TxLog(576 hex string)=>288 string
+            string merc_flg = inputData.Length.Equals(LoadKeyTxLogLength_v2) ? Encoding.ASCII.GetString(StringToByteArray(inputData.Substring(622, 6))) : null;//字串622~627為TxLog(6 hex string)=>3 string => "SET"
+            string reader_type = inputData.Length.Equals(LoadKeyTxLogLength_v2) ? Encoding.ASCII.GetString(StringToByteArray(inputData.Substring(628, 4))) : null;//字串628~631為TxLog(4 hex string)=>2 string => "02"
             //string deviceId = BitConverter.ToString(inputData, 9, 16).Replace("-", "");     //byte[9~24]
-            EskmsKeyTxLogPOCO response = null;
-            EskmsKeyTxLogPOCO request = new EskmsKeyTxLogPOCO()
+            EskmsKeyTxLogPOCO_v2 response = null;
+            EskmsKeyTxLogPOCO_v2 request = new EskmsKeyTxLogPOCO_v2()
             {
                 SAM_UID = sam_uid,
                 DeviceId = deviceId,
-                TestTxLog = txLog
+                TestTxLog = txLog,
+                Merc_Flg = merc_flg,
+                Reader_Type = reader_type
             };
+            
             //log.Debug("");
             response = GetResponse(request);
             if (response != null && response.ReturnCode != null)
@@ -157,7 +167,7 @@ namespace ReaderShipmentWebHandler
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        private static EskmsKeyTxLogPOCO GetResponse(EskmsKeyTxLogPOCO request)
+        private static EskmsKeyTxLogPOCO_v2 GetResponse(EskmsKeyTxLogPOCO_v2 request)
         {
             string requestStr = null;
             byte[] requestBytes = null;
@@ -169,7 +179,7 @@ namespace ReaderShipmentWebHandler
             int receiveTimeout = -1;
             string serverConfig = null;
             string[] configs = null;
-            EskmsKeyTxLogPOCO response = null;
+            EskmsKeyTxLogPOCO_v2 response = null;
             //*********************************
             //取得連線後台的WebConfig設定資料
             serverConfig = ConfigGetter.GetValue(ServiceName);
@@ -203,7 +213,7 @@ namespace ReaderShipmentWebHandler
                         if (responseBytes != null)
                         {
                             responseStr = Encoding.UTF8.GetString(responseBytes);
-                            response = JsonConvert.DeserializeObject<EskmsKeyTxLogPOCO>(responseStr);
+                            response = JsonConvert.DeserializeObject<EskmsKeyTxLogPOCO_v2>(responseStr);
                             //Byte[] 會被JSON轉成Base64格式
                             log.Debug(m =>
                             {

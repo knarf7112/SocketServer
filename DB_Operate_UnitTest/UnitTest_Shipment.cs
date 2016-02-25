@@ -51,6 +51,25 @@ namespace DB_Operate_UnitTest
             {
                 Trace.WriteLine(ex.ToString());
             }
+        }
+
+        [TestMethod]
+        public void TestMethod_Shipment_Reader_Define_MercFlg_and_ReaderType()
+        {
+            //使用自定義reader_type與顧客識別符號寫入db
+            string uid = "04042B6A9F2980";
+            string deviceId = "30CCFF0F04000000FE1ECD5DA64758E6";
+            string reader_type = "02";
+            string merc_flg = "CHT";
+            try
+            {
+                this.obDb.OpenConnection();
+                this.shipment.Shipment_Reader(this.obDb, uid, deviceId, reader_type, merc_flg);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
+            }
         } 
 
         [TestCleanup]

@@ -64,7 +64,7 @@ namespace DB_Module.SQL
         /// <param name="poco">Reader資料物件</param>
         /// <param name="cmdText">sql command</param>
         /// <param name="sqlParams">sql parameter</param>
-        public void Update(string osn, string deviceId, out string cmdText, out SqlParameter[] sqlParams)
+        public void Update(string osn, string deviceId, out string cmdText, out SqlParameter[] sqlParams, string reader_Type = null, string merc_flg = null)
         {
             cmdText = @"update %Table% " +
                       @"set MERCHANT_NO=@MERCHANT_NO, READER_TYPE=@READER_TYPE, READER_STS=@READER_STS, " +
@@ -85,7 +85,7 @@ namespace DB_Module.SQL
             }
             DateTime now = DateTime.Now;
             sqlParams[0].ParameterName = "@READER_TYPE";
-            sqlParams[0].Value = Sql_Getter_Reader_D.READER_TYPE;
+            sqlParams[0].Value = ((String.IsNullOrEmpty(reader_Type)) || (reader_Type.Length != 2)) ? Sql_Getter_Reader_D.READER_TYPE : reader_Type;
             sqlParams[1].ParameterName = "@READER_STS";
             sqlParams[1].Value = Sql_Getter_Reader_D.READER_STS;
             sqlParams[2].ParameterName = "@TERMINAL_PSN";
@@ -103,7 +103,7 @@ namespace DB_Module.SQL
             sqlParams[8].ParameterName = "@MERCHANT_NO";
             sqlParams[8].Value = Sql_Getter_Reader_D.MERCHANT_NO;
             sqlParams[9].ParameterName = "@MERC_FLG";
-            sqlParams[9].Value = Sql_Getter_Reader_D.MERC_FLG;
+            sqlParams[9].Value = ((String.IsNullOrEmpty(merc_flg)) || (merc_flg.Length != 3)) ? Sql_Getter_Reader_D.MERC_FLG : merc_flg;
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace DB_Module.SQL
         /// <param name="poco"></param>
         /// <param name="cmdText"></param>
         /// <param name="sqlParams"></param>
-        public void Insert(string osn,string deviceId, out string cmdText, out SqlParameter[] sqlParams)
+        public void Insert(string osn,string deviceId, out string cmdText, out SqlParameter[] sqlParams,string reader_Type = null,string merc_flg = null)
         {
             cmdText = @"insert into %Table% " +
                       @"( READER_ID, M_KIND, MERCHANT_NO, READER_TYPE, READER_STS, TERMINAL_PSN, SAM_ID, MERC_FLG, " +
@@ -136,7 +136,7 @@ namespace DB_Module.SQL
             }
             DateTime now = DateTime.Now;
             sqlParams[0].ParameterName = "@READER_TYPE";
-            sqlParams[0].Value = Sql_Getter_Reader_D.READER_TYPE;//--00:沒卡機、01:NEC R6 卡機、02:MPG/CRF 卡機、03:CASTLES/V5s 卡機
+            sqlParams[0].Value = ((String.IsNullOrEmpty(reader_Type)) || (reader_Type.Length != 2)) ? Sql_Getter_Reader_D.READER_TYPE : reader_Type;//--00:沒卡機、01:NEC R6 卡機、02:MPG/CRF 卡機、03:CASTLES/V5s 卡機
             sqlParams[1].ParameterName = "@READER_STS";
             sqlParams[1].Value = Sql_Getter_Reader_D.READER_STS;
             sqlParams[2].ParameterName = "@TERMINAL_PSN";
@@ -156,7 +156,7 @@ namespace DB_Module.SQL
             sqlParams[9].ParameterName = "@MERCHANT_NO";
             sqlParams[9].Value = Sql_Getter_Reader_D.MERCHANT_NO;
             sqlParams[10].ParameterName = "@MERC_FLG";
-            sqlParams[10].Value = Sql_Getter_Reader_D.MERC_FLG;
+            sqlParams[10].Value = ((String.IsNullOrEmpty(merc_flg)) || (merc_flg.Length != 3)) ? Sql_Getter_Reader_D.MERC_FLG : merc_flg;
         }
     }
 }

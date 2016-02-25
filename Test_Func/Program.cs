@@ -16,11 +16,83 @@ using System.IO;
 using System.Management;
 using System.Xml.Linq;
 using System.Collections.Concurrent;
+//
+using Newtonsoft.Json;
 
 namespace Test_Func
 {
     class Program
     {
+        #region
+        static void Main(string[] args)
+        {
+            Stopwatch timer = new Stopwatch();
+            //List<BaseA> qq = new List<InheritB>();//can't implicit...why? //TODO ...
+            BaseA a = new BaseA { Id = 1, Name = "QQ" };
+            InheritB b = new InheritB { Id = 2, Name = "WW", Address = "this is address", Checked = true };
+            JsonSerializerSettings setting = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+            #region List Base class A , class B 測試列舉物件轉JSON並測試有無implicit boxing的耗時比較
+            IEnumerable<BaseA> listA = new List<BaseA>
+            {
+                new BaseA{ Id= 1, Name = "t1"},
+                new BaseA{ Id= 2, Name = "t2"},
+                new BaseA{ Id= 3, Name = "t3"}
+            };
+            string jsonListA = JsonConvert.SerializeObject(listA);
+            Console.WriteLine("List Base A: {0}", jsonListA);
+            IEnumerable<BaseA> listA2 = JsonConvert.DeserializeObject<IEnumerable<BaseA>>(jsonListA);
+
+            IEnumerable<InheritB> listB = new List<InheritB>
+            {
+                new InheritB{ Id= 1, Name = "t1", Checked = true, Address = "this is t1 address"},
+                new InheritB{ Id= 2, Name = "t2", Checked = false, Address = "this is t2 address"},
+                new InheritB{ Id= 3, Name = "t3", Checked = true, Address = "this is t3 address"},
+            };
+            string jsonListB = JsonConvert.SerializeObject(listB);
+            
+            Console.WriteLine("List Base A: {0}", jsonListB);
+            //just convert base class A properties
+            IEnumerable<BaseA> listB2 = JsonConvert.DeserializeObject<IEnumerable<BaseA>>(jsonListB);
+            timer.Start();
+            //convert inherit class B properties but boxing to BaseA  : 測起來真的比較慢,因為又準備了一個類別來轉換且是放在heap,非stack
+            //ref:https://msdn.microsoft.com/zh-tw/library/yz2be5wk.aspx
+            IEnumerable<BaseA> listB3 = JsonConvert.DeserializeObject<IEnumerable<InheritB>>(jsonListB);
+            timer.Stop();
+            Console.WriteLine("Have Boxing TimeSpend:{0}", timer.ElapsedTicks);//値大約2xxx
+            InheritB tt = listB3.First() as InheritB;
+            //convert inherit class B properties
+            timer.Restart();
+            IEnumerable<InheritB> listB4 = JsonConvert.DeserializeObject<IEnumerable<InheritB>>(jsonListB);
+            timer.Stop();
+            Console.WriteLine("None Boxing TimeSpend:{0}", timer.ElapsedTicks);//値大約xx~1xx
+            #endregion
+            string jsonA = JsonConvert.SerializeObject(a);
+            //string jsonA = JsonConvert.SerializeObject(a, setting);//setting加入會寫入物件type,即多一個$type屬性,値則是assembly Name
+            string jsonB = JsonConvert.SerializeObject(b);
+            Console.WriteLine("Base A: {0}", jsonA);
+            Console.WriteLine("Inherit B: {0}", jsonB);
+            BaseA a2 = JsonConvert.DeserializeObject<BaseA>(jsonA);//一般還原
+            InheritB a3 = JsonConvert.DeserializeObject<InheritB>(jsonA);//將BaseA物件的JSON字串強制反序列化還原成InheritB也沒拋異常,但値會是null或是default
+            BaseA a4 = JsonConvert.DeserializeObject<BaseA>(jsonB);//將InheritB的JSON字串反序列化還原成BaseA也沒問題,繼承的部分就不會轉換
+            InheritB b2 = JsonConvert.DeserializeObject<InheritB>(jsonB);//看起來不加settings也可以反序列化還原回InheritB
+            //Debugger.Break();
+            Console.ReadKey();
+        }
+
+        [Serializable]
+        internal class BaseA
+        {
+            public string Name { get; set; }
+            public int Id { get; set; }
+        }
+
+        internal class InheritB : BaseA
+        {
+            public string Address { get; set; }
+            public bool Checked { get; set; }
+        }
+        #endregion
+
         #region 16.測試async await 何時開分岔的? 結果:確定是從await之後才開岔產生另一個thread的
         //ref:http://huan-lin.blogspot.com/2016/01/async-and-await.html
         static void Main16(string[] args)
@@ -70,7 +142,7 @@ namespace Test_Func
 
         #region 15.讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>>
 
-        static void Main(string[] args)
+        static void Main15(string[] args)
         {
             string path = AppDomain.CurrentDomain.BaseDirectory + @"\ProxyIPSettings.xml";
             IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> dics = Load(path);

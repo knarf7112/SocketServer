@@ -62,6 +62,18 @@
             (OK:000000/Fail:000001)
             </summary>
         </member>
+        <member name="P:Crypto.POCO.EskmsKeyTxLogPOCO_v2.Merc_Flg">
+            <summary>
+            顧客識別符號 ex:"KRT"
+            Size:3
+            </summary>
+        </member>
+        <member name="P:Crypto.POCO.EskmsKeyTxLogPOCO_v2.Reader_Type">
+            <summary>
+            卡機種別 ex: 00:沒卡機、01:NEC R6 卡機、02:MPG/CRF 卡機、03:CASTLES/V5s 卡機 ...
+            Size:2
+            </summary>
+        </member>
         <member name="F:Crypto.POCO.Extentions.lockObj">
             <summary>
             lock用的物件

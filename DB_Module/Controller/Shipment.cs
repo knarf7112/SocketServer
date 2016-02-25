@@ -150,7 +150,7 @@ namespace DB_Module.Controller
                 using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required,option))
                 {
                     //1.依據UID將SAM_D表格資料備份到SAMDIFF_D表格
-                    this.Copy_SAM_D_To_SADDIFF(obDB, uid);
+                    this.Copy_SAM_D_To_SAMDIFF(obDB, uid);
                     //2.依據UID刪除SAM_D資料
                     this.Delete_SAM_D(obDB, uid);
                     //3.依據UID新增一筆資料到SAM_D
@@ -356,13 +356,196 @@ namespace DB_Module.Controller
             }
         }
 
+        #region Reader出貨流程(自行設定顧客識別符號與卡機種別) 2016-02-23
+        /// <summary>
+        /// Reader出貨流程 -2016-02-23
+        /// 1.檢查ReaderId是否存在於Reader主檔
+        /// 2.更新或新增數據至Reader主檔(需自行設定顧客識別符號與卡機種別)
+        /// 3.根據原來的SAM UID將SAM表格資料備份到SAMDIFF
+        /// 4.刪除SAM表格原來UID的數據
+        /// 5.重新新增此UID的資料到SAM表格
+        /// </summary>
+        /// <param name="obDB">DB模組</param>
+        /// <param name="uid">SAM UID(OSN)14 hex string</param>
+        /// <param name="deviceId">卡機DeviceId:32 hex string</param>
+        /// <param name="reader_type">卡機種別, 00:沒卡機、01:NEC R6 卡機、02:MPG/CRF 卡機、03:CASTLES/V5s 卡機</param>
+        /// <param name="merc_flg">顧客識別符號, ex:"SET"</param>
+        public void Shipment_Reader(AL_DBModule obDB, string uid, string deviceId, string reader_type, string merc_flg)
+        {
+
+            string readerId = (Sql_Getter_Reader_D.Reader_Head + uid);//'86' + osn
+            bool flag = false;
+            //1.檢查ReaderId是否存在於Reader主檔
+            if (this.Check_ReaderId_FromReader_D(obDB, readerId))
+            {
+                //更新Reader主檔
+                flag = this.Update_FromReader_D(obDB, uid, deviceId, reader_type, merc_flg);
+            }
+            else
+            {
+                //新增Reader主檔
+                flag = this.Insert_FromReader_D(obDB, uid, deviceId, reader_type, merc_flg);
+            }
+            if (flag)
+            {
+                TransactionOptions option = new TransactionOptions();
+                option.IsolationLevel = System.Transactions.IsolationLevel.RepeatableRead;
+                option.Timeout = new TimeSpan(0, 0, 10);//10sec
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, option))
+                {
+                    //1.依據UID將SAM_D表格資料備份到SAMDIFF_D表格
+                    this.Copy_SAM_D_To_SAMDIFF(obDB, uid);
+                    //2.依據UID刪除SAM_D資料
+                    this.Delete_SAM_D(obDB, uid);
+                    //3.依據UID新增一筆資料到SAM_D
+                    this.Insert_SAM_D(obDB, uid);
+                    scope.Complete();
+                }
+            }
+        }
+        /// <summary>
+        /// 依據ReaderId 更新Reader主檔(需有顧客識別符號與reader_type, null=>default value)
+        /// 資料物件必須有資料的欄位(READER_ID,READER_TYPE,READER_STS,TERMINAL_PSN,SAM_ID,SH_DATE,UPT_DATE,UPT_TIME,READER_ID)
+        /// 取得更新Reader主檔的SQL參數和命令
+        /// </summary>
+        /// <param name="obDB">DB連線模組</param>
+        /// <param name="uid">SAM uid(14 hex string)</param>
+        /// <param name="deviceId">deviceId(16 bytes)</param>
+        /// <param name="reader_type">卡機種別, 00:沒卡機、01:NEC R6 卡機、02:MPG/CRF 卡機、03:CASTLES/V5s 卡機</param>
+        /// <param name="merc_flg">顧客識別符號, ex:"SET"</param>
+        /// <returns>true:更新成功/false:更新後數據無變動</returns>
+        protected bool Update_FromReader_D(AL_DBModule obDB, string uid, string deviceId, string reader_type, string merc_flg)
+        {
+            try
+            {
+                //判斷資料庫連線有無開啟            
+                if (obDB != null && obDB.ALCon.State != ConnectionState.Open)
+                {
+                    obDB.ALCon.Open();
+                }
+            }
+            catch (SqlException ex)
+            {
+                Debug.WriteLine(ex);
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            //Sql_Getter_Reader_D operate_Reader_D = new Sql_Getter_Reader_D();//產生sql指令
+            SqlParameter[] SqlParamSet = null;
+            String sSql; //查詢SQL
+
+            try
+            {
+                //依據ReaderId('86' + uid)更新Reader主檔
+                this.Operate_Reader_D.Update(uid, deviceId, out sSql, out SqlParamSet, reader_type, merc_flg);
+
+                string result = obDB.SqlExec1(sSql, SqlParamSet);
+                //if (IsDebugWriteLine)
+                //{
+                //    Debug.WriteLine("Result:" + ((result == "1") ? "Success" : "NoneChange"));
+                //}
+                return (result == "1") ? true : false;
+            }
+            catch (SqlException sqlEx)
+            {
+                if (IsDebugWriteLine)
+                {
+                    Debug.WriteLine("[Shipment][Update_FromReader_D]Sql Error:" + sqlEx.Message);
+                }
+                throw sqlEx;
+            }
+            catch (Exception ex)
+            {
+                if (IsDebugWriteLine)
+                {
+                    Debug.WriteLine("[Shipment][Update_FromReader_D]Error:" + ex.Message);
+                }
+                throw ex;
+            }
+            finally
+            {
+                //operate_Reader_D = null;
+                Array.Resize(ref SqlParamSet, 0);
+            }
+        }
+        /// <summary>
+        /// 依據ReaderId 新增Reader主檔(需有顧客識別符號與reader_type, null=>default value)
+        /// SAM uid(14 hex string), deviceId(16 bytes)
+        /// 取得更新Reader主檔的SQL參數和命令
+        /// </summary>
+        /// <param name="obDB">DB連線模組</param>
+        /// <param name="uid">SAM uid(14 hex string)</param>
+        /// <param name="deviceId">deviceId(16 bytes)</param>
+        /// <returns>true:新增成功/false:新增後數據無變動</returns>
+        protected bool Insert_FromReader_D(AL_DBModule obDB, string uid, string deviceId, string reader_type, string merc_flg)
+        {
+            try
+            {
+                //判斷資料庫連線有無開啟            
+                if (obDB != null && obDB.ALCon.State != ConnectionState.Open)
+                {
+                    obDB.ALCon.Open();
+                }
+            }
+            catch (SqlException ex)
+            {
+                Debug.WriteLine(ex);
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            //Sql_Getter_Reader_D operate_Reader_D = new Sql_Getter_Reader_D();//產生sql指令
+            SqlParameter[] SqlParamSet = null;
+            String sSql; //查詢SQL
+
+            try
+            {
+                //依據ReaderId('86' + uid)新增Reader主檔
+                this.Operate_Reader_D.Insert(uid, deviceId, out sSql, out SqlParamSet, reader_type, merc_flg);
+
+                string result = obDB.SqlExec1(sSql, SqlParamSet);
+                if (IsDebugWriteLine)
+                {
+                    Debug.WriteLine("Result:" + ((result == "1") ? "Success" : "NoneChange"));
+                }
+                return (result == "1") ? true : false;
+            }
+            catch (SqlException sqlEx)
+            {
+                if (IsDebugWriteLine)
+                {
+                    Debug.WriteLine("[Shipment][Insert_FromReader_D]Sql Error:" + sqlEx.Message);
+                }
+                throw sqlEx;
+            }
+            catch (Exception ex)
+            {
+                if (IsDebugWriteLine)
+                {
+                    Debug.WriteLine("[Shipment][Insert_FromReader_D]Error:" + ex.Message);
+                }
+                throw ex;
+            }
+            finally
+            {
+                //operate_Reader_D = null;
+                Array.Resize(ref SqlParamSet, 0);
+            }
+        }
+        #endregion
+
         /// <summary>
         /// 依據uid(osn)將SAM主檔的Row data備份到SAMDIFF_D表格
         /// </summary>
         /// <param name="obDB"></param>
         /// <param name="uid">SAM UID(14 hex string)</param>
         /// <returns>true:新增成功/false:新增數據無變動</returns>
-        protected bool Copy_SAM_D_To_SADDIFF(AL_DBModule obDB, string uid)
+        protected bool Copy_SAM_D_To_SAMDIFF(AL_DBModule obDB, string uid)
         {
             try
             {
