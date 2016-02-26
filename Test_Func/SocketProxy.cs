@@ -63,7 +63,8 @@ namespace Test_Func
             this.KeepServerAlive = true;
             string path = AppDomain.CurrentDomain.BaseDirectory + @"\ProxyIPSettings.xml";
             this.proxyList = this.LoadSettings(path);
-            //會連到本機設定的Dns問,用host問並取回IP,無法解析會拋異常
+            //會先用HostName尋問本機端的hosts列表,若查無對應IP
+            //再連到本機設定的Dns尋問,用hostName來嘗試取得IP,若無法解析hostName會拋異常(即查無任何對應IP)
             //IPAddress[] IPs = Dns.GetHostEntry(IPAddress.Parse(remoteIP)).AddressList;
             //foreach (IPAddress ip in IPs)
             //{
@@ -449,18 +450,24 @@ namespace Test_Func
         {
              return this.proxyList.FirstOrDefault(n => n.Key.Contains(origin)).Value;
         }
-        /*
-        protected IEnumerable<IPEndPoint> GetDestinationList(IDictionary<IList<IPEndPoint>,IList<IPEndPoint>> dicProxySetting,IPEndPoint origin)
+        /// <summary>
+        /// 列舉所有符合來源IP和Port所對應的遠端資訊
+        /// </summary>
+        /// <param name="dicProxySetting">載入設定的字典檔</param>
+        /// <param name="origin">來源IPEndPoint</param>
+        /// <returns>所有符合設定檔的遠端</returns>
+        protected static IEnumerable<IPEndPoint> GetDestinationList(IDictionary<IList<IPEndPoint>, IList<IPEndPoint>> dicProxySetting, IPEndPoint origin)
         {
             foreach (IList<IPEndPoint> proxy in dicProxySetting.Keys)
             {
-                //來源連線資訊符合字典集合內的條件1.指定來源的IP和Port都一樣
+                //來源連線資訊符合字典集合內的條件
+                //條件1.指定來源的IP和Port都一樣
                 if (proxy.Any(m => ((m.Equals(origin)) ||
-                                         //條件2.指定來源的IP符合允許任何Port
+                    //條件2.指定來源的IP符合允許任何Port
                              (m.Address.Equals(origin.Address) && m.Port.Equals(0)) ||
-                                         //條件3.指定來源為允許任何IP但Port要符合
+                    //條件3.指定來源為允許任何IP但Port要符合
                              (m.Address.Equals(IPAddress.Any) && m.Port.Equals(origin.Port)) ||
-                                         //條件4.允許任何IP且允許任何Port
+                    //條件4.允許任何IP且允許任何Port
                              (m.Address.Equals(IPAddress.Any) && m.Port.Equals(0)))))
                 {
                     foreach (var item in dicProxySetting[proxy])
@@ -470,7 +477,7 @@ namespace Test_Func
                 }
             }
         }
-        */
+
         #endregion
 
         /// <summary>

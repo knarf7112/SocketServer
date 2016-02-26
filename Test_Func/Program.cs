@@ -23,8 +23,94 @@ namespace Test_Func
 {
     class Program
     {
-        #region
+        #region 
         static void Main(string[] args)
+        {
+            //ref:https://msdn.microsoft.com/en-us/library/system.diagnostics.process.standardinput(v=vs.110).aspx
+            Console.WriteLine("Please Input Command String");
+            string cmd = Console.ReadLine();
+            ProcessStartInfo psinfo = new ProcessStartInfo("cmd");//, "/c" + cmd);
+            psinfo.RedirectStandardInput = true;
+            psinfo.RedirectStandardOutput = true;
+            psinfo.UseShellExecute = false;
+            psinfo.CreateNoWindow = true;
+            Process p = new Process();
+            p.StartInfo = psinfo;
+            p.Start();
+            p.StandardInput.Write("dir/w");
+            string result2 = p.StandardOutput.ReadToEnd();
+            Console.WriteLine("Result:{0}", result2);
+            /*
+             * //無法在啟動程序後,再輸入參數帶入程序內,目前測試失敗,無法寫入,只知道啟動前帶入參數
+            string senddata = Console.ReadLine();
+            p.StandardInput.WriteLine(senddata.TrimEnd('\n'));
+            p.StandardInput.Flush();
+            result2 = p.StandardOutput.ReadToEnd();
+            Console.WriteLine("Result1:{0}", result2);
+            */
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 18.測試HashSet用途:
+        static void Main18(string[] args)
+        {
+            HashSet<string> hashList = new HashSet<string>();
+            Console.WriteLine("knock hash code:{0}","knock".GetHashCode());
+            hashList.Add("test123");
+            hashList.Add("knock");
+            hashList.Add("QQ123");
+            hashList.Add("knock");//當加入時會去比較的HashCode是否相同,若有相同的就不再加入
+            #region HashSet
+            /*
+            //測試HashSet 依據某個Hash集合來刪除共同的部分
+            HashSet<string> hashList3 = new HashSet<string>();
+            hashList3.Add("test123");
+            hashList3.Add("knock");
+            hashList.ExceptWith(hashList3);//刪除跟參數集合內擁有一樣的項目
+             */
+            HashSet<string> hashList3 = new HashSet<string>();
+            hashList3.Add("test123");
+            hashList3.Add("knock");
+            hashList.UnionWith(hashList3);//
+
+            hashList.Select((n,m) => {  Console.WriteLine(":{0}", n); return n; }).ToList();//tolist才會真正執行Iterator
+            Console.ReadKey();
+            #endregion
+            foreach (var item in hashList)
+            {
+                Console.WriteLine("value:{0}", item);
+            }
+            Console.WriteLine("----------------------------");
+            HashSet<Test> hashList2 = new HashSet<Test>();
+            Test t1 = new Test(){ Id = 1, Name = "Test123", IsBool = true, data = new byte[]{10,20}};
+            Test t2 = new Test(){ Id = 2, Name = "Test123", IsBool = true, data = new byte[]{10,20}};
+            Test t3 = new Test(){ Id = 3, Name = "Test123", IsBool = true, data = new byte[]{10,20}};
+            Test t4 = new Test(){ Id = 1, Name = "Test123", IsBool = true, data = new byte[]{10,20}};
+            Test t5 = new Test(){ Id = 1, Name = "Test123", IsBool = true, data = new byte[]{10,20}};
+            hashList2.Add(t1);
+            hashList2.Add(t2);
+            hashList2.Add(t3);
+            hashList2.Add(t4);
+            hashList2.Add(t5);
+            Test t6 = t1;
+            hashList2.Add(t6);//指向一樣的物件才會算是重複項目
+            //結論:hashSet加入項目時會先比較項物的hash是否已存在列表中,若存在則不加入
+            Console.ReadKey();
+        }
+
+        internal class Test
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public bool IsBool { get; set; }
+            public byte[] data { get; set; }
+            public Test Obj { get; set; }
+        }
+        #endregion
+
+        #region 17.測試物件與繼承的子物件之間JSON轉換
+        static void Main17(string[] args)
         {
             Stopwatch timer = new Stopwatch();
             //List<BaseA> qq = new List<InheritB>();//can't implicit...why? //TODO ...
@@ -85,7 +171,7 @@ namespace Test_Func
             public string Name { get; set; }
             public int Id { get; set; }
         }
-
+        [Serializable]
         internal class InheritB : BaseA
         {
             public string Address { get; set; }
@@ -140,7 +226,7 @@ namespace Test_Func
         }
         #endregion
 
-        #region 15.讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>>
+        #region 15.讀取Xml設定檔=>Dictionary<List<來源IP>,List<目的IP>> ,輸入一組IP當來源並確認
 
         static void Main15(string[] args)
         {
@@ -530,8 +616,33 @@ namespace Test_Func
 
             TestClass1 c1 = new TestClass1();//第一次使用會跑一次靜態成員
             //TestClass1.AddStr();
-            TestClass1 c2 = new TestClass1();//看會不會再進去跑一次靜態成員
+            TestClass1 c2 = new TestClass1();//看會不會再進去跑一次靜態成員,結論是不會再進去
             Console.ReadKey();
+        }
+
+        internal class TestClass1
+        {
+            public static IList<string> StrList = new List<string>();
+
+            public static string Str = "test123";
+
+            public static int Intarger = 999;
+
+            public static IList<int> IntList = new List<int>();
+
+            public static void AddStr()
+            {
+                var tmp = "a";
+                for (var i = 1; i <= 10; i++)
+                {
+
+                    StrList.Add(tmp);
+                    byte[] bytes = Encoding.ASCII.GetBytes(tmp);
+                    bytes[0] += 1;// (byte)i;
+                    tmp = Encoding.ASCII.GetString(bytes);
+                }
+
+            }
         }
         #endregion
 
