@@ -70,4 +70,69 @@ namespace Test_Func
             }
         }
     }
+
+    #region Nuances foreach (foreach細微之處)
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //ref:http://codingsight.com/%D1%81-nuances-foreach/
+            //how to create a iterator
+            //1.create a class need GetEnumerator method to return a Enumerator object
+            //enumerator is enumerable that has MoveNext method and Current property and implement IDisposable
+            //and then can use foreach run enumerator
+            var container = new Container();
+            foreach (var item in container)
+            {
+
+            }
+
+            //2.that inside implement like this
+            Enumerator iterator = container.GetEnumerator();
+            try
+            {
+                object element = null;
+                while (iterator.MoveNext())
+                {
+                    element = iterator.Current;
+                }
+            }
+            finally
+            {
+                IDisposable disposable = iterator as IDisposable;
+                if (disposable != null)
+                {
+                    disposable.Dispose();
+                }
+            }
+        }
+    }
+
+    class Container
+    {
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator();
+        }
+    }
+
+    class Enumerator : IDisposable
+    {
+        public bool MoveNext()
+        {
+            return false;
+        }
+
+        public object Current
+        {
+            get { return null; }
+        }
+
+        public void Dispose()
+        {
+            Console.WriteLine("Dispose ...");
+        }
+    }
+    #endregion
+
 }

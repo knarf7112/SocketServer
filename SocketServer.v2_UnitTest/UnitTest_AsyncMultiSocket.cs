@@ -21,6 +21,7 @@ namespace SocketServer.v2_UnitTest
         ISocketServer server1;
         ISocketServer server2;
         ISocketServer server3;
+        ISocketServer server4;
         CountdownEvent taskCount;
         [TestInitialize]
         public void Init()
@@ -28,6 +29,7 @@ namespace SocketServer.v2_UnitTest
             this.server1 = new AsyncMultiSocketServer(8113,"一般加值和退貨");
             this.server2 = new AsyncMultiSocketServer(8114,"自動加值");
             this.server3 = new AsyncMultiSocketServer(8115, "自動加值查詢");
+            this.server4 = new AsyncMultiSocketServer(8116, "取水位額度");
         }
 
         [TestMethod]
@@ -254,6 +256,38 @@ namespace SocketServer.v2_UnitTest
             }
         }
 
+        [TestMethod]
+        public void TestMethod_PAM()
+        {
+            //測試取PAM水位加值的功能(多開)
+            //start service //要確定Back-End Service和KMS 2.0服務可用
+            this.server4.Start();
+            //send data(ComType:0631)
+            string sendPRhexData = "010101032200000002000001000386043131328D3780    KRT00100000001100110000001920000019200000000000001KRT0000000600000000001000086043131328D3780600000201603040000001520160308105037FCBB8B08        ";
+            byte[] sendPRData = StringToByteArray(sendPRhexData);//轉一下
+            string url = "127.0.0.1";
+            int port = 8116;
+            int testCount = 2;//20;//非同步連線總次數,太高就爆了
+            IPEndPoint ep = new IPEndPoint(IPAddress.Parse(url), port);
+            taskCount = new CountdownEvent(testCount);//callback sign告訴主程式完成任務用的
+            string[] receiveList = new string[testCount];
+            log.Debug("Client開始連線");
+            for (int i = 0; i < testCount; i++)
+            {
+                Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                stateObj sendObj = new stateObj() { clientNo = i, mainSocket = client, sendData = sendPRData, receiveSignList = taskCount, receiveDataList = receiveList };
+                client.BeginConnect(ep, ConnectCallback, sendObj);
+            }
+
+            taskCount.Wait(18000);//等所有任務完成:最多等18秒
+            //列出所有接收到的訊息
+            for (int j = 0; j < receiveList.Length; j++)
+            {
+                log.Info("Client[" + j + "] data:" + receiveList[j]);
+                Assert.IsNotNull(receiveList[j]);
+            }
+        }
+
         //end Connect用的callabck方法
         private void ConnectCallback(IAsyncResult ar)
         {
@@ -328,9 +362,11 @@ namespace SocketServer.v2_UnitTest
         [TestCleanup]
         public void Clear()
         {
+            //Thread.Sleep(60000);
             this.server1.Stop();
             this.server2.Stop();
             this.server3.Stop();
+            this.server4.Stop();
         }
     }
 }

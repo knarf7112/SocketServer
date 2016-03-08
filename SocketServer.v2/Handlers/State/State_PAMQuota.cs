@@ -120,7 +120,7 @@ namespace SocketServer.v2.Handlers.State
                 this.mac = msgUtility.GetStr(msgBytes, "Mac");
 
                 //將data的部分取出作SHA1
-                byte[] hashData = msgUtility.GetBytes(msgBytes, "HeaderVersion", "Mac");
+                byte[] hashData = msgUtility.GetBytes(msgBytes, "DataVersion", "Mac");
                 byte[] hashResult = CheckMacContainer.HashWorker.ComputeHash(hashData);
                 //開始檢查hash過的data部分是否與mac値一致
                 result = CheckMacContainer.Mac2Manager.ChkInitMac(this.readerId, this.transDateTime, hashResult, this.mac);
@@ -244,7 +244,7 @@ namespace SocketServer.v2.Handlers.State
         protected virtual void SetMAC(IMsgUtility resMsgUility, byte[] response, string reader_id, string transTime)
         {
             // fetch sha1 data
-            byte[] hashDataBytes = resMsgUility.GetBytes(response, "HeaderVersion", "Mac");
+            byte[] hashDataBytes = resMsgUility.GetBytes(response, "DataVersion", "Mac");
             byte[] sha1Result = CheckMacContainer.HashWorker.ComputeHash(hashDataBytes);
             string mac = CheckMacContainer.Mac2Manager.GetAuthMac(reader_id, transTime, sha1Result);
             resMsgUility.SetStr(mac, response, "Mac");

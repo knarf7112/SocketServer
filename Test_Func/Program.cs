@@ -23,8 +23,8 @@ namespace Test_Func
 {
     class Program
     {
-        #region 
-        static void Main(string[] args)
+        #region 19.Process開啟其他執行檔並帶入參數,目前只確定可執行前附帶參數,已執行或執行中都無法在附帶參數
+        static void Main19(string[] args)
         {
             //ref:https://msdn.microsoft.com/en-us/library/system.diagnostics.process.standardinput(v=vs.110).aspx
             Console.WriteLine("Please Input Command String");
@@ -41,7 +41,7 @@ namespace Test_Func
             string result2 = p.StandardOutput.ReadToEnd();
             Console.WriteLine("Result:{0}", result2);
             /*
-             * //無法在啟動程序後,再輸入參數帶入程序內,目前測試失敗,無法寫入,只知道啟動前帶入參數
+             * //無法在啟動程序後,再輸入參數帶入程序內,目前測試失敗,無法寫入,只能啟動前帶入參數
             string senddata = Console.ReadLine();
             p.StandardInput.WriteLine(senddata.TrimEnd('\n'));
             p.StandardInput.Flush();
