@@ -32,6 +32,8 @@ namespace SocketServer.Handlers.State
                     return new State_ReaderLoadKey();
                 case ServiceSelect.LoadKeyTxLog:
                     return new State_ReaderLoadKeyTxLog();
+                case ServiceSelect.LoadKeyList:
+                    return new State_ReaderLoadKeyList();
                 default:
                     return new State_Exit();
             }
@@ -54,6 +56,10 @@ namespace SocketServer.Handlers.State
         /// <summary>
         /// 取得卡機TxLog並紀錄
         /// </summary>
-        LoadKeyTxLog = 2
+        LoadKeyTxLog = 2,
+        /// <summary>
+        /// 驗證ReaderId並取得Divers key(複數)
+        /// </summary>
+        LoadKeyList = 3
     }
 }

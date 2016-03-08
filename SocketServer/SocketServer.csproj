@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{119EA747-1B8C-41A5-B64F-5C897A8D3D15}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SocketServer</RootNamespace>
     <AssemblyName>SocketServer</AssemblyName>
@@ -83,6 +83,7 @@
     <Compile Include="Handlers\State\State_Authenticate.cs" />
     <Compile Include="Handlers\State\State_Exit.cs" />
     <Compile Include="Handlers\State\State_ReaderLoadKey.cs" />
+    <Compile Include="Handlers\State\State_ReaderLoadKeyList.cs" />
     <Compile Include="Handlers\State\State_ReaderLoadKeyTxLog.cs" />
     <Compile Include="ISocketServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
