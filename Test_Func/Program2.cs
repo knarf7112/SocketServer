@@ -72,9 +72,9 @@ namespace Test_Func
     }
 
     #region Nuances foreach (foreach細微之處)
-    class Program
+    class Program3
     {
-        static void Main(string[] args)
+        static void Main1(string[] args)
         {
             //ref:http://codingsight.com/%D1%81-nuances-foreach/
             //how to create a iterator

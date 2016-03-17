@@ -18,11 +18,28 @@ using System.Xml.Linq;
 using System.Collections.Concurrent;
 //
 using Newtonsoft.Json;
-
+//sqlite
+using global::System.Data.SQLite;
+using System.Data;
 namespace Test_Func
 {
     class Program
     {
+        #region 20.測試與操作封裝SQLite的模組
+        static void Main()
+        {
+            
+            string connectionstring = @"Data Source=database.db;";
+            string tableName = "TestTable";
+            string defined_paras = "(name varchar(20),age int,merch varchar(32),createTime varchar(14),EncZMK varchar(32))";
+            IDbConnection conn = SQLiteFactory.Instance.CreateConnection();
+            global::DB_Lib.Sqlite_Module sqlite_module = new DB_Lib.Sqlite_Module(connectionstring, conn);
+            bool isSuccess = sqlite_module.Create_Table(tableName, defined_paras);
+            
+            //delete
+            sqlite_module.Delete_Table(tableName);
+        }
+        #endregion
         #region 19.Process開啟其他執行檔並帶入參數,目前只確定可執行前附帶參數,已執行或執行中都無法在附帶參數
         static void Main19(string[] args)
         {

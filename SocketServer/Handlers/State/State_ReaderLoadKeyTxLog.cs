@@ -63,7 +63,7 @@ namespace SocketServer.Handlers.State
                     log.Debug(m => m("[{0}]Request: {1}", this.GetType().Name, requestJsonStr));
                     request = JsonConvert.DeserializeObject<EskmsKeyTxLogPOCO_v2>(requestJsonStr);
                     //檢查Request資料長度(Attribute)
-                    request.CheckLength(true, out requestCheckErrMsg);
+                    //request.CheckLength(true, out requestCheckErrMsg);
 
                     //回應資料設定
                     response = new EskmsKeyTxLogPOCO_v2()

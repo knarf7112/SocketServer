@@ -12,7 +12,7 @@ namespace LoadKeyService
 
         private ISocketServer socketServer1;
         private ISocketServer socketServer2;
-        private ISocketServer socketServer3;
+        //private ISocketServer socketServer3;
         public LoadKeyService()
         {
             InitializeComponent();
@@ -28,10 +28,10 @@ namespace LoadKeyService
             string loadKeyTxLogServiceName = loadKeyTxLog[1];
             this.socketServer2 = new AsyncMultiSocketServer(loadKeyTxLogPort, loadKeyTxLogServiceName);
 
-            string[] loadKeyList = String.IsNullOrEmpty(System.Configuration.ConfigurationManager.AppSettings["LoadKeyListPortAndServiceName"]) ? ("6114:LoadKeyList").Split(':') : System.Configuration.ConfigurationManager.AppSettings["LoadKeyListPortAndServiceName"].Split(':');
-            int loadKeyListPort = Int32.Parse(loadKeyList[0]);
-            string loadKeyListServiceName = loadKeyList[1];
-            this.socketServer2 = new AsyncMultiSocketServer(loadKeyListPort, loadKeyListServiceName);
+            //string[] loadKeyList = String.IsNullOrEmpty(System.Configuration.ConfigurationManager.AppSettings["LoadKeyListPortAndServiceName"]) ? ("6114:LoadKeyList").Split(':') : System.Configuration.ConfigurationManager.AppSettings["LoadKeyListPortAndServiceName"].Split(':');
+            //int loadKeyListPort = Int32.Parse(loadKeyList[0]);
+            //string loadKeyListServiceName = loadKeyList[1];
+            //this.socketServer3 = new AsyncMultiSocketServer(loadKeyListPort, loadKeyListServiceName);
         }
 
         protected override void OnStart(string[] args)
@@ -41,7 +41,7 @@ namespace LoadKeyService
             {
                 this.socketServer1.Start();
                 this.socketServer2.Start();
-                this.socketServer3.Start();
+                //this.socketServer3.Start();
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace LoadKeyService
             log.Debug(m => m("OnStop Service ..."));
             this.socketServer1.Stop();
             this.socketServer2.Stop();
-            this.socketServer3.Stop();
+            //this.socketServer3.Stop();
         }
     }
 }

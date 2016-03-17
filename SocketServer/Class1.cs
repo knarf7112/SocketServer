@@ -13,12 +13,12 @@ namespace SocketServer
         {
             //ISocketServer s1 = new AsyncMultiSocketServer(6112, "Authenticate");
             //s1.Start();
-            //ISocketServer s2 = new AsyncMultiSocketServer(6112, "LoadKey");
-            //s2.Start();
+            ISocketServer s2 = new AsyncMultiSocketServer(6112, "LoadKey");
+            s2.Start();
             //ISocketServer s3 = new AsyncMultiSocketServer(6113, "LoadKeyTxLog");
             //s3.Start();
-            ISocketServer s4 = new AsyncMultiSocketServer(6114, "LoadKeyList");
-            s4.Start();
+            //ISocketServer s4 = new AsyncMultiSocketServer(6114, "LoadKeyList");
+            //s4.Start();
             string cmd = string.Empty;
             while (!cmd.Equals("exit"))
             {
