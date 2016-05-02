@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadKeyService", "LoadKeySe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Operate", "DB_Module\DB_Operate.csproj", "{15C31469-E46A-461A-9813-84CE6B7D166B}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ReaderShipmentWeb(1)", "http://localhost:2887", "{E44DFB55-D09F-445F-90C9-B2667F38513B}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ReaderShipmentWeb", "http://localhost:2887", "{E44DFB55-D09F-445F-90C9-B2667F38513B}"
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
@@ -55,6 +55,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAMService", "PAMService\PAMService.csproj", "{B4BC017A-6CBE-40CD-B261-46EB42A577CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Lib", "DB_Lib\DB_Lib.csproj", "{D2F5F6F4-A251-458E-9169-2E6887E05BF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServer", "WebSocketServer\WebSocketServer.csproj", "{1B400290-B24B-41AD-B08B-80C226553FA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,6 +128,10 @@ Global
 		{D2F5F6F4-A251-458E-9169-2E6887E05BF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2F5F6F4-A251-458E-9169-2E6887E05BF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2F5F6F4-A251-458E-9169-2E6887E05BF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B400290-B24B-41AD-B08B-80C226553FA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B400290-B24B-41AD-B08B-80C226553FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B400290-B24B-41AD-B08B-80C226553FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B400290-B24B-41AD-B08B-80C226553FA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
