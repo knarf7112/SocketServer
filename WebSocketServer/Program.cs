@@ -11,12 +11,14 @@ namespace WebSocketServer
         static void Main(string[] args)
         {
             AsyncMultiSocket s1 = new AsyncMultiSocket(6111, "TestAsyncSocketServer");
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; //攔截主socket設為null時,beginAccept方法拋出
-            s1.OnWriteLog = (string msg) => { Console.WriteLine(msg); };
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; //攔截主socket設為null
+            //s1.OnWriteLog = (string msg) => { Console.WriteLine(msg); };
+            Logger.OnWriteLog = (string msg) => { Console.WriteLine(msg); };
             s1.Start();
 
             Console.Read();
             s1.Stop();
+            Console.ReadKey();
             Console.ReadKey();
         }
 

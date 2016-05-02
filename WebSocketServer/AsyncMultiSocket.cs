@@ -16,7 +16,7 @@ using System.Diagnostics;
 
 namespace WebSocketServer
 {
-    public delegate void WriteLog(string msg);
+    //public delegate void WriteLog(string msg);
     public class AsyncMultiSocket : ISocketServer
     {
         #region Field
@@ -109,6 +109,7 @@ namespace WebSocketServer
                     this.Initial_Socket();
                 }
                 WriteLog("Start Service: " + this.ServiceName);
+                Logger.WriteLog("Start Service: " + this.ServiceName);
                 this.AsyncAccept();
             }
             catch (Exception ex)
@@ -122,6 +123,7 @@ namespace WebSocketServer
             {
                 this._mainSocket.BeginAccept(this.AcceptCallback, null);
                 WriteLog("one client socket waiting for ...");
+                Logger.WriteLog("one client socket waiting for ...");
             }
             catch (SocketException sckEx)
             {
@@ -144,18 +146,28 @@ namespace WebSocketServer
                     //string msg = "Hello";
                     //byte[] send_data = Encoding.UTF8.GetBytes(msg);
                     //int sendLength = client.Send(send_data);
-                    byte[] buffer = new byte[0x1000];
-                    //int recieveLength = client.Receive(buffer);
-
-                    //string recieveData = Encoding.UTF8.GetString(buffer, 0, recieveLength);
-                    //WriteLog(recieveData);
-                    WriteLog("一個client socket connected");
+                    byte[] result = new byte[0];
+                    int Totallength = 0;
+                    while (client.Available > 0)
+                    {
+                        byte[] buffer = new byte[0x10];
+                        int recieveLength = client.Receive(buffer);
+                        Totallength += recieveLength;
+                        if (recieveLength < buffer.Length)
+                            Array.Resize(ref buffer, recieveLength);
+                        result = result.Concat(buffer).ToArray();
+                        
+                    }
+                    string recieveData = Encoding.UTF8.GetString(result, 0, Totallength);
+                    WriteLog(recieveData);
+                    Logger.WriteLog(recieveData);
+                    //WriteLog("一個client socket connected");
                 }
             }
             catch (Exception ex)
             {
                 WriteLog("[Error]" + ex.Message);
-                Console.ReadKey();
+                Logger.WriteLog("[Error]" + ex.Message);
             }
         }
         protected void Initial_Socket()
