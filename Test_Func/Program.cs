@@ -25,8 +25,99 @@ namespace Test_Func
 {
     class Program
     {
-        #region 20.測試與操作封裝SQLite的模組
+        #region 22.測試非同步是否消耗ThreadPool內的completionPortThreads(非同步IO)? 是:只要receive不結束那邊不結束,此非同步IO的thread就會在使用狀態(其他人無法使用)
         static void Main()
+        {
+            string leaveCmd = "exit";
+            string data = "";
+            //ref:
+            IPEndPoint info = new IPEndPoint(IPAddress.Any,6111);
+            ThreadPoolStatus("[Main]");
+            Socket sck = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
+            sck.Bind(info);
+            sck.Listen(1000);
+            AsyncAccept(sck);
+            ThreadPoolStatus("[Main]");
+            do
+            {
+                data = Console.ReadLine();
+            }
+            while (data != leaveCmd);
+            Console.WriteLine("88................");
+            
+        }
+        static void AsyncAccept(Socket sck)
+        {
+            sck.BeginAccept(AcceptCallback, sck);
+            ThreadPoolStatus("[AsyncAccept]");
+        }
+        static void AcceptCallback(IAsyncResult ar)
+        {
+            Socket main = ((Socket)ar.AsyncState);
+            AsyncAccept(main);
+            Socket client = main.EndAccept(ar);
+            Console.WriteLine("產生了一個client...");
+            string msg = "hello\r\n";
+            client.Send(Encoding.ASCII.GetBytes(msg));
+            ThreadPoolStatus("[AcceptCallback]送完數據");
+
+
+            byte[] result = new byte[0];
+            byte[] buffer;
+            do{
+                buffer = new byte[1024];
+                int receiveLength = client.Receive(buffer);
+                if(receiveLength != buffer.Length)
+                Array.Resize(ref buffer,receiveLength);
+                result = result.Concat(buffer).ToArray();
+            }
+            while(client.Available != 0);
+
+            
+            ThreadPoolStatus("[AcceptCallback]收完數據");
+
+
+        }
+        static void ThreadPoolStatus(string whocall)
+        {
+            //依據執行緒不同有不同數量 => 4個執行緒*250=1000個
+            int workerThreads = 0;
+            int completionPortThreads = 0;
+            ThreadPool.GetAvailableThreads(out workerThreads, out completionPortThreads);//所以非同步IO是損耗completionPortThreads
+            Console.WriteLine(whocall + ":可使用的thread總數:{0} 可使用的非同步thread總數:{1}", workerThreads, completionPortThreads);
+        }
+        #endregion
+
+        #region 21.測試非同步client socket物件會不會造成thread遞增?結論不會
+        static void Main21()
+        {
+            Console.WriteLine("push any key to create client ...");
+            Console.ReadKey();
+            string ip ="127.0.0.1";
+            int port = 6111;
+            int connect_Count = 10;
+            ClientSocket client = new ClientSocket(ip, port);
+            client.InitSocketClient(connect_Count);
+            client.StartConnect_All();
+            Console.WriteLine("End===========================================================================================");
+            Console.ReadKey();
+
+            Console.WriteLine("Start Close Connection========================================================================");
+            client.CloseAll();
+            Console.WriteLine("End===========================================================================================");
+            Console.ReadKey();
+
+
+            Console.WriteLine("Run 2 ===========================================================================================");
+            client.InitSocketClient(connect_Count);
+            client.StartConnect_All();
+            Console.WriteLine("End2===========================================================================================");
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 20.測試與操作封裝SQLite的模組
+        static void Main20()
         {
             
             string connectionstring = @"Data Source=database.db;";
@@ -40,6 +131,7 @@ namespace Test_Func
             sqlite_module.Delete_Table(tableName);
         }
         #endregion
+
         #region 19.Process開啟其他執行檔並帶入參數,目前只確定可執行前附帶參數,已執行或執行中都無法在附帶參數
         static void Main19(string[] args)
         {
