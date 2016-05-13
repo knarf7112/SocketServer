@@ -10,15 +10,14 @@ namespace WebSocket_Test
     //ref:http://stackoverflow.com/questions/10200910/create-hello-world-websocket-example
     public class Test_WebSocket
     {
-        static Socket serverSocket = new Socket(AddressFamily.InterNetwork,
-        SocketType.Stream, ProtocolType.Tcp);
         static private string guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-        static void Main1(string[] args)
+        static void Main(string[] args)
         {
+            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(new IPEndPoint(IPAddress.Any, 611));
             serverSocket.Listen(128);
-            serverSocket.BeginAccept(null, 0, OnAccept, null);
+            BeginAcceptRequest(serverSocket);
             Console.WriteLine("開始非同步監聽...");
             ConsoleKey exit = ConsoleKey.N;
             while (exit != ConsoleKey.Y)
@@ -27,18 +26,32 @@ namespace WebSocket_Test
             }
         }
 
-        private static void OnAccept(IAsyncResult result)
+        static void BeginAcceptRequest(Socket main)
+        {
+            try
+            {
+                main.BeginAccept(null, 0, AcceptCallback, main);
+                ShowTthreadPoolInfo();
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine("[BeginAcceptRequest][ThreadId:{0}]Error:{1}", Thread.CurrentThread.ManagedThreadId, ex.Message);
+            }
+        }
+        private static void AcceptCallback(IAsyncResult result)
         {
             byte[] buffer = new byte[1024];
+
             Socket client = null;
             try
             {
-               
+                Socket serverSocket = result.AsyncState as Socket;
                 string headerResponse = "";
                 if (serverSocket != null && serverSocket.IsBound)
                 {
-                    
+                    BeginAcceptRequest(serverSocket);
                     client = serverSocket.EndAccept(result);
+                    ShowTthreadPoolInfo();
                     Console.WriteLine("start receive data ...");
                     var i = client.Receive(buffer);
                     Console.WriteLine("end receive data ...");
@@ -61,7 +74,7 @@ namespace WebSocket_Test
 
                     var newLine = "\r\n"; //Environment.NewLine;
 
-                    var response = "HTTP/1.1 101 Switching Protocols" + newLine
+                    var response = "HTTP/1.1 101 Switching Protocols" + Environment.NewLine//newLine
                          + "Upgrade: websocket" + newLine
                          + "Connection: Upgrade" + newLine
                          + "Sec-WebSocket-Accept: " + test1 + newLine + newLine
@@ -94,13 +107,20 @@ namespace WebSocket_Test
                 client= null;
                 Console.WriteLine("關閉此次Client");
             }
-            finally
-            {
-                if (serverSocket != null && serverSocket.IsBound)
-                {
-                    serverSocket.BeginAccept(null, 0, OnAccept, null);
-                }
-            }
+        }
+
+        private static void ShowTthreadPoolInfo()
+        {
+            int workerThreads = 0;
+            int completionThreads = 0;
+            ThreadPool.GetAvailableThreads(out workerThreads, out completionThreads);
+            Console.WriteLine("{0} 目前背景執行緒數量:{1}, 非同步IO數量:{2}", GetMethodName(2), workerThreads, completionThreads);
+        }
+
+        private static string GetMethodName(int index = 1)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            return "[" + st.GetFrame(index).GetMethod().Name + "]";
         }
 
         public static T[] SubArray<T>(T[] data, int index, int length)

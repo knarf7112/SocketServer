@@ -80,27 +80,32 @@ namespace SocketServer.v2.Handlers
         }
 
         /// <summary>
-        /// 清除所有client handler
+        /// 中斷所有Client連線並清除client字典檔,並清除所有error Msg
         /// </summary>
         public void ClearAll()
         {
+            foreach (var client in this.dic.Values)
+            {
+                client.CancelAsync();//中斷client連線
+            }
             this.dic.Clear();
             this.ErrorList.Clear();
             this.ClientNo = 0;
         }
 
         /// <summary>
-        /// 指定client Id移除client handler
+        /// 指定client Id,中斷client連線並移除client handler
         /// </summary>
         /// <param name="clientNo">指定client Id</param>
         public void RemoveClient(int clientNo)
         {
             if (this.dic.ContainsKey(clientNo))
             {
-                lock (this.lockObj)
+                lock (this.dic)
                 {
                     if (!this.dic[clientNo].IsUsed)
                     {
+                        this.dic[clientNo].CancelAsync();//中斷client連線
                         bool removed = this.dic.Remove(clientNo);
                         if (!removed)
                         {

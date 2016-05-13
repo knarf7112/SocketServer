@@ -55,7 +55,7 @@ namespace WebSocket_Test
         */
         //****************************************************************************
         //ref:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_server
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {            
             TcpListener server = new TcpListener(IPAddress.Any, 612);
             

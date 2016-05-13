@@ -63,6 +63,7 @@
     <Compile Include="SocketProxy.cs" />
     <Compile Include="StaticClass1.cs" />
     <Compile Include="Test\StaticClass1.cs" />
+    <Compile Include="Test\TestIAsyncResult.cs" />
     <Compile Include="Test\Test_AsyncSocket.cs" />
   </ItemGroup>
   <ItemGroup>

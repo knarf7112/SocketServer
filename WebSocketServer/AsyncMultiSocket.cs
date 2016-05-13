@@ -108,7 +108,7 @@ namespace WebSocketServer
                 {
                     this.Initial_Socket();
                 }
-                WriteLog("Start Service: " + this.ServiceName);
+                //WriteLog("Start Service: " + this.ServiceName);
                 Logger.WriteLog("Start Service: " + this.ServiceName);
                 this.AsyncAccept();
             }
@@ -121,13 +121,14 @@ namespace WebSocketServer
         {
             try
             {
-                this._mainSocket.BeginAccept(this.AcceptCallback, null);
-                WriteLog("one client socket waiting for ...");
+                this._mainSocket.BeginAccept(this.AcceptCallback, this._mainSocket);
+                //WriteLog("one client socket waiting for ...");
                 Logger.WriteLog("one client socket waiting for ...");
             }
             catch (SocketException sckEx)
             {
-                WriteLog("[Error]" + sckEx.Message);
+                //WriteLog("[Error]" + sckEx.Message);
+                Logger.WriteLog("[Error]" + sckEx.Message);
             }
         }
 
@@ -142,37 +143,44 @@ namespace WebSocketServer
                 {
                     
                     //Socket mainSoket = (Socket)ar.AsyncState;
-                    Socket client = this._mainSocket.EndAccept(ar);//mainSoket.EndAccept(ar);
-                    //string msg = "Hello";
-                    //byte[] send_data = Encoding.UTF8.GetBytes(msg);
-                    //int sendLength = client.Send(send_data);
-                    byte[] result = new byte[0];
-                    int Totallength = 0;
-                    while (client.Available > 0)
-                    {
-                        byte[] buffer = new byte[0x10];
-                        int recieveLength = client.Receive(buffer);
-                        Totallength += recieveLength;
-                        if (recieveLength < buffer.Length)
-                            Array.Resize(ref buffer, recieveLength);
-                        result = result.Concat(buffer).ToArray();
-                        
-                    }
-                    string recieveData = Encoding.UTF8.GetString(result, 0, Totallength);
-                    WriteLog(recieveData);
+                    Socket client = ((Socket)ar.AsyncState).EndAccept(ar);
+                    
+                    //this.
+
+                    byte[] result;
+                    int receive_size = Receive(client, out result);
+                    string recieveData = Encoding.UTF8.GetString(result, 0, receive_size);
+                    //WriteLog(recieveData);
                     Logger.WriteLog(recieveData);
-                    //WriteLog("一個client socket connected");
                 }
             }
             catch (Exception ex)
             {
-                WriteLog("[Error]" + ex.Message);
+                //WriteLog("[Error]" + ex.Message);
                 Logger.WriteLog("[Error]" + ex.Message);
             }
         }
+
+        public int Receive(Socket client, out byte[] result)
+        {
+            result = new byte[0];
+            int totallength = 0;
+            byte[] buffer;
+            while (client.Available > 0)
+            {
+                buffer = new byte[0x100];//[0x10];
+                int recieveLength = client.Receive(buffer);
+                totallength += recieveLength;
+                if (recieveLength < buffer.Length)
+                    Array.Resize(ref buffer, recieveLength);
+                result = result.Concat(buffer).ToArray();
+
+            }
+            return totallength;
+        }
         protected void Initial_Socket()
         {
-            WriteLog("Initial Main Socket");
+            Logger.WriteLog("Initial Main Socket | Listen Port:" + this.Port.ToString());
             this._mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             this._mainSocket.Bind(new IPEndPoint(this.Listen_IPAddress, this.Port));
             this._mainSocket.Listen(BACKLOG);

@@ -21,12 +21,89 @@ using Newtonsoft.Json;
 //sqlite
 using global::System.Data.SQLite;
 using System.Data;
+//regex
+using System.Text.RegularExpressions;
+
 namespace Test_Func
 {
     class Program
     {
-        #region 22.測試非同步是否消耗ThreadPool內的completionPortThreads(非同步IO)? 是:只要receive不結束那邊不結束,此非同步IO的thread就會在使用狀態(其他人無法使用)
+        #region 25.Test Regex wrap \r\n
+
         static void Main()
+        {
+            string newline = Environment.NewLine;
+            string newline2 = "\r\n";
+            byte[] newlineBytes = Encoding.ASCII.GetBytes(newline);
+            byte[] newlineBytes2 = Encoding.ASCII.GetBytes(newline2);
+
+            //websocket chrome send request sample 
+            string hexRequest = "474554202F20485454502F312E310D0A486F73743A203132372E302E302E313A343534350D0A436F6E6E656374696F6E3A20557067726164650D0A507261676D613A206E6F2D63616368650D0A43616368652D436F6E74726F6C3A206E6F2D63616368650D0A557067726164653A20776562736F636B65740D0A4F726967696E" + 
+                                "3A20687474703A2F2F737461636B6F766572666C6F772E636F6D0D0A5365632D576562536F636B65742D56657273696F6E3A2031330D0A557365722D4167656E743A204D6F7A696C6C612F352E30202857696E646F7773204E5420362E313B20574F57363429204170706C655765624B69742F3533372E333620284B48544D4C" +
+                                "2C206C696B65204765636B6F29204368726F6D652F35302E302E323636312E3934205361666172692F3533372E33360D0A4163636570742D456E636F64696E673A20677A69702C206465666C6174652C20736463680D0A4163636570742D4C616E67756167653A207A682D54572C7A683B713D302E382C656E2D55533B713D30" +
+                                "2E362C656E3B713D302E340D0A5365632D576562536F636B65742D4B65793A20456E54306F6D5A463272385A354F353372382B384D413D3D0D0A5365632D576562536F636B65742D457874656E73696F6E733A207065726D6573736167652D6465666C6174653B20636C69656E745F6D61785F77696E646F775F62697473";
+            string request = Encoding.UTF8.GetString(HextoByte(hexRequest));
+            string replacenewline = request.Replace("\r\n", "");
+            //打算group所有的key TODO...
+            //Regex reg = new Regex(@"(Connection: .*)?(Sec-WebSocket-Key: .*)?", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            string[] allParts = request.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+            var request_key = allParts.Where(header => header.Contains("Sec-WebSocket-Key")).Select(key => key.Replace("Sec-WebSocket-Key:", "").Trim()).FirstOrDefault();
+            Console.WriteLine("key:{0}", request_key);
+            //Match match = reg.Match(request);
+            //var ss = match.Groups[1].Value.Trim();
+            //var ss = match.Groups[1].Value.Trim();
+            Console.ReadKey();
+        }
+
+        static byte[] HextoByte(string hex)
+        {
+            if (hex.Length % 2 > 0)
+                throw new ArgumentException("length not double");
+            byte[] result = new byte[hex.Length >> 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                //string hex2 = hex.Substring(j, 2);
+                result[i] = Byte.Parse(hex.Substring(i<<1, 2), System.Globalization.NumberStyles.HexNumber);
+            }
+            return result;
+        }
+        #endregion
+
+        #region 24.Test byte[] combine
+        static void Main24()
+        {
+            byte[] a = new byte[] { 1, 2, 3 };
+            byte[] b = new byte[] { 4, 5, 6, 7 };
+            byte[] c = new byte[] { 8, 9 };
+            IEnumerable<byte> result = new byte[0];
+
+            //call static method
+            result = Enumerable.Concat(result, a);
+            //
+            result = result.Concat(a);//deffered combine
+            result = result.Concat(b); 
+            result = result.Concat(c);
+            Console.WriteLine("byte[]:{0}", BitConverter.ToString(result.ToArray()));
+            //foreach (byte b1 in result)
+            //{
+            //    Console.WriteLine("byte:{0}", b1);
+            //}
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 23.測試非同步作業 IAsyncResult / AsyncCallback
+        /// ref:https://dotblogs.com.tw/yc421206/2011/01/03/20540
+        static void Main23(string[] args)
+        {
+            TestIAsyncResult t1 = new TestIAsyncResult();
+            t1.CallAsyncMethod();
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 22.測試非同步是否消耗ThreadPool內的completionPortThreads(非同步IO)? 是:只要receive不結束那邊不結束,此非同步IO的thread就會在使用狀態(其他人無法使用)
+        static void Main22(string[] args)
         {
             string leaveCmd = "exit";
             string data = "";

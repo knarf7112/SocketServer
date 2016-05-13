@@ -45,10 +45,14 @@
     <Compile Include="Client\AbsRequestHandler.cs" />
     <Compile Include="Client\IRequestHandler.cs" />
     <Compile Include="Client\State\IState.cs" />
+    <Compile Include="Client\State\State_AsyncCommunicate.cs" />
+    <Compile Include="Client\State\State_Exit.cs" />
+    <Compile Include="Client\State\State_HandShake.cs" />
     <Compile Include="ISocketServer.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\Logger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

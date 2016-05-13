@@ -34,9 +34,9 @@ namespace WebSocketServer.Client
         /// </summary>
         public int ClientNo { get; set; }
         /// <summary>
-        /// Request byte array
+        /// 接收的資料
         /// </summary>
-        public byte[] Request { get; set; }
+        public byte[] ReceiveData;
         public Socket ClientSocket
         {
             get
@@ -69,7 +69,18 @@ namespace WebSocketServer.Client
         
         public virtual void DoCommunicate()
         {
-            throw new NotImplementedException();
+            this.ReceiveData = new byte[1024];
+            this.timer.Restart();
+            do
+            {
+                this.timer.Restart();
+                this.ServiceState.Handle(this);
+                Logger.WriteLog("TimeSpend:" + this.timer.ElapsedMilliseconds.ToString() + "ms");
+                this.timer.Stop();
+            }
+            while (this.KeepService);
+            this.timer.Stop();
+            Logger.WriteLog("TimeSpend:" + this.timer.ElapsedMilliseconds.ToString() + "ms");
         }
 
         public virtual void CancelAsync()
@@ -83,7 +94,7 @@ namespace WebSocketServer.Client
                 }
                 catch (SocketException sckEx)
                 {
-
+                    Logger.WriteLog("[SocketException]" + sckEx.Message);
                 }
                 finally
                 {
@@ -91,7 +102,7 @@ namespace WebSocketServer.Client
                     //清除本次狀態暫存的數據
                     this.ClientSocket = null;//清除本次的socket物件
                     this.KeepService = false;//用來離開state迴圈
-                    this.Request = null;//清除本次收到的request byte array
+                    this.ReceiveData = null;//清除本次收到的request byte array
                 }
             }
         }
