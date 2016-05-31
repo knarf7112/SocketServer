@@ -28,10 +28,141 @@ namespace Test_Func
 {
     class Program
     {
-        #region 25.Test Regex wrap \r\n
-
+        #region 28.測試 Send Mail
+        static bool mailSent = false;
         static void Main()
         {
+            //ref:https://msdn.microsoft.com/zh-tw/library/system.net.mail.smtpclient(v=vs.110).aspx
+            string smtpHost = "mail.allpay.com.tw";//用cmd 的nslookup查"192.168.50.2"對應的host Name;//SMTP host
+            System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient(smtpHost);
+            System.Net.Mail.MailAddress from = new System.Net.Mail.MailAddress("sys@allpay.com.tw","Server", Encoding.UTF8);
+            System.Net.Mail.MailAddress to = new System.Net.Mail.MailAddress("knock.yang@allpay.com.tw", "Knock", Encoding.UTF8);
+            System.Net.Mail.MailMessage msg = new System.Net.Mail.MailMessage(from, to);
+            msg.Body = "This is a test e-mail message sent by an application. 這是測試信件ㄟ";
+            msg.BodyEncoding = Encoding.UTF8;
+
+            msg.Subject = "TestKnockMail測試送信";
+            msg.SubjectEncoding = Encoding.UTF8;
+
+            //setting send mail complete
+            client.SendCompleted += new System.Net.Mail.SendCompletedEventHandler((object obj, AsyncCompletedEventArgs e) => {
+                // Get the unique identifier for this asynchronous operation.
+                string token = (string)e.UserState;
+                if (e.Cancelled)
+                {
+                    Console.WriteLine("[{0}] Send canceled.", token);
+                }
+                if (e.Error != null)
+                {
+                    Console.WriteLine("[{0}] {1}", token, e.Error.ToString());
+                }
+                else
+                {
+                    Console.WriteLine("Message sent.");
+                }
+                mailSent = true;
+            });
+
+
+            // The userState can be any object that allows your callback 
+            // method to identify this send operation.
+            // For this example, the userToken is a string constant.
+            string userState = "test message1";
+            client.SendAsync(msg, userState);
+            Console.WriteLine("Sending message... press c to cancel mail. Press any other key to exit.");
+            string answer = Console.ReadLine();
+            // If the user canceled the send, and mail hasn't been sent yet,
+            // then cancel the pending operation.
+            if (answer.StartsWith("c") && mailSent == false)
+            {
+                client.SendAsyncCancel();
+            }
+            // Clean up.
+            msg.Dispose();
+            Console.WriteLine("Goodbye.");
+
+        }
+        #endregion
+
+        #region 27.測試pipeline communication
+
+        static void Main27()
+        {
+            //一開始以為可以跨Process互相交訊但不走網路,測試結果是只能同一個Process內交訊
+            //ref:http://stackoverflow.com/questions/13806153/example-of-named-pipes
+            StartServer();
+            Task.Delay(1000).Wait();
+
+            var client = new System.IO.Pipes.NamedPipeClientStream("PipesOfPiece");
+            client.Connect();
+            Console.WriteLine("client connected ");
+            StreamReader sr = new StreamReader(client);
+            StreamWriter sw = new StreamWriter(client);
+
+            while (true)
+            {
+                Console.WriteLine("Console write any data");
+                string line = Console.ReadLine();
+                Console.WriteLine("Console write data:" + line);
+                if (String.IsNullOrEmpty(line)) break;
+                sw.WriteLine(line);
+                Console.WriteLine("client write data :" + line);
+                sw.Flush();
+                string readData = sr.ReadLine();
+                Console.WriteLine("client read data :" + readData);
+            }
+        }
+
+        static void StartServer()
+        {
+            Task.Factory.StartNew(
+                () => {
+                    var server = new System.IO.Pipes.NamedPipeServerStream("PipesOfPiece");
+                    server.WaitForConnection();
+
+                    StreamReader sr = new StreamReader(server);
+                    StreamWriter sw = new StreamWriter(server);
+                    while (true)
+                    {
+                        
+                        string line = sr.ReadLine();
+                        Console.WriteLine("Server read data :" + line);
+                        
+                        sw.WriteLine(String.Join("", line.Reverse()));
+                        Console.WriteLine("Server write data :" + String.Join("", line.Reverse()));
+                        sw.Flush();
+                    }
+                });
+        }
+        #endregion
+
+        #region 26.測試ToString("X")再PadLeft補0和直接ToString("X2")的差別,結果是一樣的
+        static void Main26()
+        {
+
+            
+            
+            byte[] b1 = new byte[] { 1, 2, 3, 128, 255 };
+            StringBuilder sb = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
+            for (int i = 0; i < b1.Length; i++)
+            {
+
+                sb.Append(b1[i].ToString("X").PadLeft(2, '0') + ",");//一樣的結果
+                sb2.Append(b1[i].ToString("X2") + ",");//一樣的結果
+            }
+            Console.WriteLine(sb.ToString());
+            Console.WriteLine(sb2.ToString());
+                Console.ReadKey();
+        }
+        #endregion
+
+        #region 25.Test Regex wrap \r\n
+
+        static void Main25()
+        {
+            var qq = 0xFFFFFFFF;
+
             string newline = Environment.NewLine;
             string newline2 = "\r\n";
             byte[] newlineBytes = Encoding.ASCII.GetBytes(newline);
