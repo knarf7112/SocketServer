@@ -23,14 +23,284 @@ using global::System.Data.SQLite;
 using System.Data;
 //regex
 using System.Text.RegularExpressions;
+using System.Linq.Expressions;
 
 namespace Test_Func
 {
     class Program
     {
+        #region 36.測試取得變量名稱
+        static void Main()
+        {
+            //1.測試取得變量名稱
+            string testName = "123";
+
+            string memberName = GetMemberName(() => testName);
+            Console.WriteLine("MemberName: " + memberName);
+            Test_GetMemberName("123", null);
+            Console.ReadKey();
+            
+            //2.測試取得(靜態)方法的參數名稱
+            //System.Reflection.MethodInfo methodInfo = Program.
+            var methodInfo = typeof(Program).GetMethod("Test_GetMemberName",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy);
+
+            var paraNamelist = GetParasName(methodInfo);
+            foreach (string paraName in paraNamelist)
+                Console.WriteLine("[Test_GetMemberName] para name:{0}", paraName);
+            Console.ReadKey();
+
+            //3.測試取得方法的參數名稱
+            //(目的:想說Controller的Action方法可以自動將Request內的Post資料自動對應到相同名稱的參數,是怎對應的,看來應該就是字串比對方法參數與戴上來的集合數據)
+            var methodInfo2 = typeof(Program).GetMethod("Test_GetMemberName2");
+            
+            var paraNamelist2 = GetParasName(methodInfo2);
+            foreach (string paraName in paraNamelist2)
+                Console.WriteLine("[Test_GetMemberName2] para name:{0}", paraName);
+            Console.ReadKey();
+        }
+
+        //取得方法的參數名稱
+        static IList<string> GetParasName(System.Reflection.MethodInfo method)
+        {
+            System.Reflection.ParameterInfo[] parasInfo = method.GetParameters();
+            if (parasInfo != null && parasInfo.Count() > 0)
+            {
+                IList<string> parasCollection = new List<string>();
+                foreach (System.Reflection.ParameterInfo para in parasInfo)
+                {
+                    parasCollection.Add(para.Name);
+                }
+                return parasCollection;
+            }
+            return null;
+        }
+
+        //取得變數(variable)的名稱
+        //ref:http://stackoverflow.com/questions/9801624/get-name-of-a-variable-or-parameter
+        static string GetMemberName<T>(System.Linq.Expressions.Expression<Func<T>> memberExpression)
+        {
+            MemberExpression expressionBody = memberExpression.Body as MemberExpression;
+            return expressionBody.Member.Name;
+        }
+
+        static void Test_GetMemberName(string memberName1, Program program)
+        {
+            string para1Name = GetMemberName(() => memberName1);
+            Console.WriteLine("Test_GetMemberName's para 1 Name:" + para1Name);
+            string para2Name = GetMemberName(() => program);
+            Console.WriteLine("Test_GetMemberName's para 2 Name:" + para2Name);
+            Console.WriteLine("para 1 value:{0} | para 2 value:{1}", memberName1, program);
+        }
+
+        public void Test_GetMemberName2(string memberName2, Program program2)
+        {
+
+        }
+        #endregion
+
+        #region 35.Delegate += 測試
+        delegate void T1();
+        static T1 t;
+        static void Main35()
+        {
+            t += () => { Console.WriteLine("method 1"); };
+            t += () => { Console.WriteLine("method 2"); };
+            if (t != null)
+                t.Invoke();
+            t.GetInvocationList()[0].DynamicInvoke();
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 34.測試Interlocked的功能 => 結論 : 看起來類似 lock(obj){ i++; },
+        static int _value;
+        static int _value1;
+        static void Main34()
+        {
+            Thread thread1 = new Thread(new ThreadStart(A_method));
+            Thread thread2 = new Thread(new ThreadStart(A_method));
+            thread1.Start();
+            thread2.Start();
+            thread1.Join();
+            thread2.Join();
+
+            Console.WriteLine(Program._value);
+            Console.ReadKey();
+            /**********************************************************/
+            Thread thread3 = new Thread(new ThreadStart(B_method));
+            Thread thread4 = new Thread(new ThreadStart(B_method));
+            Thread thread5 = new Thread(new ThreadStart(B_method));
+            thread3.Start(); thread4.Start(); thread5.Start();
+            thread3.Join(); thread4.Join(); thread5.Join();
+            
+            long value1 = ((long)Program._value1);
+	        // Written [2] : 如果有人lock就會等到lock的值改變完才讀取
+            Console.WriteLine("last result:{0}", Interlocked.Read(ref value1));//lock and wait for Program._value1
+            Console.ReadKey();
+        }
+        static void B_method()
+        {
+            // Replace value with 10.
+            int value2 = Interlocked.Exchange(ref Program._value1, 10);
+            Console.WriteLine("value2 origin:{0}  changed:{1}", value2, Program._value1);
+
+            // CompareExchange: if 10, change to 20.
+            int value3 = Interlocked.CompareExchange(ref Program._value1, 20, 10);
+            Console.WriteLine("value3 origin:{0}  changed:{1}", value3, Program._value1);
+            Thread.Sleep(2000);
+        }
+
+        static void A_method()
+        {
+            //ref:http://geekswithblogs.net/BlackRabbitCoder/archive/2012/08/09/c.net-little-wonders-interlocked-increment-decrement-and-add.aspx#617873
+            // Add one then subtract two.
+            Interlocked.Increment(ref Program._value);//就是i++的意思,類似lock(i){ i++ },不過比較省資源
+            Console.WriteLine("A+:{0}",Program._value);
+            Interlocked.Decrement(ref Program._value);
+            Interlocked.Decrement(ref Program._value);
+            Console.WriteLine("A-:{0}", Program._value);
+        }
+        #endregion
+
+        #region 33.檢查測試
+        static void Main33()
+        {
+            string data = "測";
+            char c = data[0];
+            var utf8 = Encoding.UTF8.GetBytes(data);
+            var big5 = Encoding.GetEncoding(950).GetBytes(data);
+            var c0 = Convert.ToUInt32(c) >> 8;
+            var c1 = Convert.ToUInt32(c) & 0xff;
+            string a = String.Format("{0:x4}",Convert.ToUInt32(c));
+            DateTime now = DateTime.MinValue;// = DateTime.Now;
+            string nowstr = now.ToString("yyyy/MM/dd HH:mm:ss").Replace("0001/01/01 00:00:00", "");
+            var areEquals = DateTime.MinValue.Equals(now);
+            string interger = null;//"123a";
+            int @out = -1;
+            //var qq = Convert.ToInt32(interger);//throw exception
+            Int32.TryParse(interger, out @out);//false and out data is default value;
+
+            string test = "&a=123&b=456&c=789&d=999";
+            var collection = System.Web.HttpUtility.ParseQueryString(test, Encoding.UTF8);
+            var rr = test.TrimStart(new char[] { '&' });
+
+        }
+        #endregion
+
+        #region 32.測試建立BinaryTree並分Left與Right
+        static void Main32()
+        {
+            //ref:https://msdn.microsoft.com/en-us/library/ms379572(v=vs.80).aspx
+            BinaryTree<int> btree = new BinaryTree<int>();
+            btree.Root = new BinaryTreeNode<int>(1);
+            btree.Root.Left = new BinaryTreeNode<int>(2);
+            btree.Root.Right = new BinaryTreeNode<int>(3);
+
+            btree.Root.Left.Left = new BinaryTreeNode<int>(4);
+            btree.Root.Right.Right = new BinaryTreeNode<int>(5);
+
+            btree.Root.Left.Left.Right = new BinaryTreeNode<int>(6);
+            btree.Root.Right.Right.Right = new BinaryTreeNode<int>(7);
+
+            btree.Root.Right.Right.Right.Right = new BinaryTreeNode<int>(8);
+
+        }
+        #endregion
+
+        #region 31.測試畫圖Draw Image
+        static void Main31()
+        {
+            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(500,500);
+            System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(bitmap);
+
+            graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Brushes.Red), new System.Drawing.Point(10, 10), new System.Drawing.Point(400, 400));
+            graphics.DrawString("hellow 測試畫圖", new System.Drawing.Font("Arial", 24), System.Drawing.Brushes.Blue, new System.Drawing.PointF(10, 150));
+            //bitmap.Save("qq.png", System.Drawing.Imaging.ImageFormat.Png);
+            using(MemoryStream ms = new MemoryStream())
+            {
+                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                using (FileStream sw = new FileStream("test.png",FileMode.CreateNew))
+                {
+                    ms.WriteTo(sw);
+                    //ms.Close();
+                    //ms.Flush();//無效
+                    //sw.Flush();//無效
+                    sw.Close();//關閉才會真的寫入資料
+                }
+            }
+        }
+        #endregion
+
+        #region 30.二分搜尋法
+        static void Main30()
+        {
+            var utf8 = ASCIIEncoding.UTF8;
+            var equal = utf8.Equals(UTF8Encoding.UTF8);
+            int[] arr = new int[] { 1, 3, 4, 6, 8, 9, 11, 15, 17, 19 };
+            Console.WriteLine("index:{0}",BinarySearch(arr, 4));
+            Console.ReadKey();
+        }
+        //二分搜尋法:就是一半一半找
+        static int BinarySearch(int[] arr,int num)
+        {
+            int left = 0, right = arr.Length - 1;
+            //搜索的目標資料必須是已經排序過的(以小到大排序為例)
+            while (left <= right)
+            {
+                //用中間的指標縮減左右的範圍
+                int middle = (left + right) / 2;
+                if (arr[middle] == num) 
+                    return middle;
+                if (arr[middle] > num)
+                    right = middle - 1;
+                else
+                    left = middle + 1;
+            }
+
+            return -1;//not find
+        }
+        #endregion
+
+        #region 29.測試FTP Client
+        static void Main29(string[] args)
+        {
+            /*
+                也可使用Nmap的ncat來連線FileZilla FTP server (port 21)
+             * cmd => ncat -n -v 127.0.0.1 21
+             * 1.cmd input => USER id => enter
+             * 2.cmd input => PASS test => enter and then login success
+             * 3.cmd input => OPTS utf8 on => enter and open urt8 mode
+             * 4.cmd input => PWD => enter 這邊之後沒測出來,本來只是要取得目錄而已
+             * 5.cmd input => TYPE I => enter
+             * 6.cmd input => PASV => enter
+             * 7.cmd input => PLIST => enter
+             */
+
+            //用fileZilla當FTP Server來測試FTP client連線取得目錄
+            string uri = "ftp://127.0.0.1:21/";
+
+            System.Net.FtpWebRequest ftpClient;
+            ftpClient = System.Net.FtpWebRequest.Create(new Uri(uri)) as FtpWebRequest;
+            ftpClient.KeepAlive = false;
+            ftpClient.UseBinary = true;
+            ftpClient.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
+            ftpClient.Credentials = new NetworkCredential("test", "test");//
+            var requestStream = ftpClient.GetResponse();
+            StreamReader sr = new StreamReader(requestStream.GetResponseStream());
+            string data = sr.ReadToEnd();
+            Console.WriteLine("data:" + data);
+            sr.Close();
+            requestStream.Close();
+            Console.WriteLine("End...");
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            Console.ReadKey();
+        }
+        #endregion
+
         #region 28.測試 Send Mail
         static bool mailSent = false;
-        static void Main()
+        static void Main28()
         {
             //ref:https://msdn.microsoft.com/zh-tw/library/system.net.mail.smtpclient(v=vs.110).aspx
             string smtpHost = "mail.allpay.com.tw";//用cmd 的nslookup查"192.168.50.2"對應的host Name;//SMTP host
