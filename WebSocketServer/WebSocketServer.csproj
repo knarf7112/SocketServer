@@ -43,12 +43,18 @@
   <ItemGroup>
     <Compile Include="AsyncMultiSocket.cs" />
     <Compile Include="Client\AbsRequestHandler.cs" />
+    <Compile Include="Client\ClientManager.cs" />
     <Compile Include="Client\IRequestHandler.cs" />
+    <Compile Include="Client\ISateObject.cs" />
+    <Compile Include="Client\StateObject.cs" />
     <Compile Include="Client\State\IState.cs" />
     <Compile Include="Client\State\State_AsyncCommunicate.cs" />
     <Compile Include="Client\State\State_Exit.cs" />
     <Compile Include="Client\State\State_HandShake.cs" />
+    <Compile Include="Client\SocketClient.cs" />
+    <Compile Include="Client\WebSocketClient.cs" />
     <Compile Include="ISocketServer.cs" />
+    <Compile Include="Client\ISocketClient.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

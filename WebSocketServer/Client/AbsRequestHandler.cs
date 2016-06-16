@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using WebSocketServer.Client.State;
 //count time spend
 using System.Diagnostics;
+using System.Threading;
 
 namespace WebSocketServer.Client
 {
@@ -36,7 +37,7 @@ namespace WebSocketServer.Client
         /// <summary>
         /// 接收的資料
         /// </summary>
-        public byte[] ReceiveData;
+        public byte[] ReceiveData = new byte[1024];
         public Socket ClientSocket
         {
             get
@@ -69,18 +70,20 @@ namespace WebSocketServer.Client
         
         public virtual void DoCommunicate()
         {
-            this.ReceiveData = new byte[1024];
-            this.timer.Restart();
+            this.timer = new Stopwatch();
+            KeepService = true;
+            this.ServiceState = new State_HandShake();
             do
             {
                 this.timer.Restart();
                 this.ServiceState.Handle(this);
-                Logger.WriteLog("TimeSpend:" + this.timer.ElapsedMilliseconds.ToString() + "ms");
                 this.timer.Stop();
+                Logger.WriteLog("TimeSpend:" + this.timer.ElapsedMilliseconds.ToString() + "ms");
             }
             while (this.KeepService);
-            this.timer.Stop();
-            Logger.WriteLog("TimeSpend:" + this.timer.ElapsedMilliseconds.ToString() + "ms");
+            //this.timer.Stop();
+            //Logger.WriteLog("TimeSpend:" + this.timer.ElapsedMilliseconds.ToString() + "ms");
+            
         }
 
         public virtual void CancelAsync()
@@ -94,11 +97,12 @@ namespace WebSocketServer.Client
                 }
                 catch (SocketException sckEx)
                 {
-                    Logger.WriteLog("[SocketException]" + sckEx.Message);
+                    Logger.WriteLog(String.Format("[CancelAsync]Socket Client({0}) Error:{1}", this.ClientNo, sckEx.Message));
                 }
                 finally
                 {
-                    this.ClientSocket.Close(1000);
+                    if (this.ClientSocket != null)
+                        this.ClientSocket.Close(1000);
                     //清除本次狀態暫存的數據
                     this.ClientSocket = null;//清除本次的socket物件
                     this.KeepService = false;//用來離開state迴圈

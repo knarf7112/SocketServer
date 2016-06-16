@@ -17,24 +17,34 @@ namespace WebSocketServer.Client.State
     /// </summary>
     public class State_AsyncCommunicate : IState
     {
+        #region WebSocket Component
         private AutoResetEvent _receiveDone = new AutoResetEvent(false);
+        private byte[] _maskingKey { get; set; }
+        private int _kindOfLength { get; set; }
+        private int _payload_size { get; set; }
+        private IEnumerable<byte> receiveData { get; set; }
         private bool _keepAlive;
-        private byte[] _maskingKey;
-        private int _kindOfLength;
-        private int _payload_size;
-        private IEnumerable<byte> receiveData;
+        private int _sequenceNO;//StateObj產生的順序
+        private AbsRequestHandler _clientHandler;
+        #endregion
+
         public void Handle(AbsRequestHandler handler)
         {
             try
             {
+                this._clientHandler = handler;
                 _keepAlive = true;
                 receiveData = new byte[0];
                 //this.AsyncReceive(handler);
-
+                handler.ReceiveData = new byte[20];
                 do
                 {
-                    Array.Clear(handler.ReceiveData, 0, handler.ReceiveData.Length);
-                    handler.ClientSocket.BeginReceive(handler.ReceiveData, 0, handler.ReceiveData.Length, SocketFlags.None, ReceiveCallback, handler);
+                    lock (_clientHandler)
+                    {
+                        _sequenceNO += 1; 
+                    }
+                    StateObj obj = new StateObj { SequnceNO = _sequenceNO, ClientSocket = handler.ClientSocket };
+                    handler.ClientSocket.BeginReceive(obj.Receive_buffer, 0, obj.Receive_buffer.Length, SocketFlags.None, ReceiveCallback, obj);
                     _receiveDone.WaitOne();
                 }
                 while (_keepAlive);
@@ -59,33 +69,44 @@ namespace WebSocketServer.Client.State
 
             try
             {
-                AbsRequestHandler clientObj = ar.AsyncState as AbsRequestHandler;
+                StateObj clientObj = ar.AsyncState as StateObj;
                 _receiveDone.Set();
-                do
-                {
+                
                     int receiveLength = clientObj.ClientSocket.EndReceive(ar);
 
-                    if(receiveLength < clientObj.ReceiveData.Length )
+                    if(receiveLength < clientObj.Receive_buffer.Length )
                     {
-                        Array.Resize(ref clientObj.ReceiveData, receiveLength);
+                        Array.Resize(ref clientObj.Receive_buffer, receiveLength);
                     }
                     //lock (receiveData)
                     //{
-                        receiveData = receiveData.Concat(clientObj.ReceiveData);
+                        //receiveData = receiveData.Concat(clientObj.ReceiveData);
                     //}
-                }
-                while (clientObj.ClientSocket.Available >= 0);
+                    if (clientObj.ClientSocket.Available > 0)
+                    {
+                        receiveData = receiveData.Concat(clientObj.Receive_buffer);
+                    }
+                    else
+                    {
+                        //判斷websocket frame格式
+                        bool over126 = false;
+                        long payloadSize_over126;
+                        if (null == _maskingKey && !FilterPayloadData(receiveData.ToArray(), out over126, out payloadSize_over126))
+                        {
+                            _clientHandler.CancelAsync();
+                        }
 
-                string receive = Encoding.UTF8.GetString(receiveData.ToArray());
-                Logger.WriteLog("Client " + clientObj.ClientNo + " ReceiveData:" + receive);
-                if (receive.Contains("Exit"))
-                {
-                    _keepAlive = false;
-                    _receiveDone.Set();
-                }
-                byte[] sendData = Encoding.UTF8.GetBytes("Server Say:" + receive);
-                clientObj.ClientSocket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, SendCallback, clientObj.ClientSocket);
-                Logger.WriteLog("SendLength:" + sendData.Length + " Server Say:" + receive);
+                        string receive = Encoding.UTF8.GetString(receiveData.ToArray());
+                        Logger.WriteLog("Client " + clientObj.SequnceNO + " ReceiveData:" + receive);
+                        if (receive.Contains("Exit"))
+                        {
+                            _keepAlive = false;
+                            _receiveDone.Set();
+                        }
+                        byte[] sendData = Encoding.UTF8.GetBytes("Server Say:" + receive);
+                        clientObj.ClientSocket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, SendCallback, clientObj.ClientSocket);
+                        Logger.WriteLog("SendLength:" + sendData.Length + " Server Say:" + receive);
+                    }
             }
             catch (SocketException sckEx)
             {
@@ -93,12 +114,30 @@ namespace WebSocketServer.Client.State
             }
         }
 
+        protected bool CheckWebSocketFrame(byte[] data)
+        {
+            if ((data[0] & 0x88) == 0x88) return false;
+            if ((data[1] & 0x80) != 0x80) return false;
+
+
+            return true;
+            
+        }
+
+        /// <summary>
+        /// 取得masking-key數據(收到的資料要用此來解)
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="over126">length大於126(即127)</param>
+        /// <param name="payLoad_size">長度65536以上,最多2^63所以用long(規定MSB為0,所以是2^(64-1))</param>
+        /// <returns>true/false:</returns>
         protected bool FilterPayloadData(byte[] data,out bool over126,out long payLoad_size)
         {
             over126 = false;
             payLoad_size = 0;
             _maskingKey = new byte[4];//masking-key size
-            int length = data[1] & 0x7F;
+            int length = data[1] & 0x7F;//length and
+            if ((data[1] & 0x80) != 0x80) return false;//none masking-key
             if (length <= 125)
             {
                 _kindOfLength = 2;//masking-key array start index
@@ -159,14 +198,60 @@ namespace WebSocketServer.Client.State
                 Logger.WriteLog(sckEx.Message);
             }
         }
+
+        /// <summary>
+        /// 把要回送的數據封裝成websocket規定的frame格式
+        /// </summary>
+        /// <param name="sendData"></param>
+        /// <returns></returns>
+        protected byte[] Package(byte[] sendData)
+        {
+            List<byte> result = new List<byte>();
+
+            result.Add((byte)0x81);//FIN + opcode //byte[0]
+
+            //add data length format
+            if (sendData.LongLength <= 125)
+            {
+                result.Add((byte)sendData.Length);//byte[1]
+            }
+            else if(sendData.LongLength  <= 65535)
+            {
+                //前4byte依據websocket frame規格
+                result.Add((byte)126);//byte[1]
+                result.Add((byte)((sendData.Length >> 8) & 0xFF));//(sendData.Length / 256) //byte[2]
+                result.Add((byte)(sendData.Length & 0xFF));       //(sendData.Length % 256) //byte[3]
+            }
+            else
+            {
+                //前10byte依據websocket frame規格
+                result.Add((byte)127);//byte[1]
+                result.Add((byte)((sendData.LongLength >> 8 * 7) & 0xFF));  //byte[2]
+                result.Add((byte)((sendData.LongLength >> 8 * 6) & 0xFF));  //byte[3]
+                result.Add((byte)((sendData.LongLength >> 8 * 5) & 0xFF));  //byte[4]
+                result.Add((byte)((sendData.LongLength >> 8 * 4) & 0xFF));  //byte[5]
+                result.Add((byte)((sendData.LongLength >> 8 * 3) & 0xFF));  //byte[6]
+                result.Add((byte)((sendData.LongLength >> 8 * 2) & 0xFF));  //byte[7]
+                result.Add((byte)((sendData.LongLength >> 8) & 0xFF));      //byte[8]
+                result.Add((byte)((sendData.LongLength) & 0xFF));           //byte[9]
+            }
+            //串上真正的資料
+            result.AddRange(sendData);
+            return result.ToArray();;
+        }
         #endregion
     }
-    public class StateObj
+
+    protected class StateObj
     {
-        public static readonly int RECEIVE_SIZE = 1024;
+        static int BUFFER_SIZE = 1024;
 
-        public Socket Client_Sck { get; set; }
+        public int SequnceNO { get; set; }
 
-        public byte[] ReceiveData = new byte[RECEIVE_SIZE];
+        public byte[] Receive_buffer = new byte[BUFFER_SIZE];
+        
+        public Socket ClientSocket { get; set; }
+
+        
     }
 }

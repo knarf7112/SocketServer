@@ -24,6 +24,7 @@ namespace WebSocketServer
         private bool SocketInitial;
         private bool KeepServerAlive;
         private static readonly int BACKLOG = 2000;
+        private static object lockObj = new object();
         #endregion
 
         #region Property
@@ -85,7 +86,7 @@ namespace WebSocketServer
             }
             catch (SocketException sckEx)
             {
-                this.WriteLog("[Error]" + sckEx.Message);
+                Logger.WriteLog("[Error]" + sckEx.Message);
             }
             finally
             {
@@ -114,7 +115,7 @@ namespace WebSocketServer
             }
             catch (Exception ex)
             {
-                WriteLog("[Error]" + ex.Message);
+                Logger.WriteLog("[Error]" + ex.Message);
             }
         }
         protected void AsyncAccept()
@@ -136,7 +137,7 @@ namespace WebSocketServer
         {
             if (this.KeepServerAlive)
                 this.AsyncAccept();
-
+            WebSocketServer.Client.AbsRequestHandler cleintHandler = null;
             try
             {
                 if (ar.IsCompleted && null != this._mainSocket)
@@ -144,20 +145,31 @@ namespace WebSocketServer
                     
                     //Socket mainSoket = (Socket)ar.AsyncState;
                     Socket client = ((Socket)ar.AsyncState).EndAccept(ar);
-                    
-                    //this.
+                    lock (lockObj)
+                    {
 
+                    }
+                    cleintHandler = new WebSocketServer.Client.AbsRequestHandler();
+                    cleintHandler.ClientSocket = client;
+                    cleintHandler.DoCommunicate();
+
+                    /*
                     byte[] result;
                     int receive_size = Receive(client, out result);
                     string recieveData = Encoding.UTF8.GetString(result, 0, receive_size);
                     //WriteLog(recieveData);
                     Logger.WriteLog(recieveData);
+                    */
                 }
             }
             catch (Exception ex)
             {
                 //WriteLog("[Error]" + ex.Message);
                 Logger.WriteLog("[Error]" + ex.Message);
+                if (null != cleintHandler)
+                {
+                    cleintHandler.CancelAsync();
+                }
             }
         }
 
@@ -178,6 +190,7 @@ namespace WebSocketServer
             }
             return totallength;
         }
+
         protected void Initial_Socket()
         {
             Logger.WriteLog("Initial Main Socket | Listen Port:" + this.Port.ToString());
@@ -185,6 +198,15 @@ namespace WebSocketServer
             this._mainSocket.Bind(new IPEndPoint(this.Listen_IPAddress, this.Port));
             this._mainSocket.Listen(BACKLOG);
             this.SocketInitial = true;
+        }
+
+
+        private void ShowThreadPoolStatus()
+        {
+            int workerThreads = 0;
+            int completionPortThreads = 0;
+            ThreadPool.GetAvailableThreads(out workerThreads, out completionPortThreads);
+            Logger.WriteLog("目前執行緒總數: " + workerThreads.ToString() + " 非同步IO總數: " + completionPortThreads.ToString());
         }
         #endregion
 

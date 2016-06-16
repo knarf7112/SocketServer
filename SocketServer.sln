@@ -58,6 +58,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DB_Lib", "DB_Lib\DB_Lib.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServer", "WebSocketServer\WebSocketServer.csproj", "{1B400290-B24B-41AD-B08B-80C226553FA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Apple_APNs_PushNotification", "Test_Apple_APNs_PushNotification\Test_Apple_APNs_PushNotification.csproj", "{E29B811F-537D-4A9C-BC9B-03CAAA61B00E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,10 @@ Global
 		{1B400290-B24B-41AD-B08B-80C226553FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B400290-B24B-41AD-B08B-80C226553FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B400290-B24B-41AD-B08B-80C226553FA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E29B811F-537D-4A9C-BC9B-03CAAA61B00E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E29B811F-537D-4A9C-BC9B-03CAAA61B00E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E29B811F-537D-4A9C-BC9B-03CAAA61B00E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E29B811F-537D-4A9C-BC9B-03CAAA61B00E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -20,6 +20,7 @@ namespace WebSocketServer.Client.State
         private static int RECEIVE_LENGTH = 1024;
         private static int RECEIVE_TIMEOUT = 2000;//2 second
         private static int SEND_TIMEOUT = 2000;// 2 second
+
         public void Handle(AbsRequestHandler handler)
         {
             try
@@ -38,7 +39,7 @@ namespace WebSocketServer.Client.State
                 }
                 while (handler.ClientSocket.Available > 0);
                 byte[] data = receiveBuffer.ToArray();
-                Logger.WriteLog("收到資料了...");
+                
                 byte[] response = null;
                 if (!ResponseHandShake(data, out response)) 
                 {
@@ -51,7 +52,7 @@ namespace WebSocketServer.Client.State
             }
             catch(SocketException sckEx)
             {
-                Logger.WriteLog("[SocketException]" + sckEx.Message);
+                Logger.WriteLog("[State_HandShake]Socket Error:" + sckEx.Message);
                 handler.ServiceState = new State_Exit();
             }
 
@@ -63,6 +64,7 @@ namespace WebSocketServer.Client.State
             {
                 Regex reg = new Regex("Sec-WebSocket-Key: (.*)", RegexOptions.IgnoreCase);
                 string request = Encoding.UTF8.GetString(data);
+                Logger.WriteLog("Request:" + request);
                 string key = reg.Match(request).Groups[1].Value;
                 if (String.IsNullOrEmpty(key))
                 {
