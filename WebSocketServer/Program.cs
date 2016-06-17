@@ -15,8 +15,11 @@ namespace WebSocketServer
             //s1.OnWriteLog = (string msg) => { Console.WriteLine(msg); };
             Logger.OnWriteLog = (string msg) => { Console.WriteLine(msg); };
             s1.Start();
-
-            Console.Read();
+            ConsoleKey cmd;
+            do{
+                cmd = Console.ReadKey().Key;
+            }
+            while (cmd != ConsoleKey.Q);
             s1.Stop();
             Console.ReadKey();
             Console.ReadKey();

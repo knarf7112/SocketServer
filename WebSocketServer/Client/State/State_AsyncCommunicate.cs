@@ -26,6 +26,9 @@ namespace WebSocketServer.Client.State
         private bool _keepAlive;
         private int _sequenceNO;//StateObj產生的順序
         private AbsRequestHandler _clientHandler;
+        private Queue<byte> buffer = new Queue<byte>();
+        private object lockObj = new object();
+        private SortedDictionary<int, byte[]> dataCollection = new SortedDictionary<int, byte[]>();
         #endregion
 
         public void Handle(AbsRequestHandler handler)
@@ -71,32 +74,58 @@ namespace WebSocketServer.Client.State
             {
                 StateObj clientObj = ar.AsyncState as StateObj;
                 _receiveDone.Set();
-                
+                //System.IO.MemoryStream ms = new System.IO.MemoryStream(); ms.Seek(0, System.IO.SeekOrigin.Begin);
                     int receiveLength = clientObj.ClientSocket.EndReceive(ar);
 
                     if(receiveLength < clientObj.Receive_buffer.Length )
                     {
                         Array.Resize(ref clientObj.Receive_buffer, receiveLength);
                     }
+                    lock (lockObj)
+                    {
+                        //Think:如果Client送過來的資料太大會被分割成數塊buffer大小的數據,測試時看起來依然會依切割的順序進來,不會亂入
+                        //不過這樣判斷就需要有個判斷, 可以知道資料的結尾, 才能清除存資料的buffer
+                        //ref:http://stackoverflow.com/questions/18368130/how-to-parse-and-validate-a-websocket-frame-in-java
+                        if ((clientObj.Receive_buffer[0] & 0x80) != 0x80)
+                        this.buffer.Clear();//要清除buffer
+                        foreach (byte b in clientObj.Receive_buffer)
+                        {
+                            this.buffer.Enqueue(b);
+                        }
+                        dataCollection.Add(clientObj.SequnceNO, clientObj.Receive_buffer);
+                        //Available 無法當依據,兩個非同步同時進來都是0
+                        if (clientObj.ClientSocket.Available > 0)
+                        {
+                            Logger.WriteLog("還有多少數據可讀取:" + clientObj.ClientSocket.Available);
+                            return;
+                        }
+                        else
+                        {
+                            Logger.WriteLog("Buffer資料量:" + this.buffer.Count);
+                            Logger.WriteLog("Data:" + BitConverter.ToString(this.buffer.ToArray()));
+                            Console.WriteLine("按一下吧 Available:{0}", clientObj.ClientSocket.Available);
+                            //Console.ReadKey();
+                            Console.WriteLine("dataCollection:{0}", dataCollection.Count);
+                            //Console.ReadKey();
+                        }
+                    }
                     //lock (receiveData)
                     //{
                         //receiveData = receiveData.Concat(clientObj.ReceiveData);
                     //}
-                    if (clientObj.ClientSocket.Available > 0)
-                    {
-                        receiveData = receiveData.Concat(clientObj.Receive_buffer);
-                    }
-                    else
-                    {
+                    string echo = "hello i am server!國字";
+                    byte[] send2 = Package(Encoding.UTF8.GetBytes(echo));
+                    clientObj.ClientSocket.Send(send2, 0, send2.Length, SocketFlags.None);
                         //判斷websocket frame格式
                         bool over126 = false;
                         long payloadSize_over126;
-                        if (null == _maskingKey && !FilterPayloadData(receiveData.ToArray(), out over126, out payloadSize_over126))
+                        //下一次來的mask-key要重取
+                        if (/*null == _maskingKey && */!FilterPayloadData(this.buffer.ToArray(), out over126, out payloadSize_over126))
                         {
                             _clientHandler.CancelAsync();
                         }
-
-                        string receive = Encoding.UTF8.GetString(receiveData.ToArray());
+                        byte[] data = ParseRealData(_maskingKey, this.buffer.ToArray(), this._kindOfLength + this._maskingKey.Length);
+                        string receive = Encoding.UTF8.GetString(data);//超過ASCII的長度就是3 bytes為一個單位
                         Logger.WriteLog("Client " + clientObj.SequnceNO + " ReceiveData:" + receive);
                         if (receive.Contains("Exit"))
                         {
@@ -104,9 +133,10 @@ namespace WebSocketServer.Client.State
                             _receiveDone.Set();
                         }
                         byte[] sendData = Encoding.UTF8.GetBytes("Server Say:" + receive);
+                        sendData = Package(sendData);
                         clientObj.ClientSocket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, SendCallback, clientObj.ClientSocket);
                         Logger.WriteLog("SendLength:" + sendData.Length + " Server Say:" + receive);
-                    }
+                    
             }
             catch (SocketException sckEx)
             {
@@ -123,7 +153,19 @@ namespace WebSocketServer.Client.State
             return true;
             
         }
-
+        //
+        private byte[] ParseRealData(byte[] masking_key,byte[] data,int startIndex)
+        {
+            byte[] result = new byte[data.Length - startIndex];
+            byte[] payloadData = new byte[data.Length - startIndex];
+            Buffer.BlockCopy(data, startIndex, payloadData, 0, payloadData.Length);
+            //Array.Resize(ref data)
+            for (int i = 0; i < payloadData.Length; i++)
+            {
+                result[i] = (byte)(masking_key[i % 4] ^ payloadData[i]);
+            }
+            return result;
+        }
         /// <summary>
         /// 取得masking-key數據(收到的資料要用此來解)
         /// </summary>
@@ -242,9 +284,9 @@ namespace WebSocketServer.Client.State
         #endregion
     }
 
-    protected class StateObj
+    public class StateObj
     {
-        static int BUFFER_SIZE = 1024;
+        static int BUFFER_SIZE = 10;//1024;
 
         public int SequnceNO { get; set; }
 
