@@ -52,6 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="AppleCertificate\allpay.p12">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppleCertificate\AllPayEPAPNS.p12">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="AppleCertificate\allpay_apns_dev.p12">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

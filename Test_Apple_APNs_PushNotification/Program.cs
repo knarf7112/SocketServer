@@ -11,6 +11,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Test_Apple_APNs_PushNotification
 {
@@ -20,11 +21,16 @@ namespace Test_Apple_APNs_PushNotification
         static DateTime? Expiration;
         static DateTime DoNotStore;
         static DateTime UNIX_EPOCH = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        static string DeviceToken = "c1564dd73cd73a003d2ad143d96c9e6d651f8b48b45ba8c0ae9c5db87513fde8";
+        static string DeviceToken = "63974870e3c059c8e8dae324d734a87189552d0cab0864b58dd785be299baff6";//"7408e047feed9fff7990d3cc9204fb80f43cf1aeb8268e7d5c3b799737e3e0a6"; ////1002728(iphone6s+ 只能收款)憑證(dev)allpay_apns_dev.p12用的
+                                    //"c1564dd73cd73a003d2ad143d96c9e6d651f8b48b45ba8c0ae9c5db87513fde8";
+                                      //"7408e047feed9fff7990d3cc9204fb80f43cf1aeb8268e7d5c3b799737e3e0a6"; //憑證(prod)aps_production_allpay.p12用的
+                                      //"b25ba4c8b4b01a3a101592615275d7a5a7231a107d6952f4cdd0afa08749bb9d";//1002728(iphone6s+ 只能收款)
+                                    //"f6c0ad4ac5ed95d339af637976efb6df61f3619ed3dd1297fd7e489fe9494766";//1000298(白色小支的iphone--只能付款)
         //  private static string DeviceToken = "64d73e7b0815f7c22d7a412dbde7c4f4477ada6fdc4ee8d57db8ee536706dea6";
         //ref:http://dbhills.blogspot.tw/2015/01/ciosapns.html
         static void Main(string[] args)
         {
+            //MID:1002728, Sum:2, MsgID:9257, Subj:【羅小姐】收款成功2元, Title:【羅小姐】收款成功2元, RegID:b25ba4c8b4b01a3a101592615275d7a5a7231a107d6952f4cdd0afa08749bb9d
             /*
             byte[] b1 = new byte[0];
             byte[] b2 = new byte[] { };
@@ -36,9 +42,26 @@ namespace Test_Apple_APNs_PushNotification
             int data1 = IPAddress.HostToNetworkOrder(514);
             byte[] aaa = BitConverter.GetBytes(data1);
             */
+            int Count = 13;
+            Timer timer = new Timer(new TimerCallback((object obj) => {
+                //int count = (int)obj;
+                Count++;
+                AppleNotificationPayload payload = new AppleNotificationPayload();
+                payload.Alert.Body = String.Format("Test{0} 使用dev憑證 + (gateway.sandbox.push.apple.com)", Count.ToString("##0"));
+                payload.Badge = Count;
+                payload.Sound = "default";
+
+
+                string json = payload.ToJson();
+                Console.WriteLine("Send Json: " + json);
+
+                string sendUTF8Str = SendAPNS(DeviceToken, json);
+                Console.WriteLine("" + sendUTF8Str);
+            }), Count,10,2000);
+            /*
             AppleNotificationPayload payload = new AppleNotificationPayload();
-            payload.Alert.Body = "Test 國字來一下 Content";
-            payload.Badge = 3;
+            payload.Alert.Body = "Test13 使用dev憑證 + (gateway.sandbox.push.apple.com)";
+            payload.Badge = 4;
             payload.Sound = "default";
 
 
@@ -47,6 +70,7 @@ namespace Test_Apple_APNs_PushNotification
 
             string sendUTF8Str = SendAPNS(DeviceToken, json);
             Console.WriteLine("" + sendUTF8Str);
+             */
             Console.ReadKey();
         }
 
@@ -58,12 +82,12 @@ namespace Test_Apple_APNs_PushNotification
             string jsonContent = String.Format("{{\"aps:\":{{\"alert\":\"{0}\",\"badge\":8,\"sound\":\"default\"}}}}",deviceToken);
             //Json: { MID = 1000242, MsgID = 12345, RegID = "c1564dd73cd73a003d2ad143d96c9e6d651f8b48b45ba8c0ae9c5db87513fde8", Subj = "測試12 主題一:88個badge", Sum = 88, Title = "test2 Content" };
             //str = "{\"aps\":{\"alert\":\"" + s2 + "\",\"badge\":10,\"sound\":\"default\"}}";
-            string hostIP = "gateway.sandbox.push.apple.com";//"gateway.push.apple.com";//feedback.sandbox.push.apple.com//"feedback.sandbox.push.apple.com";
-            int port = 2195;//2195;//2196
-            string password = "AllPay";//
+            string hostIP = "gateway.sandbox.push.apple.com";//;//"gateway.push.apple.com";//feedback.sandbox.push.apple.com//"feedback.sandbox.push.apple.com";
+            int port = 2195;//2196;
+            string password = "AllPay";//AllPay
 
             //certificate load 需要去Apple申請App的憑證才有此檔
-            string certificatepath = "allpay_apns_dev.p12";// "aps_developer_allpay.p12";//bin/debug
+            string certificatepath = "allpay_apns_dev.p12";//"AllPayEPAPNS.p12" ;//"aps_production_allpay.p12";// //"allpay.p12";//bin/debug
             string certificateFullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleCertificate", certificatepath);
 
             certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(File.ReadAllBytes(certificateFullPath), password,X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
@@ -109,6 +133,7 @@ namespace Test_Apple_APNs_PushNotification
             if (!apnsStream.CanWrite)
             {
                 Console.WriteLine("error:" + "Ssl Stream is not Writable");
+                return "";
             }
             //需要取得Apple手機給的token來當作裝置的識別碼,送的格式參考APPLE規定的JSON
             byte[] message = ToBytes(deviceToken, content);

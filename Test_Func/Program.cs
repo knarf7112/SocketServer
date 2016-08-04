@@ -24,16 +24,249 @@ using System.Data;
 //regex
 using System.Text.RegularExpressions;
 using System.Linq.Expressions;
+//HttpUtility
+using System.Web;
+//MD5
+using System.Security.Cryptography;
 
 namespace Test_Func
 {
     class Program
     {
-        #region 36.測試取得變量名稱
+        #region 40.
         static void Main()
         {
+            var md5 = MD5.Create();
+            var defaultEncode = Encoding.Default;
+            Console.WriteLine("Big5:" + (defaultEncode == Encoding.GetEncoding(950)));//Big5
+            string queryStringOrigin = "ChoosePayment=ALL&ClientRedirectURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentInfo_Client&CreditInstallment=0&DeviceSource=M&HoldTradeAMT=1&IgnorePayment=WebATM%23Credit%23ATM%23CVS%23BARCODE%23Alipay%23Tenpay%23AccountLink%23COD%23APPBARCODE&ItemName=%u58fd%u559c%u71d2%u5403%u5230%u98fd&MerchantID=2000132&MerchantTradeDate=2016%2f06%2f28+10%3a40%3a14&MerchantTradeNo=2316062800001&OrderResultURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentResult_Client&PaymentInfoURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentInfo&PaymentType=aio&PlatformChargeFee=&PlatformID=2000812&Redeem=&ReturnURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentResult&TotalAmount=30&TradeDesc=%u96fb%u5b50%u7968%u5238&CheckMacValue=9A85DF1D62608EFE357124C42CAFCC81";
+            string queryString = "ChoosePayment=ALL&ClientRedirectURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentInfo_Client&CreditInstallment=0&DeviceSource=M&HoldTradeAMT=1&IgnorePayment=WebATM%23Credit%23ATM%23CVS%23BARCODE%23Alipay%23Tenpay%23AccountLink%23COD%23APPBARCODE&ItemName=%u58fd%u559c%u71d2%u5403%u5230%u98fd&MerchantID=2000132&MerchantTradeDate=2016%2f06%2f28+10%3a40%3a14&MerchantTradeNo=2316062800001&OrderResultURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentResult_Client&PaymentInfoURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentInfo&PaymentType=aio&PlatformChargeFee=&PlatformID=2000812&Redeem=&ReturnURL=http%3a%2f%2flocalhost%3a53910%2fAllPayPayment%2fPaymentResult&TotalAmount=30&TradeDesc=%u96fb%u5b50%u7968%u5238";
+            var collection = HttpUtility.ParseQueryString(queryString, Encoding.UTF8);
+            foreach (string item in collection.Keys)
+            {
+                Console.WriteLine("{0}={1}", item, collection[item]);
+            }
+            string key = "HashKey=Zf1AjVRlwE4XjlF9&".ToLower();
+            string iv = "&HashIV=Ps8hPWGtUW0PE3Gk".ToLower();
+            AllPayGenMac.AddSomeData addKeyAndIV = (string origin) => 
+            {
+                string result = key + origin + iv;
+                Console.WriteLine("1.Add Key and IV:{0}{1}", System.Environment.NewLine , result);
+                Console.WriteLine();
+                result = HttpUtility.UrlEncode(result);
+                Console.WriteLine("2.Parse UrlEncode:{0}{1}", System.Environment.NewLine, result.ToLower());
+                return result; 
+            };
+            var data = AllPayGenMac.SortQueryString(collection, addKeyAndIV);
+            string origin_macValue = "9A85DF1D62608EFE357124C42CAFCC81";
+            byte[] mac = Encoding.UTF8.GetBytes(data);
+            Console.WriteLine("Macvalue:{0}{1}", System.Environment.NewLine, BitConverter.ToString(mac).Replace("-", "").ToUpper());
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 39.測試忽略列表
+        class B
+        {
+            public int Id { get; set; }
+            public string TypeName { get; set; }
+            public string Name { get; set; }
+
+            public override string ToString()
+            {
+                return String.Format("Id={0}, Name={1}, TypeName={2}", Id, Name, TypeName);
+            }
+        }
+        static void Main39()
+        {
+            string[] condition = new string[] { "WebATM", "Credit" };//{"ATM"};
+            List<B> b_list = new List<B>();
+            b_list.AddRange(new B[]{
+                new B{ Id = 1, Name = "ATM1", TypeName = "ATM"},
+                new B { Id = 2, Name = "WebATM1", TypeName = "WebATM" },
+                new B { Id = 3, Name = "ATM2", TypeName = "ATM" },
+                new B { Id = 4, Name = "WebATM2", TypeName = "WebATM" },
+                new B { Id = 5, Name = "Credit", TypeName = "Credit" },
+            });
+            condition.ToList().ForEach(e => Console.WriteLine("忽略清單:" + e));
+            foreach(var item in b_list)
+            {
+                //若符合要忽略的陣列集合
+                if (!Array.Exists(condition, ele => item.TypeName.Contains(ele)))
+                {
+                    Console.WriteLine("不符合:" + item);
+                }
+                else
+                {
+                    Console.WriteLine("  符合:" + item);
+                }
+            };
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region 38.測試使用Task靜態物件的事件來抓取Task所拋出的異常 => 結論:無法抓到
+        static void Main38()
+        {
+            TaskScheduler.UnobservedTaskException += (object sender, UnobservedTaskExceptionEventArgs eventArgs) =>
+            {
+                eventArgs.SetObserved();
+                ((AggregateException)eventArgs.Exception).Handle(ex =>
+                {
+                    Console.WriteLine("Exception type: {0}", ex.GetType());
+                    return true;
+                });
+            };
+
+            Task.Factory.StartNew(() =>
+            {
+                //throw new ArgumentNullException();
+                int x = 1, y = 0;
+                x = x / y;
+            });
+
+            //Task.Factory.StartNew(() =>
+            //{
+            //    throw new ArgumentOutOfRangeException();
+            //});
+
+
+            Thread.Sleep(100);
+            GC.Collect();
+            //GC.WaitForPendingFinalizers();
+
+            Console.WriteLine("Done");
+            Console.ReadKey();
+        }
+        static void Main38(string[] args)
+        {
+            Console.WriteLine("AppDomain加入UnhandledException事件針測");
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Console.WriteLine("Task加入UnhandledException事件針測");
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            Console.WriteLine("按1(main),2(Thread),3(Task)鍵, 選擇測試");
+            ConsoleKey key = Console.ReadKey().Key;
+            
+            switch (key)
+            {
+                case ConsoleKey.D1:
+                    Console.WriteLine("開始測試main拋出的除0異常");
+                    ThrowException();//main throw 
+                    break;
+                case ConsoleKey.D2:
+                    Console.WriteLine("開始測試Thread拋出的除0異常");
+                    Thread t1 = new Thread(ThrowException);
+                    t1.Start();//thread throw
+                    break;
+                case ConsoleKey.D3:
+                    Console.WriteLine("開始測試Task拋出的除0異常");
+                    //Task.Run(new Action(ThrowException));//Task Parallel Library throw//測試後發現抓不到
+                    Task task = new Task(ThrowException);
+                    try
+                    {
+                        task.Start();
+                        //task.
+                        Console.WriteLine("GG" + task.Exception ?? "none exception");
+
+                    }
+                    catch (AggregateException ex)
+                    {
+                        Console.WriteLine("AggregateException" + ex.Message);
+                    }
+                    //2.
+                    //Task.Factory.StartNew(ThrowException);
+                    //Thread.Sleep(100);
+                    //GC.Collect();
+                    //GC.WaitForPendingFinalizers();
+                    break;
+                default:
+                    Console.WriteLine("按錯鍵了");
+                    break;
+            }
+            Console.ReadKey();
+        }
+
+        static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            if (sender is TaskScheduler)
+            {
+                Console.WriteLine("TaskScheduler捕捉到的異常" + e.Exception.ToString());
+            }
+            else
+            {
+                Console.WriteLine("不知道誰捕捉到的異常" + e.Exception.ToString());
+            }
+        }
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (sender is AppDomain)
+            {
+                Console.WriteLine("AppDomain捕捉到的異常" + e.ExceptionObject.ToString());
+            }
+            else
+            {
+                Console.WriteLine("不知道誰捕捉到的異常" + e.ExceptionObject.ToString());
+            }
+        }
+
+        static void ThrowException()
+        {
+            int x = 1, y = 0;
+            x = x / y;//throw exception
+            
+        }
+        #endregion
+
+        #region 37.測試抓取當前程序的記憶體使用量
+        static void Main37()
+        {
+
+
+            //string dd = Encoding.UTF8.GetString(null);//噴exception出來
+            string dd = Encoding.UTF8.GetString(new byte[0]);//empty string
+            bool ee = (dd == null);
+            Queue<string> q = new Queue<string>(5);
+            for (int i = 0; i < 6; i++)
+            {
+                q.Enqueue(i.ToString());
+            }
+            List<string> test = new List<string> { "123", "456", "789", "123", "123", "456", "789", "123" };
+            string data = test.Where((str) => str == "789").FirstOrDefault();
+
+            int index = test.IndexOf(data);
+            test[index] = data + "666";
+            ConsoleKey key;
+            do
+            {
+                Console.WriteLine("Plz input any key to show ,if exit input q ...");
+                key = Console.ReadKey().Key;
+                GetThreadCount();
+            }
+            while (key != ConsoleKey.Q);
+            Console.WriteLine("Plz input any key to Exit ...");
+            Console.ReadKey();
+        }
+        //get process usage memory : WorkingSet64 is 程序的專用記憶體
+        static void GetThreadCount()
+        {
+            Process current = Process.GetCurrentProcess();
+            string processName = current.ProcessName;
+            int processId = current.Id;
+            int threads = current.Threads.Count;
+            long memorySize = current.PrivateMemorySize64;
+            //var proc = new PerformanceCounter("Process", "Working Set - Private", processName);//使用效能監視器一開始建立物件有點鈍
+            //Console.WriteLine("Name:{0}, Id:{1}, Threads:{2}, MemorySize:{3}k", processName, processId, threads, proc.RawValue / 1000);
+            var mem2 = GC.GetTotalMemory(false);
+            Console.WriteLine("workingSet:{0}, GC-TotalMem:{1}", current.WorkingSet64, mem2);
+        }
+        #endregion
+
+        #region 36.測試取得變量名稱
+        static void Main36()
+        {
             //1.測試取得變量名稱
-            string testName = "123";
+            string testName = "123";//null;// String.Empty;// "";
 
             string memberName = GetMemberName(() => testName);
             Console.WriteLine("MemberName: " + memberName);
