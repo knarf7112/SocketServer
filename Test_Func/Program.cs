@@ -33,8 +33,180 @@ namespace Test_Func
 {
     class Program
     {
-        #region 40.
-        static void Main()
+        #region 44.Test Generic Delegate Type : 測試集合物件做委派
+        static void Main(string[] args)
+        {
+            string theString = "Some Very Large String Here";
+            var array = theString.Split(' ');
+            string firstElem = array.First();
+            string restOfArray = string.Join(",", array.Skip(1));
+            
+            string user_agent2 = "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)/{&quot;AppName&quot;:&quot;allpay&quot;,&quot;Vers&quot;:&quot;2.8.0.2&quot;,&quot;OS&quot;:&quot;2&quot;,&quot;OSVersion&quot;:&quot;4.4.4&quot;}/";
+            var instead = user_agent2.Replace("&quot;", "\"");
+            Console.WriteLine("Instead string: {0}", instead);
+            Regex reg2 = new Regex("&quot;Vers&quot;:&quot;(?<vers>.*)&quot;,&quot;OS&quot;");//(?<vers>.+)
+            var match2 = reg2.Match(user_agent2);
+            if (match2.Groups["vers"].Success)
+            {
+                string result = match2.Groups["vers"].Value;
+                Console.WriteLine("Vers:{0}", result);
+                Console.ReadKey();
+            }
+
+
+            Regex reg = new Regex("\"Vers\":\"(?<vers>.*)\",\"OS\"");//(?<vers>.+)
+            string user_agent = "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)/{\"AppName\":\"allpay\",\"Vers\":\"2.8.0.2\",\"OS\":\"2\",\"OSVersion\":\"4.4.4\"}/";
+            var match = reg.Match(user_agent);
+            if (match.Groups["vers"].Success)
+            {
+                string result = match.Groups["vers"].Value;
+                Console.WriteLine("Vers:{0}", result);
+                Console.ReadKey();
+            }
+            string dateTime = DateTime.Now.ToString("MM月dd日{0}");
+            int iii = 3;
+            string ee = iii.ToString("d3");
+            int[] values = { 1, 2, 3 };
+            Util1.Transform(values, Square);
+            for (int index = 0; index < values.Length; index++)
+            {
+                Console.WriteLine("after invoke method: values[{0}]={1}", index, values[index]);
+            }
+            Console.ReadKey();
+        }
+
+        public delegate T Transformer<T>(T arg);
+        public class Util1
+        {
+            public static void Transform<T>(T[] values, Transformer<T> t)
+            {
+                for (int i = 0; i < values.Length; i++)
+                {
+                    values[i] = t.Invoke(values[i]);
+                }
+            }
+        }
+
+        static int Square(int x) { return x * x; }
+        #endregion
+
+        #region 43. K.M.P Test TODO.....
+        static void Main43()
+        {
+            string str1 = "abcdefagabcdefaefahhg";
+            string condition = "efah";
+            var result = IndexOf(str1, condition);
+            Console.WriteLine("是否符合:{0} 索引位置:{1}", result != -1, result);
+            Console.ReadKey();
+        }
+
+        // Voilent Match:暴力破解法,一格一格慢慢比較,有問題就退回來重比
+        static int IndexOf(string origin, string search)
+        {
+            int i = 0, j = 0;
+            int index = -1;
+            while (i < origin.Length && j < search.Length)
+            {
+                if (origin[i] == search[j])
+                {
+                    Debug.Write(origin[i]);
+                    i++;
+                    j++;
+                }
+                else
+                {
+                    //ref: http://blog.csdn.net/v_july_v/article/details/7041827
+                    //i = i + 1;
+                    i = i - j + 1;//退回一開始比較的索引並前進一格
+                    //思索:如果不想讓i回朔到原點,只能在j動手腳了
+                    j = 0;
+                }
+            }
+            if (j == search.Length)
+            {
+                index = i - j;
+            }
+            return index;
+        }
+
+
+        #endregion
+
+        #region 42. Test Linq GroupBy to Dictionary
+        static void Main42()
+        {
+            Test_LinqGroup.RunTest();
+            Console.WriteLine("End ...");
+            Console.ReadKey();
+        }
+
+        #endregion
+
+        #region 41. Test Json.Net Deserialize the readonly Object
+        public class Ticket
+        {
+            readonly string symbol;
+            readonly string market;
+            [JsonIgnore]//告訴json.net序列化和反序列化時,這個不需要
+            public string Symbol { get { return symbol; } }
+            [JsonIgnore]//告訴json.net序列化和反序列化時,這個不需要
+            public string Market { get { return market; } }
+            [JsonProperty("Tick")]//告訴json.net序列化和反序列化時,用這個名稱當屬性名稱
+            public string FullSymbol { get { return symbol + "." + market; } }
+
+            //1.若存在2個constructor,JSON.NET在反序列化時,會不知道要選哪個Constructor,會噴error(Json.Net會嘗試將與建構子參數同樣名稱的屬性值帶入建構子中)
+            public Ticket(string symbol, string market)
+            {
+                this.market = market;
+                this.symbol = symbol;
+            }
+            [JsonConstructor]//2.所以可以利用Attribute來指定JSON反序列化時的依據
+            public Ticket(string fullSymbol/*string fullSymbol123:若改成這段Json.Net就無法利用同名稱(可忽略大小寫的樣子)的屬性值帶入建構子了*/)
+            {
+                string[] tickets = fullSymbol.Split('.');
+                if (tickets.Length != 2) throw new ArgumentException("format not match");
+                this.market = tickets[1];
+                this.symbol = tickets[0];
+            }
+             
+        }
+
+        static void Main41()
+        {
+            string qq = null;
+            Console.WriteLine("empty string == null ? {0}", (qq == ""));
+            Ticket t1 = new Ticket("2003.TW");
+            //Ticket t1 = new Ticket("2003","TW");
+            /*
+             * ref:http://blog.darkthread.net/post-2016-08-10-json-net-constructor-issue.aspx
+             * 當物件有預設建構式（不傳任何參數），Json.NET會先以預設建構式建立物件，再一一設定屬性值。
+             * 若遇到屬性值只能由物件內部指定（例如：public string Prop { get; private set; }）
+             * 或像Ticker使用readonly欄位，屬性只能透過建構式設定的狀況，類別不一定有預設建構式可用。
+             * Json.NET很聰明，即使是帶參數的建構式，也會試著將JSON裡的屬性做為參數傳。
+             * 例如：當JSON為{"Symbol":"2330","Market":"TW","FullSymbol":"2330.TW"}
+             * 而建構式為public Ticker(string symbol, string market)，
+             * Json.NET會偵測參數名稱symbol、market，在JSON屬性中尋找相同名稱的屬性值（忽略大小寫），
+             * 找不到則填入參數型別預設值，一樣可以建構物件。
+             */
+            var json = JsonConvert.SerializeObject(t1);
+            Console.WriteLine("JSON={0}", json);//"{\"Tick\":\"2003.TW\"}"
+            try
+            {
+                Ticket t1_1 = JsonConvert.DeserializeObject<Ticket>(json);//"{\"Tick\":\"2003.TW\"}"
+                Console.WriteLine("Restored={0}", t1_1.FullSymbol);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error:" + ex.Message);
+            }
+            Console.ReadKey();
+        }
+
+
+        #endregion
+
+        #region 40. Test MacValue
+        static void Main40()
         {
             var md5 = MD5.Create();
             var defaultEncode = Encoding.Default;
@@ -46,6 +218,7 @@ namespace Test_Func
             {
                 Console.WriteLine("{0}={1}", item, collection[item]);
             }
+            
             string key = "HashKey=Zf1AjVRlwE4XjlF9&".ToLower();
             string iv = "&HashIV=Ps8hPWGtUW0PE3Gk".ToLower();
             AllPayGenMac.AddSomeData addKeyAndIV = (string origin) => 

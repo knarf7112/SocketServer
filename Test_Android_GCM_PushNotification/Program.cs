@@ -1,11 +1,13 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+//
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Test_Android_GCM_PushNotification
 {
@@ -14,7 +16,18 @@ namespace Test_Android_GCM_PushNotification
         static string GCM_Url = "https://android.googleapis.com/gcm/send";
         static void Main(string[] args)
         {
+            string jsonStr =string.Format("{{\"alert\":\"{0}\",\"badge\":{1},\"NotifyMessageID\":{2},\"MID\":{3},\"subject\":\"{4}\",\"action-loc-key\":\"{5}\"}}",
+                                    "內容",
+                                    "12",
+                                    "985",
+                                    "1234567",
+                                    "抬頭",
+                                    "自定義命令");
 
+            JObject jObj = JObject.Parse(jsonStr);
+            var qq = jObj["dd"];
+
+            Console.ReadKey();
         }
         //1.api_key, 2.msg 3.RegistrationID(deviceID)
         static string HttpPostToGCM(string RegistrationID, string api_key, string msg) 
