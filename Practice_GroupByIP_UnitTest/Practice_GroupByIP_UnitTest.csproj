@@ -58,12 +58,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Practice_GroupByIP\Practice_GroupByIP.csproj">
-      <Project>{72cddb6e-b5c6-48a4-b2c2-bdbc8ccae2a4}</Project>
-      <Name>Practice_GroupByIP</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServer", "SocketServer\SocketServer.csproj", "{119EA747-1B8C-41A5-B64F-5C897A8D3D15}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocket_Test", "WebSocket_Test\WebSocket_Test.csproj", "{049206F2-AA76-4F4D-9F4E-919EE94BF501}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticateService", "AuthenticateService\AuthenticateService.csproj", "{84A377D3-F01D-40AC-94E4-651B0DC58214}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocket_Net45_Test", "WebSocket_Net45_Test\WebSocket_Net45_Test.csproj", "{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadKeyService", "LoadKeyService\LoadKeyService.csproj", "{303FD900-0091-48F1-AFC6-1F7313030161}"
 EndProject
@@ -62,10 +60,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Apple_APNs_PushNotific
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Android_GCM_PushNotification", "Test_Android_GCM_PushNotification\Test_Android_GCM_PushNotification.csproj", "{0E6303B6-4026-4524-A039-92AF0D14151F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Practice_GroupByIP", "Practice_GroupByIP\Practice_GroupByIP.csproj", "{72CDDB6E-B5C6-48A4-B2C2-BDBC8CCAE2A4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Practice_GroupByIP_UnitTest", "Practice_GroupByIP_UnitTest\Practice_GroupByIP_UnitTest.csproj", "{DBE9D870-0B3A-4015-AE95-9C3CB26AC7DE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,10 +78,6 @@ Global
 		{84A377D3-F01D-40AC-94E4-651B0DC58214}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84A377D3-F01D-40AC-94E4-651B0DC58214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84A377D3-F01D-40AC-94E4-651B0DC58214}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55E59CE4-05FD-49D9-8ACD-77303B1AA04C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{303FD900-0091-48F1-AFC6-1F7313030161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{303FD900-0091-48F1-AFC6-1F7313030161}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{303FD900-0091-48F1-AFC6-1F7313030161}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -148,16 +138,11 @@ Global
 		{0E6303B6-4026-4524-A039-92AF0D14151F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E6303B6-4026-4524-A039-92AF0D14151F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E6303B6-4026-4524-A039-92AF0D14151F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{72CDDB6E-B5C6-48A4-B2C2-BDBC8CCAE2A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72CDDB6E-B5C6-48A4-B2C2-BDBC8CCAE2A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72CDDB6E-B5C6-48A4-B2C2-BDBC8CCAE2A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72CDDB6E-B5C6-48A4-B2C2-BDBC8CCAE2A4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBE9D870-0B3A-4015-AE95-9C3CB26AC7DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBE9D870-0B3A-4015-AE95-9C3CB26AC7DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBE9D870-0B3A-4015-AE95-9C3CB26AC7DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBE9D870-0B3A-4015-AE95-9C3CB26AC7DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C310300-D235-4E73-AD29-27E469052AE7}
 	EndGlobalSection
 EndGlobal
